@@ -518,55 +518,54 @@
 
   /* Picker modal */
   .picker-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
     display: none; align-items: center; justify-content: center;
     z-index: 999;
   }
   .picker-panel {
-    width: min(420px, 92vw);
+    width: 100vw; height: 100vh;
     background: #0d0d0d; color: #fff;
-    border-radius: 16px;
-    overflow: hidden;
     display: flex; flex-direction: column;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.45);
   }
   .picker-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px;
+    padding: 16px 18px;
     font-family: 'Oswald', sans-serif; text-transform: uppercase;
-    letter-spacing: 0.8px; font-size: 16px; background: #111;
+    letter-spacing: 0.8px; font-size: 17px; background: #0d0d0d;
   }
   .picker-title { flex: 1; text-align: center; }
   .picker-btn { background: none; border: none; color: var(--arch-green); font-weight: 700; cursor: pointer; }
   .picker-body {
-    padding: 12px 16px 8px 16px;
+    flex: 1;
+    padding: 20px 16px 10px 16px;
     display: grid; grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 14px;
+    align-items: center;
   }
   .wheel {
-    height: 180px;
+    height: 220px;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     scrollbar-width: none;
     -ms-overflow-style: none;
     background: #161616;
-    border-radius: 12px;
+    border-radius: 14px;
     position: relative;
   }
   .wheel::-webkit-scrollbar { display: none; }
   .wheel-item {
-    height: 44px;
+    height: 50px;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Oswald', sans-serif;
-    font-size: 28px;
-    color: #666;
+    font-size: 30px;
+    color: #555;
     scroll-snap-align: center;
   }
-  .wheel-item.active { color: #fff; font-size: 32px; }
-  .wheel-label { text-align: center; margin-top: 6px; text-transform: uppercase; color: #777; font-size: 12px; letter-spacing: 0.6px; }
+  .wheel-item.active { color: #fff; font-size: 34px; }
+  .wheel-label { text-align: center; margin-top: 8px; text-transform: uppercase; color: #777; font-size: 12px; letter-spacing: 0.6px; }
   .picker-colors {
-    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
-    padding: 10px 16px 16px 16px;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+    padding: 12px 16px 16px 16px;
   }
   .color-swatch {
     height: 38px; border-radius: 10px; border: 2px solid transparent; cursor: pointer;
@@ -1907,7 +1906,7 @@
   }
 
   // Picker logic
-  const COLOR_OPTIONS = ['#f3c744', '#0f7d3b', '#ff3b30', '#5fa8ff', '#e5e5e5', '#ffffff'];
+  const COLOR_OPTIONS = ['#e5e5e5', '#0f7d3b', '#ff3b30', '#5fa8ff', '#ffffff', '#f3c744'];
 
   function openPicker(field) {
     pickerContext.field = field;
@@ -1938,13 +1937,13 @@
 
   function syncWheel(id, value) {
     const el = document.getElementById(id);
-    const itemHeight = 44;
+    const itemHeight = 50;
     el.scrollTop = value * itemHeight;
     highlightWheel(el);
   }
 
   function highlightWheel(el) {
-    const itemHeight = 44;
+    const itemHeight = 50;
     const idx = Math.round(el.scrollTop / itemHeight);
     Array.from(el.children).forEach((c, i) => {
       c.classList.toggle('active', i === idx);
@@ -2010,7 +2009,7 @@
 
   function nearestWheelValue(id) {
     const el = document.getElementById(id);
-    const itemHeight = 44;
+    const itemHeight = 50;
     return Math.round(el.scrollTop / itemHeight);
   }
 
