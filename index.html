@@ -724,10 +724,14 @@
 
   function speakCountdown(n) {
     if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
     const utter = new SpeechSynthesisUtterance(String(n));
-    utter.lang = 'en-US';
+    utter.lang = enVoice?.lang || 'en-US';
+    if (enVoice) utter.voice = enVoice;
     utter.rate = 1.0;
     utter.pitch = 1.0;
+    utter.volume = 1.0;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
   }
