@@ -270,6 +270,10 @@
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
   }
+  .btn-fullscreen {
+    background: #0d0d0d;
+    color: #f3c744;
+  }
   .btn-toggle-top { display: none; }
 
   .runner-main {
@@ -601,9 +605,14 @@
         <div class="runner-total" id="disp-total">00:00</div>
       </div>
 
-      <button class="icon-btn btn-toggle-top" id="btn-toggle-top" onclick="toggleTimer()" aria-label="Play/Pause">
-        <i class="fa fa-play"></i>
-      </button>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="icon-btn btn-fullscreen" id="btn-fullscreen" onclick="toggleFullscreen()" aria-label="Fullscreen">
+          <i class="fa-solid fa-expand"></i>
+        </button>
+        <button class="icon-btn btn-toggle-top" id="btn-toggle-top" onclick="toggleTimer()" aria-label="Play/Pause">
+          <i class="fa fa-play"></i>
+        </button>
+      </div>
     </div>
 
     <div class="runner-main" id="runner-main">
@@ -1100,6 +1109,17 @@
   updateUI();
   loadPresets();
   renderPresets();
+
+  function toggleFullscreen() {
+    const elem = document.documentElement;
+    if (!document.fullscreenElement) {
+      if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  }
 </script>
 </body>
 </html>
