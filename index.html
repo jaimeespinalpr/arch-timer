@@ -673,7 +673,7 @@
     <div class="section-title">Intervals</div>
 
     <div class="options-list">
-      <div class="list-item">
+      <div class="list-item" onclick="openPicker('ready')">
         <div class="item-left">
           <div class="dot d-yellow"></div>
           <div class="text-group">
@@ -682,12 +682,12 @@
           </div>
         </div>
         <div class="item-right">
-          <input type="number" id="inp-ready" class="input-display" value="10" min="0">
+          <input type="number" id="inp-ready" class="input-display" value="10" min="0" readonly>
           <i class="fa fa-chevron-right chevron"></i>
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="openPicker('work')">
         <div class="item-left">
           <div class="dot d-green"></div>
           <div class="text-group">
@@ -696,12 +696,12 @@
           </div>
         </div>
         <div class="item-right">
-          <input type="number" id="inp-work" class="input-display" value="30" min="0">
+          <input type="number" id="inp-work" class="input-display" value="30" min="0" readonly>
           <i class="fa fa-chevron-right chevron"></i>
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="openPicker('rest')">
         <div class="item-left">
           <div class="dot d-red"></div>
           <div class="text-group">
@@ -710,12 +710,12 @@
           </div>
         </div>
         <div class="item-right">
-          <input type="number" id="inp-rest" class="input-display" value="15" min="0">
+          <input type="number" id="inp-rest" class="input-display" value="15" min="0" readonly>
           <i class="fa fa-chevron-right chevron"></i>
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="openPicker('sets','int')">
         <div class="item-left">
           <div class="dot d-blue"></div>
           <div class="text-group">
@@ -724,12 +724,12 @@
           </div>
         </div>
         <div class="item-right">
-          <input type="number" id="inp-sets" class="input-display" value="4" min="1">
+          <input type="number" id="inp-sets" class="input-display" value="4" min="1" readonly>
           <i class="fa fa-chevron-right chevron"></i>
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="openPicker('cycleRest')">
         <div class="item-left">
           <div class="dot d-yellow"></div>
           <div class="text-group">
@@ -752,12 +752,12 @@
           </div>
         </div>
         <div class="item-right">
-          <input type="number" id="inp-cycleRest" class="input-display" value="60" min="0">
+          <input type="number" id="inp-cycleRest" class="input-display" value="60" min="0" readonly>
           <i class="fa fa-chevron-right chevron"></i>
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="openPicker('cooldown')">
         <div class="item-left">
           <div class="dot d-blue"></div>
           <div class="text-group">
@@ -766,7 +766,7 @@
           </div>
         </div>
         <div class="item-right">
-          <input type="number" id="inp-cooldown" class="input-display" value="120" min="0">
+          <input type="number" id="inp-cooldown" class="input-display" value="120" min="0" readonly>
           <i class="fa fa-chevron-right chevron"></i>
         </div>
       </div>
