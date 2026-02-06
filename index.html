@@ -38,19 +38,19 @@
   }
 
   .nav-header {
-    height: 46px;
+    height: 42px;
     background-color: var(--bg-card);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 12px;
+    padding: 0 10px;
     border-bottom: 1px solid #000;
     z-index: 50;
   }
   .nav-btn {
-    background: none; border: none; font-size: 16px; cursor: pointer;
+    background: none; border: none; font-size: 15px; cursor: pointer;
     font-weight: 600; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px;
   }
   .btn-left { color: var(--text-gray); text-transform: uppercase; }
-  .btn-center { color: var(--text-white); font-size: 18px; font-weight: bold; pointer-events: none; }
+  .btn-center { color: var(--text-white); font-size: 17px; font-weight: bold; pointer-events: none; }
   .btn-right { color: var(--arch-green); text-transform: uppercase; }
 
   #view-editor {
@@ -63,21 +63,21 @@
   .editor-brand {
     display: flex;
     justify-content: center;
-    padding: clamp(8px, 1.6vh, 14px) 14px clamp(3px, 0.8vh, 8px) 14px;
+    padding: clamp(6px, 1.4vh, 12px) 12px clamp(3px, 0.6vh, 7px) 12px;
     background: #000;
   }
   .editor-brand img {
-    width: clamp(130px, 42vw, 240px);
+    width: clamp(120px, 38vw, 220px);
     height: auto;
     filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5));
   }
 
   .section-title {
     color: #555;
-    font-size: clamp(10px, 2vw, 13px);
+    font-size: clamp(9px, 1.8vw, 12px);
     font-weight: bold;
     text-transform: uppercase;
-    padding: 20px 15px 10px 15px;
+    padding: 16px 14px 8px 14px;
     text-align: center;
     letter-spacing: 1px;
   }
@@ -145,7 +145,7 @@
     display: flex; align-items: center; justify-content: center; gap: 10px;
   }
   .saved-section {
-    padding: 0 20px 30px 20px;
+    padding: 0 16px 24px 16px;
   }
   .saved-title {
     font-family: 'Oswald', sans-serif;
@@ -201,10 +201,10 @@
   }
 
   .runner-top {
-    height: clamp(54px, 11vh, 84px);
+    height: clamp(50px, 10vh, 76px);
     background: var(--bar-dark);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 clamp(10px, 3vw, 16px);
+    padding: 0 clamp(8px, 2.8vw, 14px);
     border-bottom: 1px solid #1a1a1a;
   }
   .runner-top-center {
@@ -216,21 +216,21 @@
     gap: clamp(2px, 0.6vh, 6px);
   }
   .brand-icon {
-    width: clamp(32px, 7.5vw, 52px);
+    width: clamp(28px, 7vw, 46px);
     height: auto;
     opacity: 0.9;
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
   }
   .runner-title {
     font-family: 'Oswald', sans-serif;
-    font-size: clamp(15px, 3.8vw, 22px);
+    font-size: clamp(14px, 3.4vw, 20px);
     color: var(--arch-green);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   .runner-total {
     font-family: 'Oswald', sans-serif;
-    font-size: clamp(16px, 4.4vw, 28px);
+    font-size: clamp(15px, 4vw, 24px);
     color: var(--arch-green);
   }
 
@@ -254,7 +254,7 @@
     background: var(--dot-green);
     color: #000;
     text-align: center;
-    padding: clamp(4px, 1.6vh, 12px) 10px;
+    padding: clamp(3px, 1.4vh, 10px) 8px;
     position: relative;
     overflow: hidden;
   }
@@ -263,8 +263,8 @@
     left: 75%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: clamp(110px, 28vw, 320px);
-    max-width: 40vw;
+    width: clamp(96px, 26vw, 260px);
+    max-width: 36vw;
     height: auto;
     opacity: 0.18;
     filter: saturate(1.05) drop-shadow(0 6px 12px rgba(0,0,0,0.25));
@@ -277,7 +277,7 @@
     top: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Oswald', sans-serif;
-    font-size: clamp(20px, 5.4vw, 52px);
+    font-size: clamp(18px, 5vw, 48px);
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
@@ -294,7 +294,7 @@
   .runner-watermark-text span { display: block; }
   .phase-label {
     font-family: 'Oswald', sans-serif;
-    font-size: clamp(24px, 7vw, 56px);
+    font-size: clamp(20px, 6vw, 48px);
     font-weight: 700;
     text-transform: uppercase;
     margin-top: clamp(2px, 1vh, 8px);
@@ -303,7 +303,7 @@
   }
   .time-big {
     font-family: 'Oswald', sans-serif;
-    font-size: clamp(72px, 22vw, 180px);
+    font-size: clamp(64px, 20vw, 150px);
     font-weight: 700;
     line-height: 0.95;
     position: relative;
@@ -311,7 +311,7 @@
   }
 
   .runner-next {
-    height: clamp(72px, 13vh, 130px);
+    height: clamp(64px, 12vh, 120px);
     background: var(--dot-red);
     color: #fff;
     display: flex; align-items: center; justify-content: center;
@@ -320,29 +320,29 @@
     font-family: 'Oswald', sans-serif;
     border-top: 2px solid #000;
   }
-  .next-label { font-size: clamp(16px, 4.5vw, 28px); letter-spacing: 0.5px; }
-  .next-time { font-size: clamp(24px, 7.5vw, 56px); font-weight: 700; }
+  .next-label { font-size: clamp(14px, 4vw, 24px); letter-spacing: 0.5px; }
+  .next-time { font-size: clamp(20px, 6.5vw, 48px); font-weight: 700; }
 
   .next-up { display: none; }
   .next-side { display: none; }
 
   .runner-bottom {
-    height: clamp(110px, 16vh, 170px);
+    height: clamp(96px, 15vh, 140px);
     background: #222;
     display: flex; align-items: center; justify-content: space-around;
     color: #fff;
   }
   .stat-box {
     text-align: center;
-    min-width: 120px;
+    min-width: 110px;
   }
   .stat-value {
-    font-size: clamp(30px, 8vw, 56px);
+    font-size: clamp(26px, 7vw, 48px);
     font-family: 'Oswald', sans-serif;
     font-weight: 700;
   }
   .stat-label {
-    font-size: clamp(11px, 2.6vw, 15px);
+    font-size: clamp(10px, 2.4vw, 14px);
     font-weight: 600;
     text-transform: uppercase;
   }
@@ -350,12 +350,12 @@
   .stat-right { color: #f5ea3b; }
 
   .btn-play-round {
-    width: clamp(60px, 15vw, 86px); height: clamp(60px, 15vw, 86px);
+    width: clamp(54px, 14vw, 78px); height: clamp(54px, 14vw, 78px);
     border-radius: 50%;
     border: 3px solid #2a2a2a;
     background: var(--arch-green);
     color: #111;
-    font-size: clamp(20px, 6vw, 32px);
+    font-size: clamp(18px, 5.6vw, 28px);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
   }
@@ -398,20 +398,20 @@
       font-size: clamp(18px, 4vw, 38px);
       opacity: 0.5;
     }
-    .phase-label { font-size: clamp(22px, 4.6vw, 36px); }
-    .time-big { font-size: clamp(70px, 16vw, 120px); }
+    .phase-label { font-size: clamp(20px, 4.4vw, 32px); }
+    .time-big { font-size: clamp(62px, 15vw, 110px); }
 
     .runner-next {
-      height: clamp(56px, 11vh, 72px);
+      height: clamp(52px, 10vh, 68px);
       flex-direction: row;
       justify-content: space-between;
-      padding: 0 clamp(10px, 2vw, 14px);
+      padding: 0 clamp(8px, 2vw, 12px);
     }
     .next-label, .next-time { display: none; }
 
     .next-up {
       display: block;
-      font-size: clamp(16px, 3.6vw, 24px);
+      font-size: clamp(14px, 3.4vw, 22px);
       font-weight: 700;
       color: #000;
       margin-right: 10px;
@@ -420,22 +420,22 @@
     .next-core {
       background: var(--dot-red);
       color: #fff;
-      padding: clamp(6px, 1.6vh, 9px) clamp(10px, 3vw, 18px);
+      padding: clamp(6px, 1.4vh, 8px) clamp(10px, 3vw, 16px);
       border-radius: 6px;
-      font-size: clamp(17px, 4.4vw, 28px);
+      font-size: clamp(16px, 4.2vw, 26px);
       font-weight: 700;
-      min-width: clamp(150px, 26vw, 220px);
+      min-width: clamp(140px, 24vw, 200px);
       text-align: center;
     }
 
     .next-side {
       display: flex;
       align-items: center; justify-content: center;
-      width: clamp(42px, 8.5vw, 60px); height: clamp(42px, 8.5vw, 60px);
+      width: clamp(38px, 8vw, 54px); height: clamp(38px, 8vw, 54px);
       background: #1c1c1c;
       color: #fff;
       font-family: 'Oswald', sans-serif;
-      font-size: clamp(19px, 5.5vw, 30px);
+      font-size: clamp(17px, 5vw, 26px);
       font-weight: 700;
     }
     .next-side.left { color: #5bc0ff; }
