@@ -852,6 +852,7 @@
   }
 
   function saveCurrentPreset() {
+    syncConfigFromInputs();
     const base = 'Workout';
     const input = window.prompt('Workout name:', base);
     if (input === null) return;
@@ -868,6 +869,16 @@
     renderPresets();
   }
 
+  function syncConfigFromInputs() {
+    config.ready = clampInt(document.getElementById('inp-ready').value, 0, config.ready);
+    config.work = clampInt(document.getElementById('inp-work').value, 0, config.work);
+    config.rest = clampInt(document.getElementById('inp-rest').value, 0, config.rest);
+    config.sets = clampInt(document.getElementById('inp-sets').value, 1, config.sets);
+    config.cycles = clampInt(document.getElementById('inp-cycles').value, 1, config.cycles);
+    config.cycleRest = clampInt(document.getElementById('inp-cycleRest').value, 0, config.cycleRest);
+    config.cooldown = clampInt(document.getElementById('inp-cooldown').value, 0, config.cooldown);
+  }
+
   function applyPreset(preset) {
     config.name = preset.name || 'Workout';
     config.ready = preset.ready;
@@ -878,6 +889,8 @@
     config.cycleRest = preset.cycleRest;
     config.cooldown = preset.cooldown;
     applyConfigToInputs();
+    resetTimer();
+    closeEditor();
     updateUI();
   }
 
@@ -893,13 +906,7 @@
   }
 
   function saveAndStart() {
-    config.ready = clampInt(document.getElementById('inp-ready').value, 0, config.ready);
-    config.work = clampInt(document.getElementById('inp-work').value, 0, config.work);
-    config.rest = clampInt(document.getElementById('inp-rest').value, 0, config.rest);
-    config.sets = clampInt(document.getElementById('inp-sets').value, 1, config.sets);
-    config.cycles = clampInt(document.getElementById('inp-cycles').value, 1, config.cycles);
-    config.cycleRest = clampInt(document.getElementById('inp-cycleRest').value, 0, config.cycleRest);
-    config.cooldown = clampInt(document.getElementById('inp-cooldown').value, 0, config.cooldown);
+    syncConfigFromInputs();
 
     applyConfigToInputs();
     closeEditor();
