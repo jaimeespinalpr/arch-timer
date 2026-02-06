@@ -1,0 +1,1078 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Archmere Tabata Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  :root {
+    --bg-dark: #121212;
+    --bg-card: #1c1c1e;
+    --text-white: #ffffff;
+    --text-gray: #8e8e93;
+    --border-color: #2c2c2e;
+
+    --arch-green: #0f7d3b;
+    --arch-gold: #f3c744;
+
+    --dot-yellow: var(--arch-gold);
+    --dot-green: var(--arch-green);
+    --dot-red: #ff3b30;
+    --dot-blue: #1f4e79;
+    --bar-dark: #2a2a2a;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    font-family: 'Roboto', sans-serif;
+    margin: 0; padding: 0;
+    height: 100vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  .nav-header {
+    height: 50px;
+    background-color: var(--bg-card);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 15px;
+    border-bottom: 1px solid #000;
+    z-index: 50;
+  }
+  .nav-btn {
+    background: none; border: none; font-size: 16px; cursor: pointer;
+    font-weight: 600; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px;
+  }
+  .btn-left { color: var(--text-gray); text-transform: uppercase; }
+  .btn-center { color: var(--text-white); font-size: 18px; font-weight: bold; pointer-events: none; }
+  .btn-right { color: var(--arch-green); text-transform: uppercase; }
+
+  #view-editor {
+    flex: 1;
+    background-color: #000;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+  }
+  .editor-brand {
+    display: flex;
+    justify-content: center;
+    padding: clamp(10px, 2vh, 18px) 16px clamp(4px, 1vh, 10px) 16px;
+    background: #000;
+  }
+  .editor-brand img {
+    width: clamp(150px, 46vw, 280px);
+    height: auto;
+    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5));
+  }
+
+  .section-title {
+    color: #555;
+    font-size: clamp(11px, 2.2vw, 14px);
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 20px 15px 10px 15px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .options-list {
+    display: flex; flex-direction: column;
+    background-color: var(--bg-dark);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .list-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-dark);
+    min-height: 70px;
+  }
+  .list-item:last-child { border-bottom: none; }
+
+  .item-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; }
+
+  .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .d-yellow { background-color: var(--dot-yellow); }
+  .d-green { background-color: var(--dot-green); }
+  .d-red { background-color: var(--dot-red); }
+  .d-blue { background-color: var(--dot-blue); }
+
+  .text-group { display: flex; flex-direction: column; }
+  .item-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(14px, 3.2vw, 18px); font-weight: 700; text-transform: uppercase;
+    color: var(--text-white); margin-bottom: 4px;
+  }
+  .item-sub {
+    font-size: clamp(10px, 2.2vw, 12px); color: #666; font-weight: 600; text-transform: uppercase;
+  }
+
+  .item-right { display: flex; align-items: center; gap: 10px; }
+
+  .input-display {
+    background: transparent; border: none;
+    color: var(--text-white);
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(20px, 5.4vw, 30px); font-weight: 400;
+    text-align: right;
+    width: clamp(70px, 18vw, 110px);
+    outline: none;
+  }
+  .input-display:focus { color: var(--arch-green); }
+
+  .chevron { color: #444; font-size: 14px; }
+
+  .bottom-action-area { padding: 30px 20px; }
+  .btn-pill-gray {
+    width: 100%; padding: 15px;
+    background-color: #333; color: white;
+    border: none; border-radius: 12px;
+    font-family: 'Oswald', sans-serif; font-size: clamp(13px, 3.4vw, 16px); font-weight: bold;
+    text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .saved-section {
+    padding: 0 20px 30px 20px;
+  }
+  .saved-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 10px 0 12px 0;
+    text-align: center;
+  }
+  .saved-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .saved-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+  }
+  .saved-item:hover { border-color: #3a3a3a; }
+  .saved-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .saved-meta {
+    font-size: 12px;
+    color: #9a9a9a;
+    text-transform: uppercase;
+  }
+  .saved-empty {
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+    padding: 10px 0 0 0;
+  }
+
+  #view-runner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-dark);
+  }
+
+  .runner-top {
+    height: clamp(60px, 12vh, 96px);
+    background: var(--bar-dark);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 clamp(10px, 3vw, 18px);
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .runner-top-center {
+    text-align: center;
+    line-height: 1.1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2px, 0.6vh, 6px);
+  }
+  .brand-icon {
+    width: clamp(34px, 8vw, 56px);
+    height: auto;
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
+  }
+  .runner-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(16px, 4.2vw, 24px);
+    color: var(--arch-green);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .runner-total {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(18px, 5vw, 32px);
+    color: var(--arch-green);
+  }
+
+  .icon-btn {
+    width: clamp(38px, 8vw, 54px); height: clamp(38px, 8vw, 54px);
+    border-radius: 50%;
+    border: none;
+    background: #1f1f1f;
+    color: var(--arch-green);
+    font-size: clamp(16px, 4.2vw, 22px);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .btn-toggle-top { display: none; }
+
+  .runner-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--dot-green);
+    color: #000;
+    text-align: center;
+    padding: clamp(6px, 2vh, 16px) 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .runner-watermark {
+    position: absolute;
+    left: 75%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(120px, 30vw, 360px);
+    max-width: 42vw;
+    height: auto;
+    opacity: 0.18;
+    filter: saturate(1.05) drop-shadow(0 6px 12px rgba(0,0,0,0.25));
+    pointer-events: none;
+    z-index: 0;
+  }
+  .runner-watermark-text {
+    position: absolute;
+    left: 25%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(22px, 6vw, 64px);
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.25);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 0;
+    text-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    line-height: 0.9;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .runner-watermark-text span { display: block; }
+  .phase-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(28px, 8vw, 72px);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: clamp(2px, 1vh, 8px);
+    position: relative;
+    z-index: 1;
+  }
+  .time-big {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(88px, 26vw, 220px);
+    font-weight: 700;
+    line-height: 0.95;
+    position: relative;
+    z-index: 1;
+  }
+
+  .runner-next {
+    height: clamp(80px, 14vh, 140px);
+    background: var(--dot-red);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    text-transform: uppercase;
+    font-family: 'Oswald', sans-serif;
+    border-top: 2px solid #000;
+  }
+  .next-label { font-size: clamp(18px, 5.2vw, 34px); letter-spacing: 0.5px; }
+  .next-time { font-size: clamp(28px, 8.6vw, 68px); font-weight: 700; }
+
+  .next-up { display: none; }
+  .next-side { display: none; }
+
+  .runner-bottom {
+    height: clamp(120px, 18vh, 190px);
+    background: #222;
+    display: flex; align-items: center; justify-content: space-around;
+    color: #fff;
+  }
+  .stat-box {
+    text-align: center;
+    min-width: 120px;
+  }
+  .stat-value {
+    font-size: clamp(36px, 9.5vw, 72px);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+  }
+  .stat-label {
+    font-size: clamp(11px, 2.8vw, 16px);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .stat-left { color: #5bc0ff; }
+  .stat-right { color: #f5ea3b; }
+
+  .btn-play-round {
+    width: clamp(68px, 16vw, 100px); height: clamp(68px, 16vw, 100px);
+    border-radius: 50%;
+    border: 4px solid #2a2a2a;
+    background: var(--arch-green);
+    color: #111;
+    font-size: clamp(22px, 6.5vw, 36px);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+
+  .tab-bar {
+    height: 60px; background-color: #000;
+    display: flex; border-top: 1px solid #222;
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: #555; background: none; border: none; cursor: pointer;
+  }
+  .tab-item.active { color: var(--text-white); }
+  .tab-icon { font-size: 20px; margin-bottom: 4px; }
+  .tab-label { font-size: 10px; font-weight: 500; }
+
+  .hidden { display: none !important; }
+
+  #view-runner.phase-ready .runner-main { background: var(--dot-yellow); color: #000; }
+  #view-runner.phase-work  .runner-main { background: var(--dot-green);  color: #000; }
+  #view-runner.phase-rest  .runner-main { background: var(--dot-green);  color: #000; }
+  #view-runner.phase-rest  .runner-next { background: var(--dot-red); }
+  #view-runner.phase-cycle .runner-main { background: var(--dot-yellow); color: #000; }
+  #view-runner.phase-cool  .runner-main { background: var(--dot-blue);  color: #fff; }
+
+  @media (orientation: landscape) and (max-height: 520px) {
+    .btn-toggle-top { display: inline-flex; }
+
+    .runner-main { justify-content: flex-start; padding-top: clamp(6px, 2vh, 12px); }
+    .runner-watermark {
+      left: 78%;
+      top: 50%;
+      width: clamp(132px, 22vw, 288px);
+      max-width: 36vw;
+      opacity: 0.12;
+    }
+    .runner-watermark-text {
+      left: 22%;
+      font-size: clamp(18px, 4vw, 38px);
+      opacity: 0.5;
+    }
+    .phase-label { font-size: clamp(24px, 5vw, 40px); }
+    .time-big { font-size: clamp(80px, 18vw, 140px); }
+
+    .runner-next {
+      height: clamp(60px, 12vh, 80px);
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 0 clamp(10px, 2vw, 16px);
+    }
+    .next-label, .next-time { display: none; }
+
+    .next-up {
+      display: block;
+      font-size: clamp(18px, 4vw, 26px);
+      font-weight: 700;
+      color: #000;
+      margin-right: 10px;
+    }
+
+    .next-core {
+      background: var(--dot-red);
+      color: #fff;
+      padding: clamp(6px, 1.6vh, 10px) clamp(10px, 3vw, 22px);
+      border-radius: 6px;
+      font-size: clamp(18px, 4.8vw, 30px);
+      font-weight: 700;
+      min-width: clamp(160px, 28vw, 240px);
+      text-align: center;
+    }
+
+    .next-side {
+      display: flex;
+      align-items: center; justify-content: center;
+      width: clamp(44px, 9vw, 64px); height: clamp(44px, 9vw, 64px);
+      background: #1c1c1c;
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(22px, 6vw, 34px);
+      font-weight: 700;
+    }
+    .next-side.left { color: #5bc0ff; }
+    .next-side.right { color: #f5ea3b; }
+
+    .runner-bottom { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="view-editor">
+    <div class="nav-header">
+      <button class="nav-btn btn-left" onclick="closeEditor()">Cancel</button>
+      <span class="nav-btn btn-center">TABATA</span>
+      <button class="nav-btn btn-right" onclick="saveAndStart()">READY</button>
+    </div>
+
+    <div class="editor-brand">
+      <img src="assets/archmere-auks-greeniii-original.png" alt="Archmere Auks">
+    </div>
+
+    <div class="section-title">Intervals</div>
+
+    <div class="options-list">
+      <div class="list-item">
+        <div class="item-left">
+          <div class="dot d-yellow"></div>
+          <div class="text-group">
+            <div class="item-title">PREPARE</div>
+            <div class="item-sub">Countdown before you start</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-ready" class="input-display" value="10" min="0">
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <div class="dot d-green"></div>
+          <div class="text-group">
+            <div class="item-title">WORK</div>
+            <div class="item-sub">Do exercises for this long</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-work" class="input-display" value="30" min="0">
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <div class="dot d-red"></div>
+          <div class="text-group">
+            <div class="item-title">REST</div>
+            <div class="item-sub">Rest for this long</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-rest" class="input-display" value="15" min="0">
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <div class="dot d-blue"></div>
+          <div class="text-group">
+            <div class="item-title">ROUNDS</div>
+            <div class="item-sub">One round is work + rest</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-sets" class="input-display" value="4" min="1">
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <div class="dot d-yellow"></div>
+          <div class="text-group">
+            <div class="item-title">CYCLES</div>
+            <div class="item-sub">One cycle is 4 rounds</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-cycles" class="input-display" value="2" min="1">
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <div class="dot d-yellow"></div>
+          <div class="text-group">
+            <div class="item-title">REST BETWEEN CYCLES</div>
+            <div class="item-sub">Recovery interval</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-cycleRest" class="input-display" value="60" min="0">
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <div class="dot d-blue"></div>
+          <div class="text-group">
+            <div class="item-title">COOLDOWN</div>
+            <div class="item-sub">Cooldown after workout</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-cooldown" class="input-display" value="120" min="0">
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-action-area">
+      <button class="btn-pill-gray" id="btn-save-timer" onclick="saveCurrentPreset()">
+        <i class="fa fa-stopwatch"></i> SAVE THIS TIMER
+      </button>
+    </div>
+
+    <div class="saved-section">
+      <div class="saved-title">Saved Timers</div>
+      <div class="saved-list" id="saved-list"></div>
+      <div class="saved-empty" id="saved-empty">No saved timers yet</div>
+    </div>
+  </div>
+
+  <div id="view-runner" class="phase-ready">
+    <div class="runner-top">
+      <button class="icon-btn" onclick="openEditor()" aria-label="Settings"><i class="fa-solid fa-gear"></i></button>
+
+      <div class="runner-top-center">
+        <img class="brand-icon" src="assets/archmere-a-auks-green-original.png" alt="Archmere Auks">
+        <div class="runner-title" id="runner-title">WORKOUT</div>
+        <div class="runner-total" id="disp-total">00:00</div>
+      </div>
+
+      <button class="icon-btn btn-toggle-top" id="btn-toggle-top" onclick="toggleTimer()" aria-label="Play/Pause">
+        <i class="fa fa-play"></i>
+      </button>
+    </div>
+
+    <div class="runner-main" id="runner-main">
+      <img class="runner-watermark" src="assets/auks-old-school2.png" alt="Auks Old School">
+      <div class="runner-watermark-text">
+        <span>Yeah</span>
+        <span>You</span>
+        <span>Right</span>
+      </div>
+      <div class="phase-label" id="disp-phase">PREPARE</div>
+      <div class="time-big" id="disp-time">00:00</div>
+    </div>
+
+    <div class="runner-next" id="runner-next">
+      <div class="next-side left" id="disp-rounds-land">4</div>
+      <div class="next-up">UP NEXT</div>
+      <div class="next-core" id="disp-next-core">REST: 00:15</div>
+      <div class="next-side right" id="disp-cycles-land">2</div>
+
+      <div class="next-label" id="disp-next-label">REST</div>
+      <div class="next-time" id="disp-next-time">00:15</div>
+    </div>
+
+    <div class="runner-bottom">
+      <div class="stat-box">
+        <div class="stat-value stat-left" id="disp-rounds">4</div>
+        <div class="stat-label">ROUNDS LEFT</div>
+      </div>
+
+      <button class="btn-play-round" id="btn-toggle" onclick="toggleTimer()" aria-label="Play/Pause">
+        <i class="fa fa-play"></i>
+      </button>
+
+      <div class="stat-box">
+        <div class="stat-value stat-right" id="disp-cycles">2</div>
+        <div class="stat-label">CYCLES LEFT</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-item active">
+      <i class="fa-solid fa-stopwatch-20 tab-icon"></i>
+      <span class="tab-label">TABATA</span>
+    </button>
+    <button class="tab-item">
+      <i class="fa-solid fa-circle-notch tab-icon"></i>
+      <span class="tab-label">ROUNDS</span>
+    </button>
+    <button class="tab-item">
+      <i class="fa-regular fa-clock tab-icon"></i>
+      <span class="tab-label">STOPWATCH</span>
+    </button>
+    <button class="tab-item">
+      <i class="fa-solid fa-ellipsis tab-icon"></i>
+      <span class="tab-label">MORE</span>
+    </button>
+  </div>
+
+<script>
+  let config = {
+    name: 'Workout',
+    ready: 10, work: 30, rest: 15, sets: 4,
+    cycles: 2, cycleRest: 60, cooldown: 120
+  };
+
+  let state = {
+    running: false, paused: false, phase: 'IDLE',
+    timeLeft: 0, timerId: null,
+    currentSet: 1, currentCycle: 1,
+    lastSpoken: null, zeroBeeped: false
+  };
+
+  let audioCtx;
+  const STORAGE_KEY = 'archmere_tabata_presets_v1';
+  let presets = [];
+
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playBeep(type) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    if (type === 'go') {
+      osc.frequency.setValueAtTime(1000, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.6);
+      osc.type = 'square';
+      gain.gain.setValueAtTime(0.3, now);
+      osc.start(now); osc.stop(now + 0.6);
+      return;
+    }
+
+    if (type === 'rest') {
+      osc.frequency.value = 400; osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.3, now);
+      osc.start(now); osc.stop(now + 0.4);
+      return;
+    }
+
+    if (type === 'tick') {
+      osc.frequency.value = 800; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.18, now);
+      osc.start(now); osc.stop(now + 0.12);
+      return;
+    }
+
+    if (type === 'end') {
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(120, now + 1.0);
+      osc.type = 'sawtooth';
+      gain.gain.setValueAtTime(0.35, now);
+      osc.start(now); osc.stop(now + 1.0);
+    }
+  }
+
+  function speakCountdown(n) {
+    if (!('speechSynthesis' in window)) return;
+    const utter = new SpeechSynthesisUtterance(String(n));
+    utter.lang = 'en-US';
+    utter.rate = 1.0;
+    utter.pitch = 1.0;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+  }
+
+  function clampInt(value, min, fallback) {
+    const n = parseInt(value, 10);
+    if (Number.isNaN(n)) return fallback;
+    return Math.max(min, n);
+  }
+
+  function formatTime(sec) {
+    const s = Math.max(0, Math.floor(sec));
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const r = (s % 60).toString().padStart(2, '0');
+    return `${m}:${r}`;
+  }
+
+  function totalSeconds() {
+    const perCycle = config.sets * (config.work + config.rest);
+    return config.ready + (config.cycles * perCycle) + (config.cycleRest * (config.cycles - 1)) + config.cooldown;
+  }
+
+  function applyConfigToInputs() {
+    document.getElementById('inp-ready').value = config.ready;
+    document.getElementById('inp-work').value = config.work;
+    document.getElementById('inp-rest').value = config.rest;
+    document.getElementById('inp-sets').value = config.sets;
+    document.getElementById('inp-cycles').value = config.cycles;
+    document.getElementById('inp-cycleRest').value = config.cycleRest;
+    document.getElementById('inp-cooldown').value = config.cooldown;
+  }
+
+  function getConfigSnapshot() {
+    return {
+      name: config.name,
+      ready: config.ready,
+      work: config.work,
+      rest: config.rest,
+      sets: config.sets,
+      cycles: config.cycles,
+      cycleRest: config.cycleRest,
+      cooldown: config.cooldown
+    };
+  }
+
+  function loadPresets() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      presets = Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      presets = [];
+    }
+  }
+
+  function persistPresets() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
+  }
+
+  function presetSummary(p) {
+    return `W ${p.work}s / R ${p.rest}s | Rounds ${p.sets} | Cycles ${p.cycles}`;
+  }
+
+  function renderPresets() {
+    const list = document.getElementById('saved-list');
+    const empty = document.getElementById('saved-empty');
+    list.innerHTML = '';
+
+    if (!presets.length) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    presets.forEach((p) => {
+      const btn = document.createElement('button');
+      btn.className = 'saved-item';
+      btn.type = 'button';
+      btn.onclick = () => applyPreset(p);
+
+      const left = document.createElement('div');
+      const name = document.createElement('div');
+      name.className = 'saved-name';
+      name.textContent = p.name;
+      const meta = document.createElement('div');
+      meta.className = 'saved-meta';
+      meta.textContent = presetSummary(p);
+      left.appendChild(name);
+      left.appendChild(meta);
+
+      const icon = document.createElement('i');
+      icon.className = 'fa fa-chevron-right';
+      icon.style.color = '#666';
+
+      btn.appendChild(left);
+      btn.appendChild(icon);
+      list.appendChild(btn);
+    });
+  }
+
+  function uniquePresetName(base) {
+    let name = base;
+    let i = 2;
+    const names = new Set(presets.map(p => p.name));
+    while (names.has(name)) {
+      name = `${base} ${i}`;
+      i += 1;
+    }
+    return name;
+  }
+
+  function saveCurrentPreset() {
+    const base = 'Workout';
+    const input = window.prompt('Workout name:', base);
+    if (input === null) return;
+    const trimmed = input.trim();
+    const name = uniquePresetName(trimmed || base);
+    config.name = name;
+    const snapshot = getConfigSnapshot();
+    presets.unshift({
+      id: Date.now(),
+      name,
+      ...snapshot
+    });
+    persistPresets();
+    renderPresets();
+  }
+
+  function applyPreset(preset) {
+    config.name = preset.name || 'Workout';
+    config.ready = preset.ready;
+    config.work = preset.work;
+    config.rest = preset.rest;
+    config.sets = preset.sets;
+    config.cycles = preset.cycles;
+    config.cycleRest = preset.cycleRest;
+    config.cooldown = preset.cooldown;
+    applyConfigToInputs();
+    updateUI();
+  }
+
+  function openEditor() {
+    applyConfigToInputs();
+    document.getElementById('view-runner').classList.add('hidden');
+    document.getElementById('view-editor').style.display = 'flex';
+  }
+
+  function closeEditor() {
+    document.getElementById('view-editor').style.display = 'none';
+    document.getElementById('view-runner').classList.remove('hidden');
+  }
+
+  function saveAndStart() {
+    config.ready = clampInt(document.getElementById('inp-ready').value, 0, config.ready);
+    config.work = clampInt(document.getElementById('inp-work').value, 0, config.work);
+    config.rest = clampInt(document.getElementById('inp-rest').value, 0, config.rest);
+    config.sets = clampInt(document.getElementById('inp-sets').value, 1, config.sets);
+    config.cycles = clampInt(document.getElementById('inp-cycles').value, 1, config.cycles);
+    config.cycleRest = clampInt(document.getElementById('inp-cycleRest').value, 0, config.cycleRest);
+    config.cooldown = clampInt(document.getElementById('inp-cooldown').value, 0, config.cooldown);
+
+    applyConfigToInputs();
+    closeEditor();
+    resetTimer();
+  }
+
+  function toggleTimer() {
+    ensureAudio();
+    if (state.running) {
+      state.running = false; state.paused = true;
+      clearInterval(state.timerId);
+      updatePlayButton();
+    } else {
+      state.running = true; state.paused = false;
+      if (state.phase === 'IDLE') {
+        state.currentSet = 1; state.currentCycle = 1;
+        setPhase('READY', config.ready);
+      } else {
+        runTicker();
+      }
+      updatePlayButton();
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(state.timerId);
+    state.running = false; state.paused = false; state.phase = 'IDLE';
+    state.lastSpoken = null; state.zeroBeeped = false;
+    updatePlayButton();
+    setPhase('READY', config.ready);
+    state.phase = 'IDLE';
+  }
+
+  function setPhase(phase, time) {
+    state.phase = phase;
+    state.timeLeft = Math.max(0, time);
+    state.lastSpoken = null;
+    state.zeroBeeped = false;
+    updateUI();
+
+    if (state.running) {
+      if (phase === 'WORK') playBeep('go');
+      else playBeep('rest');
+
+      if (state.timeLeft <= 0) {
+        setTimeout(() => nextPhase(), 0);
+      } else {
+        runTicker();
+      }
+    }
+  }
+
+  function runTicker() {
+    clearInterval(state.timerId);
+    state.timerId = setInterval(() => {
+      if (!state.running) return;
+
+      state.timeLeft -= 1;
+      if (state.timeLeft < 0) state.timeLeft = 0;
+
+      if (state.timeLeft > 0 && state.timeLeft <= 5) {
+        if (state.lastSpoken !== state.timeLeft) {
+          playBeep('tick');
+          speakCountdown(state.timeLeft);
+          state.lastSpoken = state.timeLeft;
+        }
+      }
+
+      if (state.timeLeft === 0 && !state.zeroBeeped) {
+        playBeep('end');
+        state.zeroBeeped = true;
+      }
+
+      updateUI();
+
+      if (state.timeLeft <= 0) nextPhase();
+    }, 1000);
+  }
+
+  function nextPhase() {
+    if (state.phase === 'READY') {
+      setPhase('WORK', config.work);
+      return;
+    }
+
+    if (state.phase === 'WORK') {
+      setPhase('REST', config.rest);
+      return;
+    }
+
+    if (state.phase === 'REST') {
+      if (state.currentSet < config.sets) {
+        state.currentSet++;
+        setPhase('WORK', config.work);
+      } else {
+        if (state.currentCycle < config.cycles) {
+          setPhase('CYCLE_REST', config.cycleRest);
+        } else {
+          setPhase('COOLDOWN', config.cooldown);
+        }
+      }
+      return;
+    }
+
+    if (state.phase === 'CYCLE_REST') {
+      state.currentCycle++;
+      state.currentSet = 1;
+      setPhase('WORK', config.work);
+      return;
+    }
+
+    if (state.phase === 'COOLDOWN') {
+      resetTimer();
+    }
+  }
+
+  function computeNextInfo() {
+    if (state.phase === 'READY' || state.phase === 'IDLE') return { label: 'WORK', time: config.work };
+    if (state.phase === 'WORK') return { label: 'REST', time: config.rest };
+    if (state.phase === 'REST') {
+      if (state.currentSet < config.sets) return { label: 'WORK', time: config.work };
+      if (state.currentCycle < config.cycles) return { label: 'CYCLE REST', time: config.cycleRest };
+      return { label: 'COOLDOWN', time: config.cooldown };
+    }
+    if (state.phase === 'CYCLE_REST') return { label: 'WORK', time: config.work };
+    return { label: 'DONE', time: 0 };
+  }
+
+  function roundsLeft() {
+    if (state.phase === 'COOLDOWN') return 0;
+    if (state.phase === 'CYCLE_REST') return config.sets;
+    if (state.phase === 'IDLE' || state.phase === 'READY') return config.sets;
+    return Math.max(0, config.sets - state.currentSet + 1);
+  }
+
+  function cyclesLeft() {
+    if (state.phase === 'COOLDOWN') return 0;
+    if (state.phase === 'IDLE' || state.phase === 'READY') return config.cycles;
+    return Math.max(0, config.cycles - state.currentCycle + 1);
+  }
+
+  function updateUI() {
+    document.getElementById('runner-title').innerText = (config.name || 'Workout').toUpperCase();
+    document.getElementById('disp-time').innerText = formatTime(state.timeLeft);
+
+    const view = document.getElementById('view-runner');
+    view.classList.remove('phase-ready','phase-work','phase-rest','phase-cycle','phase-cool');
+
+    if (state.phase === 'READY' || state.phase === 'IDLE') {
+      view.classList.add('phase-ready');
+      document.getElementById('disp-phase').innerText = 'PREPARE';
+    } else if (state.phase === 'WORK') {
+      view.classList.add('phase-work');
+      document.getElementById('disp-phase').innerText = 'WORK';
+    } else if (state.phase === 'REST') {
+      view.classList.add('phase-rest');
+      document.getElementById('disp-phase').innerText = 'WORK';
+    } else if (state.phase === 'CYCLE_REST') {
+      view.classList.add('phase-cycle');
+      document.getElementById('disp-phase').innerText = 'CYCLE REST';
+    } else if (state.phase === 'COOLDOWN') {
+      view.classList.add('phase-cool');
+      document.getElementById('disp-phase').innerText = 'COOLDOWN';
+    }
+
+    const next = computeNextInfo();
+    document.getElementById('disp-next-label').innerText = next.label;
+    document.getElementById('disp-next-time').innerText = formatTime(next.time);
+    document.getElementById('disp-next-core').innerText = `${next.label}: ${formatTime(next.time)}`;
+
+    const rLeft = roundsLeft();
+    const cLeft = cyclesLeft();
+    document.getElementById('disp-rounds').innerText = rLeft;
+    document.getElementById('disp-cycles').innerText = cLeft;
+    document.getElementById('disp-rounds-land').innerText = rLeft;
+    document.getElementById('disp-cycles-land').innerText = cLeft;
+
+    document.getElementById('disp-total').innerText = formatTime(totalSeconds());
+  }
+
+  function updatePlayButton() {
+    const btn = document.getElementById('btn-toggle');
+    const btnTop = document.getElementById('btn-toggle-top');
+    const icon = state.running ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>';
+
+    if (btn) {
+      btn.innerHTML = icon;
+      btn.style.background = state.running ? 'var(--dot-yellow)' : 'var(--arch-green)';
+    }
+    if (btnTop) {
+      btnTop.innerHTML = icon;
+      btnTop.style.background = state.running ? 'var(--dot-yellow)' : '#1f1f1f';
+      btnTop.style.color = state.running ? '#000' : 'var(--arch-green)';
+    }
+  }
+
+  updateUI();
+  loadPresets();
+  renderPresets();
+</script>
+</body>
+</html>
