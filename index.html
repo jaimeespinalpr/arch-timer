@@ -24,6 +24,21 @@
   --dot-blue: #5fa8ff;
     --bar-dark: #2a2a2a;
   }
+  .quote-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #1a1a1a;
+    color: #fefefe;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive, 'Oswald', sans-serif;
+    font-size: clamp(16px, 4vw, 24px);
+    letter-spacing: 0.4px;
+    text-transform: none;
+    font-weight: 700;
+    text-align: center;
+  }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -272,10 +287,10 @@
   .runner-watermark {
     position: absolute;
     left: 75%;
-    top: 50%;
+    top: 45%;
     transform: translate(-50%, -50%);
-    width: clamp(96px, 26vw, 260px);
-    max-width: 36vw;
+    width: clamp(90px, 24vw, 240px);
+    max-width: 34vw;
     height: auto;
     opacity: 0.18;
     filter: saturate(1.05) drop-shadow(0 6px 12px rgba(0,0,0,0.25));
@@ -283,26 +298,8 @@
     z-index: 0;
   }
   .runner-watermark-text {
-    position: absolute;
-    left: 25%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Oswald', sans-serif;
-    font-size: clamp(18px, 5vw, 48px);
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.25);
-    opacity: 0.6;
-    pointer-events: none;
-    z-index: 0;
-    text-shadow: 0 6px 14px rgba(0,0,0,0.25);
-    line-height: 0.9;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: none;
   }
-  .runner-watermark-text span { display: block; }
   .phase-label {
     font-family: 'Oswald', sans-serif;
     font-size: clamp(20px, 6vw, 48px);
@@ -611,14 +608,11 @@
 
     <div class="runner-main" id="runner-main">
       <img class="runner-watermark" src="assets/auks-old-school2.png" alt="Auks Old School">
-      <div class="runner-watermark-text">
-        <span>Yeah</span>
-        <span>You</span>
-        <span>Right</span>
-      </div>
       <div class="phase-label" id="disp-phase">PREPARE</div>
       <div class="time-big" id="disp-time">00:00</div>
     </div>
+
+    <div class="quote-strip" id="quote-strip">“Yeah you right”</div>
 
     <div class="runner-next" id="runner-next">
       <div class="next-side left" id="disp-rounds-land">4</div>
