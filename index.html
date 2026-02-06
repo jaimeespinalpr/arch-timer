@@ -394,6 +394,84 @@
     color: #aaa; font-family: 'Oswald', sans-serif; font-size: 18px;
   }
 
+  /* Stopwatch */
+  .sw-container {
+    display: flex; flex-direction: column; height: 100%;
+    background: #0d0d0d;
+  }
+  .sw-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: #111;
+    color: #fefefe;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.6px;
+    font-size: 16px;
+    text-transform: uppercase;
+  }
+  .sw-header .sw-title { font-weight: 700; flex: 1; text-align: center; }
+  .sw-header .sw-btn {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: #1f1f1f; color: var(--arch-gold); display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer;
+  }
+  .sw-phase {
+    background: var(--dot-yellow);
+    color: #000;
+    text-align: center;
+    padding: 12px 10px 6px 10px;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .sw-time-main {
+    background: var(--dot-yellow);
+    color: #000;
+    text-align: center;
+    padding: 8px 10px 18px 10px;
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(72px, 20vw, 160px);
+    font-weight: 800;
+    line-height: 0.9;
+  }
+  .sw-lap {
+    background: var(--dot-green);
+    color: #000;
+    text-align: center;
+    padding: 10px 10px 14px 10px;
+    font-family: 'Oswald', sans-serif;
+  }
+  .sw-lap-label {
+    font-size: 14px; letter-spacing: 0.5px; font-weight: 700; text-transform: uppercase;
+  }
+  .sw-lap-time {
+    font-size: clamp(44px, 12vw, 90px); font-weight: 800; line-height: 1;
+  }
+  .sw-actions {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #0d0d0d;
+    gap: 16px;
+  }
+  .sw-play {
+    width: clamp(100px, 32vw, 160px); height: clamp(100px, 32vw, 160px);
+    border-radius: 50%;
+    border: 4px solid var(--dot-yellow);
+    background: #111;
+    color: var(--dot-yellow);
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(36px, 10vw, 64px);
+    cursor: pointer;
+  }
+  .sw-start-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(18px, 4vw, 26px);
+    color: var(--arch-gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
   .hidden { display: none !important; }
 
 #view-runner.phase-ready .runner-main { background: #e5e5e5; color: #000; }
@@ -748,7 +826,28 @@
     </div>
   </div>
   <div id="screen-stopwatch" class="tab-screen">
-    <div class="screen-placeholder">Stopwatch view</div>
+    <div class="sw-container">
+      <div class="sw-header">
+        <button class="sw-btn" onclick="switchTab('tabata')" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="sw-title">Stopwatch</div>
+        <button class="sw-btn" onclick="swReset()" aria-label="Reset"><i class="fa-solid fa-rotate-right"></i></button>
+      </div>
+
+      <div class="sw-phase" id="sw-phase">Prepare</div>
+      <div class="sw-time-main" id="sw-time-main">00:00</div>
+
+      <div class="sw-lap">
+        <div class="sw-lap-label">Time Lap</div>
+        <div class="sw-lap-time" id="sw-lap-time">00:00</div>
+      </div>
+
+      <div class="sw-actions">
+        <button class="sw-play" id="sw-play" onclick="swToggle()" aria-label="Start/Pause">
+          <i class="fa fa-play"></i>
+        </button>
+        <div class="sw-start-label" id="sw-start-label">Start</div>
+      </div>
+    </div>
   </div>
   <div id="screen-more" class="tab-screen">
     <div class="screen-placeholder">More options</div>
@@ -786,6 +885,13 @@
     currentSet: 1, currentCycle: 1,
     lastSpoken: null, zeroBeeped: false
   };
+
+  // Stopwatch state
+  let swRunning = false;
+  let swStartTs = 0;
+  let swElapsed = 0;
+  let swLap = 0;
+  let swTimer = null;
 
   let audioCtx;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
@@ -1234,6 +1340,11 @@
 
     if (name === 'rounds') {
       updateRoundsView();
+    } else if (name === 'stopwatch') {
+      updateStopwatchUI();
+    } else {
+      // pause stopwatch when leaving
+      if (swRunning) swToggle();
     }
   }
 
@@ -1245,6 +1356,54 @@
     document.getElementById('rounds-disp-rest').value = formatTime(config.rest);
     document.getElementById('rounds-disp-sets').value = config.sets;
     document.getElementById('rounds-disp-cooldown').value = formatTime(config.cooldown);
+  }
+
+  function swFormat(sec) {
+    const s = Math.max(0, Math.floor(sec));
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const r = (s % 60).toString().padStart(2, '0');
+    return `${m}:${r}`;
+  }
+
+  function updateStopwatchUI() {
+    document.getElementById('sw-time-main').innerText = swFormat(swElapsed / 1000);
+    document.getElementById('sw-lap-time').innerText = swFormat(swLap / 1000);
+    document.getElementById('sw-phase').innerText = swRunning ? 'Running' : 'Stopped';
+    const play = document.getElementById('sw-play');
+    const label = document.getElementById('sw-start-label');
+    play.innerHTML = swRunning ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>';
+    play.style.color = swRunning ? '#000' : 'var(--dot-yellow)';
+    play.style.background = swRunning ? 'var(--dot-yellow)' : '#111';
+    play.style.borderColor = swRunning ? 'var(--dot-yellow)' : 'var(--dot-yellow)';
+    label.innerText = swRunning ? 'Pause' : 'Start';
+  }
+
+  function swTick() {
+    const now = Date.now();
+    swElapsed = now - swStartTs;
+    updateStopwatchUI();
+  }
+
+  function swToggle() {
+    if (swRunning) {
+      swRunning = false;
+      clearInterval(swTimer);
+      swTimer = null;
+    } else {
+      swRunning = true;
+      swStartTs = Date.now() - swElapsed;
+      swTimer = setInterval(swTick, 250);
+    }
+    updateStopwatchUI();
+  }
+
+  function swReset() {
+    swRunning = false;
+    clearInterval(swTimer);
+    swTimer = null;
+    swElapsed = 0;
+    swLap = 0;
+    updateStopwatchUI();
   }
 
   function parseTimeInput(val, fallbackSec) {
