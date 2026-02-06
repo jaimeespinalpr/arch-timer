@@ -29,9 +29,9 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 8px 12px;
-    background: #1a1a1a;
-    color: #fefefe;
+    padding: 10px 12px;
+    background: #e5e5e5;
+    color: #111;
     font-family: 'Comic Sans MS', 'Comic Neue', cursive, 'Oswald', sans-serif;
     font-size: clamp(16px, 4vw, 24px);
     letter-spacing: 0.4px;
@@ -327,11 +327,9 @@
     background: #222;
     color: #fff;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
     align-items: center;
-    gap: 10px;
-    flex-direction: row;
-    flex-wrap: nowrap;
+    justify-items: center;
     text-transform: uppercase;
     font-family: 'Oswald', sans-serif;
     border-top: 2px solid #000;
@@ -440,13 +438,13 @@
   }
 
   .next-core {
-    background: var(--dot-red);
-    color: #fff;
-      padding: clamp(6px, 1.4vh, 8px) clamp(10px, 3vw, 16px);
-    border-radius: 6px;
-    font-size: clamp(16px, 4.2vw, 26px);
-    font-weight: 700;
-    min-width: clamp(140px, 24vw, 200px);
+    background: transparent;
+    color: inherit;
+    padding: clamp(4px, 1.2vh, 6px) clamp(8px, 2.4vw, 14px);
+    border-radius: 0;
+    font-size: clamp(18px, 4.8vw, 30px);
+    font-weight: 800;
+    min-width: auto;
     text-align: center;
   }
 
