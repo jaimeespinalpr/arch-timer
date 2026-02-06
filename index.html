@@ -1175,7 +1175,9 @@
 
   let audioCtx;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
+  const STORAGE_ROUNDS_KEY = 'archmere_rounds_presets_v1';
   let presets = [];
+  let roundsPresets = [];
 
   function loadSettings() {
     try {
@@ -1189,6 +1191,18 @@
 
   function persistSettings() {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
+
+  function loadRoundsPresets() {
+    try {
+      const raw = localStorage.getItem(STORAGE_ROUNDS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      roundsPresets = Array.isArray(parsed) ? parsed : [];
+    } catch (e) { roundsPresets = []; }
+  }
+
+  function persistRoundsPresets() {
+    localStorage.setItem(STORAGE_ROUNDS_KEY, JSON.stringify(roundsPresets));
   }
 
   function applySettingsToUI() {
@@ -1412,10 +1426,59 @@
     });
   }
 
+  function renderRoundsPresets() {
+    const list = document.getElementById('rounds-saved-list');
+    const empty = document.getElementById('rounds-saved-empty');
+    if (!list || !empty) return;
+    list.innerHTML = '';
+
+    if (!roundsPresets.length) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    roundsPresets.forEach((p) => {
+      const btn = document.createElement('button');
+      btn.className = 'saved-item';
+      btn.type = 'button';
+      btn.onclick = () => applyRoundsPreset(p);
+
+      const left = document.createElement('div');
+      left.style.display = 'flex';
+      left.style.flexDirection = 'column';
+
+      const name = document.createElement('div');
+      name.className = 'saved-name';
+      name.textContent = p.name;
+
+      const meta = document.createElement('div');
+      meta.className = 'saved-meta';
+      meta.textContent = presetSummary(p);
+
+      left.appendChild(name);
+      left.appendChild(meta);
+      btn.appendChild(left);
+
+      list.appendChild(btn);
+    });
+  }
+
   function uniquePresetName(base) {
     let name = base;
     let i = 2;
     const names = new Set(presets.map(p => p.name));
+    while (names.has(name)) {
+      name = `${base} ${i}`;
+      i += 1;
+    }
+    return name;
+  }
+
+  function uniquePresetNameRounds(base) {
+    let name = base;
+    let i = 2;
+    const names = new Set(roundsPresets.map(p => p.name));
     while (names.has(name)) {
       name = `${base} ${i}`;
       i += 1;
@@ -1439,6 +1502,34 @@
     });
     persistPresets();
     renderPresets();
+  }
+
+  function saveRoundsPreset() {
+    syncConfigFromInputs();
+    const base = 'Rounds';
+    const input = window.prompt('Rounds name:', base);
+    if (input === null) return;
+    const name = uniquePresetNameRounds(input.trim() || base);
+    const snapshot = getConfigSnapshot();
+    roundsPresets.unshift({ id: Date.now(), name, ...snapshot });
+    persistRoundsPresets();
+    renderRoundsPresets();
+  }
+
+  function applyRoundsPreset(preset) {
+    config.name = preset.name || 'Workout';
+    config.ready = preset.ready;
+    config.work = preset.work;
+    config.rest = preset.rest;
+    config.sets = preset.sets;
+    config.cycles = preset.cycles;
+    config.cycleRest = preset.cycleRest;
+    config.cooldown = preset.cooldown;
+    applyConfigToInputs();
+    updateRoundsView();
+    resetTimer();
+    closeEditor();
+    updateUI();
   }
 
   function syncConfigFromInputs() {
@@ -1694,8 +1785,12 @@
   }
 
   updateUI();
+  loadSettings();
+  applySettingsToUI();
+  loadRoundsPresets();
   loadPresets();
   renderPresets();
+  renderRoundsPresets();
 
   function switchTab(name) {
     const screens = ['tabata','rounds','stopwatch','more'];
