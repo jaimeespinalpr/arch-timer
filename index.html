@@ -375,6 +375,7 @@
     cursor: pointer;
   }
 
+  .tab-screen { display: none; flex: 1; flex-direction: column; }
   .tab-bar {
     height: 60px; background-color: #000;
     display: flex; border-top: 1px solid #222;
@@ -387,6 +388,11 @@
   .tab-item.active { color: var(--text-white); }
   .tab-icon { font-size: 20px; margin-bottom: 4px; }
   .tab-label { font-size: 10px; font-weight: 500; }
+
+  .screen-placeholder {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    color: #aaa; font-family: 'Oswald', sans-serif; font-size: 18px;
+  }
 
   .hidden { display: none !important; }
 
@@ -466,6 +472,8 @@
 </style>
 </head>
 <body>
+
+  <div id="screen-tabata" class="tab-screen" style="display:flex; flex-direction:column;">
 
   <div id="view-editor">
     <div class="nav-header">
@@ -648,20 +656,32 @@
     </div>
   </div>
 
+  </div> <!-- end screen-tabata -->
+
+  <div id="screen-rounds" class="tab-screen">
+    <div class="screen-placeholder">Rounds view</div>
+  </div>
+  <div id="screen-stopwatch" class="tab-screen">
+    <div class="screen-placeholder">Stopwatch view</div>
+  </div>
+  <div id="screen-more" class="tab-screen">
+    <div class="screen-placeholder">More options</div>
+  </div>
+
   <div class="tab-bar">
-    <button class="tab-item active">
+    <button class="tab-item active" onclick="switchTab('tabata')">
       <i class="fa-solid fa-stopwatch-20 tab-icon"></i>
       <span class="tab-label">TABATA</span>
     </button>
-    <button class="tab-item">
+    <button class="tab-item" onclick="switchTab('rounds')">
       <i class="fa-solid fa-circle-notch tab-icon"></i>
       <span class="tab-label">ROUNDS</span>
     </button>
-    <button class="tab-item">
+    <button class="tab-item" onclick="switchTab('stopwatch')">
       <i class="fa-regular fa-clock tab-icon"></i>
       <span class="tab-label">STOPWATCH</span>
     </button>
-    <button class="tab-item">
+    <button class="tab-item" onclick="switchTab('more')">
       <i class="fa-solid fa-ellipsis tab-icon"></i>
       <span class="tab-label">MORE</span>
     </button>
@@ -1114,6 +1134,20 @@
   updateUI();
   loadPresets();
   renderPresets();
+
+  function switchTab(name) {
+    const screens = ['tabata','rounds','stopwatch','more'];
+    screens.forEach((s) => {
+      const el = document.getElementById(`screen-${s}`);
+      if (el) el.style.display = s === name ? 'flex' : 'none';
+    });
+    document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
+    const idx = screens.indexOf(name);
+    const buttons = Array.from(document.querySelectorAll('.tab-item'));
+    if (buttons[idx]) buttons[idx].classList.add('active');
+  }
+
+  switchTab('tabata');
 
   function toggleFullscreen() {
     const elem = document.documentElement;
