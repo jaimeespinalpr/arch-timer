@@ -670,7 +670,7 @@
     </div>
 
     <div class="options-list">
-      <div class="list-item">
+      <div class="list-item" onclick="editField('ready','time')">
         <div class="item-left">
           <span class="dot d-yellow"></span>
           <div class="text-group">
@@ -684,7 +684,7 @@
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="editField('work','time')">
         <div class="item-left">
           <span class="dot d-green"></span>
           <div class="text-group">
@@ -698,7 +698,7 @@
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="editField('rest','time')">
         <div class="item-left">
           <span class="dot d-red"></span>
           <div class="text-group">
@@ -712,7 +712,7 @@
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="editField('sets','int')">
         <div class="item-left">
           <span class="dot d-blue"></span>
           <div class="text-group">
@@ -726,7 +726,7 @@
         </div>
       </div>
 
-      <div class="list-item">
+      <div class="list-item" onclick="editField('cooldown','time')">
         <div class="item-left">
           <span class="dot d-blue"></span>
           <div class="text-group">
@@ -1245,6 +1245,43 @@
     document.getElementById('rounds-disp-rest').value = formatTime(config.rest);
     document.getElementById('rounds-disp-sets').value = config.sets;
     document.getElementById('rounds-disp-cooldown').value = formatTime(config.cooldown);
+  }
+
+  function parseTimeInput(val, fallbackSec) {
+    if (!val) return fallbackSec;
+    const trimmed = val.trim();
+    if (trimmed.includes(':')) {
+      const parts = trimmed.split(':').map(Number);
+      if (parts.some(isNaN)) return fallbackSec;
+      if (parts.length === 2) {
+        return parts[0]*60 + parts[1];
+      }
+      if (parts.length === 3) {
+        return parts[0]*3600 + parts[1]*60 + parts[2];
+      }
+    }
+    const num = Number(trimmed);
+    if (Number.isNaN(num)) return fallbackSec;
+    return Math.max(0, Math.floor(num));
+  }
+
+  function editField(field, kind) {
+    if (kind === 'time') {
+      const current = formatTime(config[field]);
+      const input = window.prompt(`Set ${field.toUpperCase()} (mm:ss or seconds):`, current);
+      if (input === null) return;
+      const sec = parseTimeInput(input, config[field]);
+      config[field] = sec;
+    } else if (kind === 'int') {
+      const current = config[field];
+      const input = window.prompt(`Set ${field.toUpperCase()} (number):`, current);
+      if (input === null) return;
+      const num = parseInt(input, 10);
+      if (!Number.isNaN(num) && num > 0) config[field] = num;
+    }
+    applyConfigToInputs();
+    updateRoundsView();
+    updateUI();
   }
 
   function toggleFullscreen() {
