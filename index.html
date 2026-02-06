@@ -516,6 +516,71 @@
     width: 100%; accent-color: var(--arch-green);
   }
 
+  /* Picker modal */
+  .picker-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+    z-index: 999;
+  }
+  .picker-panel {
+    width: min(420px, 92vw);
+    background: #0d0d0d; color: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+  }
+  .picker-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    font-family: 'Oswald', sans-serif; text-transform: uppercase;
+    letter-spacing: 0.8px; font-size: 16px; background: #111;
+  }
+  .picker-title { flex: 1; text-align: center; }
+  .picker-btn { background: none; border: none; color: var(--arch-green); font-weight: 700; cursor: pointer; }
+  .picker-body {
+    padding: 12px 16px 8px 16px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .wheel {
+    height: 180px;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background: #161616;
+    border-radius: 12px;
+    position: relative;
+  }
+  .wheel::-webkit-scrollbar { display: none; }
+  .wheel-item {
+    height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    color: #666;
+    scroll-snap-align: center;
+  }
+  .wheel-item.active { color: #fff; font-size: 32px; }
+  .wheel-label { text-align: center; margin-top: 6px; text-transform: uppercase; color: #777; font-size: 12px; letter-spacing: 0.6px; }
+  .picker-colors {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+    padding: 10px 16px 16px 16px;
+  }
+  .color-swatch {
+    height: 38px; border-radius: 10px; border: 2px solid transparent; cursor: pointer;
+  }
+  .color-swatch.selected { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.25); }
+  .picker-footer {
+    padding: 12px 16px 16px 16px;
+  }
+  .picker-apply {
+    width: 100%; padding: 12px; border: none; border-radius: 10px;
+    background: var(--arch-green); color: #000; font-weight: 800; font-size: 16px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Oswald', sans-serif;
+  }
+
 #view-runner.phase-ready .runner-main { background: #e5e5e5; color: #000; }
 #view-runner.phase-work  .runner-main { background: var(--dot-green);  color: #000; }
 #view-runner.phase-rest  .runner-main { background: var(--dot-red);   color: #fff; }
@@ -1011,6 +1076,31 @@
     </div>
   </div>
 
+  <!-- Picker Modal -->
+  <div class="picker-overlay" id="picker-modal">
+    <div class="picker-panel">
+      <div class="picker-header">
+        <button class="picker-btn" onclick="closePicker()">Back</button>
+        <div class="picker-title" id="picker-title">Set Time</div>
+        <button class="picker-btn" onclick="applyPicker()">Done</button>
+      </div>
+      <div class="picker-body">
+        <div>
+          <div class="wheel" id="wheel-mins"></div>
+          <div class="wheel-label">Min</div>
+        </div>
+        <div>
+          <div class="wheel" id="wheel-secs"></div>
+          <div class="wheel-label">Sec</div>
+        </div>
+      </div>
+      <div class="picker-colors" id="picker-colors"></div>
+      <div class="picker-footer">
+        <button class="picker-apply" onclick="applyPicker()">Apply</button>
+      </div>
+    </div>
+  </div>
+
   <div class="tab-bar">
     <button class="tab-item active" onclick="switchTab('tabata')">
       <i class="fa-solid fa-stopwatch-20 tab-icon"></i>
@@ -1071,6 +1161,17 @@
     paleColors: false,
     timeFormat: 'mm:ss'
   };
+
+  const PHASE_COLORS = {
+    READY: '#e5e5e5',
+    WORK: 'var(--dot-green)',
+    REST: 'var(--dot-red)',
+    CYCLE_REST: 'var(--dot-yellow)',
+    COOLDOWN: 'var(--dot-blue)'
+  };
+
+  let phaseColors = { ...PHASE_COLORS };
+  let pickerContext = { field: 'ready', kind: 'time' };
 
   let audioCtx;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
@@ -1556,6 +1657,16 @@
     else if (next.label === 'COOLDOWN') nextBox.classList.add('next-cool');
     else nextBox.classList.add('next-ready');
 
+    const phaseColor = (label) => {
+      if (label === 'WORK') return phaseColors.WORK || PHASE_COLORS.WORK;
+      if (label === 'REST') return phaseColors.REST || PHASE_COLORS.REST;
+      if (label === 'CYCLE REST') return phaseColors.CYCLE_REST || PHASE_COLORS.CYCLE_REST;
+      if (label === 'COOLDOWN') return phaseColors.COOLDOWN || PHASE_COLORS.COOLDOWN;
+      return phaseColors.READY || PHASE_COLORS.READY;
+    };
+    document.getElementById('runner-main').style.background = phaseColor(state.phase === 'IDLE' ? 'READY' : state.phase);
+    nextBox.style.background = phaseColor(next.label);
+
     const rLeft = roundsLeft();
     const cLeft = cyclesLeft();
     document.getElementById('disp-rounds').innerText = rLeft;
@@ -1700,6 +1811,114 @@
     applySettingsToUI();
   }
 
+  // Picker logic
+  const COLOR_OPTIONS = ['#f3c744', '#0f7d3b', '#ff3b30', '#5fa8ff', '#e5e5e5', '#ffffff'];
+
+  function openPicker(field) {
+    pickerContext.field = field;
+    const modal = document.getElementById('picker-modal');
+    document.getElementById('picker-title').innerText = `Set ${field.toUpperCase()}`;
+    buildWheel('wheel-mins', 59);
+    buildWheel('wheel-secs', 59);
+    syncWheel('wheel-mins', Math.floor((config[field] || 0) / 60));
+    syncWheel('wheel-secs', (config[field] || 0) % 60);
+    renderColorBar();
+    modal.style.display = 'flex';
+  }
+
+  function closePicker() {
+    document.getElementById('picker-modal').style.display = 'none';
+  }
+
+  function buildWheel(id, max) {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    for (let i = 0; i <= max; i++) {
+      const div = document.createElement('div');
+      div.className = 'wheel-item';
+      div.innerText = i.toString().padStart(2, '0');
+      el.appendChild(div);
+    }
+  }
+
+  function syncWheel(id, value) {
+    const el = document.getElementById(id);
+    const itemHeight = 44;
+    el.scrollTop = value * itemHeight;
+    highlightWheel(el);
+  }
+
+  function highlightWheel(el) {
+    const itemHeight = 44;
+    const idx = Math.round(el.scrollTop / itemHeight);
+    Array.from(el.children).forEach((c, i) => {
+      c.classList.toggle('active', i === idx);
+    });
+  }
+
+  ['wheel-mins','wheel-secs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('scroll', () => {
+        clearTimeout(el._t);
+        el._t = setTimeout(() => {
+          const itemHeight = 44;
+          const idx = Math.round(el.scrollTop / itemHeight);
+          el.scrollTo({ top: idx * itemHeight, behavior: 'smooth' });
+          highlightWheel(el);
+        }, 80);
+      });
+    }
+  });
+
+  function renderColorBar() {
+    const bar = document.getElementById('picker-colors');
+    bar.innerHTML = '';
+    const current = phaseColors[fieldToPhase(pickerContext.field)];
+    COLOR_OPTIONS.forEach(col => {
+      const div = document.createElement('div');
+      div.className = 'color-swatch';
+      div.style.background = col;
+      if (col.toLowerCase() === (current || '').toLowerCase()) div.classList.add('selected');
+      div.onclick = () => {
+        Array.from(bar.children).forEach(c => c.classList.remove('selected'));
+        div.classList.add('selected');
+        pickerContext.color = col;
+      };
+      bar.appendChild(div);
+    });
+    pickerContext.color = current || COLOR_OPTIONS[0];
+  }
+
+  function fieldToPhase(field) {
+    if (field === 'ready') return 'READY';
+    if (field === 'work') return 'WORK';
+    if (field === 'rest') return 'REST';
+    if (field === 'cycleRest') return 'CYCLE_REST';
+    if (field === 'cooldown') return 'COOLDOWN';
+    return 'READY';
+  }
+
+  function applyPicker() {
+    const mins = nearestWheelValue('wheel-mins');
+    const secs = nearestWheelValue('wheel-secs');
+    const total = mins * 60 + secs;
+    config[pickerContext.field] = total;
+    const phase = fieldToPhase(pickerContext.field);
+    phaseColors[phase] = pickerContext.color || phaseColors[phase];
+    applyConfigToInputs();
+    updateRoundsView();
+    updateUI();
+    persistSettings();
+    closePicker();
+  }
+
+  function nearestWheelValue(id) {
+    const el = document.getElementById(id);
+    const itemHeight = 44;
+    return Math.round(el.scrollTop / itemHeight);
+  }
+
   function saveSettings() {
     persistSettings();
     switchTab('tabata');
@@ -1725,21 +1944,17 @@
 
   function editField(field, kind) {
     if (kind === 'time') {
-      const current = formatTime(config[field]);
-      const input = window.prompt(`Set ${field.toUpperCase()} (mm:ss or seconds):`, current);
-      if (input === null) return;
-      const sec = parseTimeInput(input, config[field]);
-      config[field] = sec;
+      openPicker(field);
     } else if (kind === 'int') {
       const current = config[field];
       const input = window.prompt(`Set ${field.toUpperCase()} (number):`, current);
       if (input === null) return;
       const num = parseInt(input, 10);
       if (!Number.isNaN(num) && num > 0) config[field] = num;
+      applyConfigToInputs();
+      updateRoundsView();
+      updateUI();
     }
-    applyConfigToInputs();
-    updateRoundsView();
-    updateUI();
   }
 
   function toggleFullscreen() {
