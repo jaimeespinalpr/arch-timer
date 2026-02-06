@@ -659,7 +659,93 @@
   </div> <!-- end screen-tabata -->
 
   <div id="screen-rounds" class="tab-screen">
-    <div class="screen-placeholder">Rounds view</div>
+    <div class="nav-header">
+      <button class="nav-btn btn-left" onclick="switchTab('tabata')">Cancel</button>
+      <span class="nav-btn btn-center">Rounds</span>
+      <button class="nav-btn btn-right" onclick="saveAndStart()">Save</button>
+    </div>
+
+    <div style="padding: 12px 16px; color:#888; text-transform: uppercase; letter-spacing:1px; font-size:12px; font-weight:700;">
+      Intervals
+    </div>
+
+    <div class="options-list">
+      <div class="list-item">
+        <div class="item-left">
+          <span class="dot d-yellow"></span>
+          <div class="text-group">
+            <div class="item-title">Prepare</div>
+            <div class="item-sub">Countdown before you start</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input class="input-display" id="rounds-disp-ready" value="00:00" readonly>
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <span class="dot d-green"></span>
+          <div class="text-group">
+            <div class="item-title">Work</div>
+            <div class="item-sub">Do exercises for this long</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input class="input-display" id="rounds-disp-work" value="00:00" readonly>
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <span class="dot d-red"></span>
+          <div class="text-group">
+            <div class="item-title">Rest</div>
+            <div class="item-sub">Rest for this long</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input class="input-display" id="rounds-disp-rest" value="00:00" readonly>
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <span class="dot d-blue"></span>
+          <div class="text-group">
+            <div class="item-title">Rounds</div>
+            <div class="item-sub">One round is work + rest</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input class="input-display" id="rounds-disp-sets" value="0" readonly>
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+
+      <div class="list-item">
+        <div class="item-left">
+          <span class="dot d-blue"></span>
+          <div class="text-group">
+            <div class="item-title">Cooldown</div>
+            <div class="item-sub">Cooldown after workout</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input class="input-display" id="rounds-disp-cooldown" value="00:00" readonly>
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-action-area">
+      <button class="btn-pill-gray" onclick="switchTab('tabata')">
+        <i class="fa fa-stopwatch"></i> ADD NEW TIMER
+      </button>
+    </div>
   </div>
   <div id="screen-stopwatch" class="tab-screen">
     <div class="screen-placeholder">Stopwatch view</div>
@@ -1145,9 +1231,21 @@
     const idx = screens.indexOf(name);
     const buttons = Array.from(document.querySelectorAll('.tab-item'));
     if (buttons[idx]) buttons[idx].classList.add('active');
+
+    if (name === 'rounds') {
+      updateRoundsView();
+    }
   }
 
   switchTab('tabata');
+
+  function updateRoundsView() {
+    document.getElementById('rounds-disp-ready').value = formatTime(config.ready);
+    document.getElementById('rounds-disp-work').value = formatTime(config.work);
+    document.getElementById('rounds-disp-rest').value = formatTime(config.rest);
+    document.getElementById('rounds-disp-sets').value = config.sets;
+    document.getElementById('rounds-disp-cooldown').value = formatTime(config.cooldown);
+  }
 
   function toggleFullscreen() {
     const elem = document.documentElement;
