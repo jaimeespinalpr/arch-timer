@@ -474,6 +474,48 @@
 
   .hidden { display: none !important; }
 
+  /* Settings (More) */
+  .settings-wrap { display: flex; flex-direction: column; height: 100%; background: #0d0d0d; color: #fefefe; }
+  .settings-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: #111; text-transform: uppercase;
+    font-family: 'Oswald', sans-serif; letter-spacing: 0.8px; font-size: 16px; font-weight: 700;
+  }
+  .settings-title { flex: 1; text-align: center; }
+  .settings-btn { background: none; border: none; color: var(--arch-green); font-weight: 700; font-size: 14px; cursor: pointer; }
+  .settings-section-title {
+    color: #777; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;
+    padding: 14px 16px 6px 16px; font-weight: 700;
+  }
+  .settings-list { background: #0d0d0d; }
+  .settings-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-top: 1px solid #1a1a1a;
+  }
+  .settings-left { display: flex; flex-direction: column; gap: 4px; }
+  .settings-label { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; font-size: 14px; }
+  .settings-sub { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 0.5px; }
+  .settings-value { font-family: 'Oswald', sans-serif; color: var(--arch-green); font-size: 14px; letter-spacing: 0.5px; }
+
+  .switch {
+    position: relative; width: 48px; height: 26px; flex-shrink: 0;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background-color: #444; border-radius: 26px; transition: .2s;
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 20px; width: 20px;
+    left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .2s;
+  }
+  input:checked + .slider { background-color: var(--arch-green); }
+  input:checked + .slider:before { transform: translateX(22px); background:#0d0d0d; }
+
+  .settings-range {
+    width: 100%; accent-color: var(--arch-green);
+  }
+
 #view-runner.phase-ready .runner-main { background: #e5e5e5; color: #000; }
 #view-runner.phase-work  .runner-main { background: var(--dot-green);  color: #000; }
 #view-runner.phase-rest  .runner-main { background: var(--dot-red);   color: #fff; }
@@ -850,7 +892,123 @@
     </div>
   </div>
   <div id="screen-more" class="tab-screen">
-    <div class="screen-placeholder">More options</div>
+    <div class="settings-wrap">
+      <div class="settings-header">
+        <button class="settings-btn" onclick="switchTab('tabata')">Cancel</button>
+        <div class="settings-title">Settings</div>
+        <button class="settings-btn" onclick="saveSettings()">Done</button>
+      </div>
+
+      <div class="settings-section-title">Sound</div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Sound</div>
+            <div class="settings-sub">App audio on/off</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-sound" onchange="toggleSetting('soundEnabled', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item" onclick="pickSoundScheme()">
+          <div class="settings-left">
+            <div class="settings-label">Sound Scheme</div>
+            <div class="settings-sub">Select alert tone</div>
+          </div>
+          <div class="settings-value" id="set-scheme">Censor</div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Volume</div>
+            <div class="settings-sub">Alert loudness</div>
+          </div>
+          <input id="set-volume" class="settings-range" type="range" min="0" max="100" step="1" oninput="setVolume(this.value)">
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Voice Assist</div>
+            <div class="settings-sub">Countdown voice</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-voice" onchange="toggleSetting('voiceAssist', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Ticking Sound</div>
+            <div class="settings-sub">Beep on countdown</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-ticking" onchange="toggleSetting('tickingSound', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section-title">Device</div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Vibration</div>
+            <div class="settings-sub">Use haptics when available</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-vibration" onchange="toggleSetting('vibration', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Rotation</div>
+            <div class="settings-sub">Allow screen rotate</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-rotation" onchange="toggleSetting('rotation', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Pale Colors</div>
+            <div class="settings-sub">Dim UI colors</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-pale" onchange="toggleSetting('paleColors', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section-title">Advanced</div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Ducking</div>
+            <div class="settings-sub">Reduce music volume</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-ducking" onchange="toggleSetting('ducking', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item" onclick="pickTimeFormat()">
+          <div class="settings-left">
+            <div class="settings-label">Time Format</div>
+            <div class="settings-sub">Display format</div>
+          </div>
+          <div class="settings-value" id="set-timeformat">mm:ss</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="tab-bar">
@@ -893,9 +1051,44 @@
   let swLap = 0;
   let swTimer = null;
 
+  const SETTINGS_KEY = 'archmere_tabata_settings_v1';
+  const SOUND_SCHEMES = [
+    'Censor','Boxing Bell','Gym Whistle','Digital Beep','Wood Block',
+    'Cowbell','Claves','Click','Ping','Buzzer','Ride Cymbal','Clap'
+  ];
+
+  let settings = {
+    soundEnabled: true,
+    soundScheme: 'Censor',
+    volume: 80, // 0-100
+    voiceAssist: true,
+    vibration: true,
+    flashlight: false,
+    screenFlash: false,
+    ducking: false,
+    rotation: true,
+    tickingSound: true,
+    paleColors: false,
+    timeFormat: 'mm:ss'
+  };
+
   let audioCtx;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
   let presets = [];
+
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        settings = { ...settings, ...parsed };
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function persistSettings() {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
 
   function ensureAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -903,46 +1096,92 @@
   }
 
   function playBeep(type) {
+    if (!settings.soundEnabled) return;
     if (!audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
 
     const now = audioCtx.currentTime;
+    const vol = settings.volume / 100;
+    gain.gain.setValueAtTime(vol, now);
 
-    if (type === 'go') {
-      osc.frequency.setValueAtTime(1000, now);
-      osc.frequency.exponentialRampToValueAtTime(600, now + 0.6);
-      osc.type = 'square';
-      gain.gain.setValueAtTime(0.3, now);
-      osc.start(now); osc.stop(now + 0.6);
-      return;
+    const scheme = settings.soundScheme;
+    const setTone = (freq, duration, shape='sine') => {
+      osc.frequency.value = freq;
+      osc.type = shape;
+      osc.start(now);
+      osc.stop(now + duration);
+    };
+
+    if (scheme === 'Boxing Bell') {
+      if (type === 'go') { setTone(620, 0.45, 'triangle'); return; }
+      if (type === 'rest' || type === 'tick') { setTone(440, 0.25, 'triangle'); return; }
+      if (type === 'end') { setTone(260, 0.8, 'sawtooth'); return; }
     }
 
-    if (type === 'rest') {
-      osc.frequency.value = 400; osc.type = 'triangle';
-      gain.gain.setValueAtTime(0.3, now);
-      osc.start(now); osc.stop(now + 0.4);
-      return;
+    if (scheme === 'Gym Whistle') {
+      if (type === 'go') { setTone(1500, 0.35, 'sine'); return; }
+      if (type === 'rest' || type === 'tick') { setTone(1100, 0.25, 'sine'); return; }
+      if (type === 'end') { setTone(600, 0.9, 'square'); return; }
     }
 
-    if (type === 'tick') {
-      osc.frequency.value = 800; osc.type = 'sine';
-      gain.gain.setValueAtTime(0.18, now);
-      osc.start(now); osc.stop(now + 0.12);
-      return;
+    if (scheme === 'Censor') {
+      if (type === 'go') { setTone(1000, 0.25, 'square'); return; }
+      if (type === 'rest' || type === 'tick') { setTone(600, 0.18, 'square'); return; }
+      if (type === 'end') { setTone(300, 0.9, 'sawtooth'); return; }
     }
 
-    if (type === 'end') {
-      osc.frequency.setValueAtTime(220, now);
-      osc.frequency.exponentialRampToValueAtTime(120, now + 1.0);
-      osc.type = 'sawtooth';
-      gain.gain.setValueAtTime(0.35, now);
-      osc.start(now); osc.stop(now + 1.0);
+    if (scheme === 'Digital Beep') {
+      if (type === 'go') { setTone(1200, 0.2, 'sine'); return; }
+      if (type === 'rest' || type === 'tick') { setTone(900, 0.1, 'sine'); return; }
+      if (type === 'end') { setTone(500, 0.6, 'triangle'); return; }
     }
+
+    if (scheme === 'Wood Block') {
+      if (type === 'go') { setTone(800, 0.15, 'square'); return; }
+      if (type === 'rest' || type === 'tick') { setTone(500, 0.08, 'square'); return; }
+      if (type === 'end') { setTone(300, 0.45, 'sawtooth'); return; }
+    }
+
+    if (scheme === 'Cowbell') {
+      if (type === 'go') { setTone(700, 0.3, 'triangle'); return; }
+      if (type === 'rest' || type === 'tick') { setTone(520, 0.12, 'triangle'); return; }
+      if (type === 'end') { setTone(320, 0.7, 'sawtooth'); return; }
+    }
+
+    if (scheme === 'Claves') {
+      if (type === 'go') { setTone(1300, 0.12, 'square'); return; }
+      if (type === 'rest' || type === 'tick') { setTone(1000, 0.08, 'square'); return; }
+      if (type === 'end') { setTone(600, 0.4, 'square'); return; }
+    }
+
+    if (scheme === 'Click') {
+      setTone(type === 'end' ? 400 : 900, type === 'end' ? 0.4 : 0.05, 'square'); return;
+    }
+
+    if (scheme === 'Ping') {
+      setTone(type === 'end' ? 500 : 1500, type === 'end' ? 0.6 : 0.15, 'sine'); return;
+    }
+
+    if (scheme === 'Buzzer') {
+      setTone(type === 'end' ? 220 : 800, type === 'end' ? 1.0 : 0.25, 'sawtooth'); return;
+    }
+
+    if (scheme === 'Ride Cymbal') {
+      setTone(type === 'end' ? 500 : 900, type === 'end' ? 0.7 : 0.18, 'triangle'); return;
+    }
+
+    if (scheme === 'Clap') {
+      setTone(type === 'end' ? 400 : 1000, type === 'end' ? 0.6 : 0.12, 'square'); return;
+    }
+
+    // default
+    setTone(type === 'end' ? 220 : 880, type === 'end' ? 1.0 : 0.2, 'sine');
   }
 
   function speakCountdown(n) {
+    if (!settings.voiceAssist) return;
     if (!('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
     const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
