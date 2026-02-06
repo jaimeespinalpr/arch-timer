@@ -1090,6 +1090,26 @@
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   }
 
+  function applySettingsToUI() {
+    const set = (id, value) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = value;
+      else if (el.type === 'range') el.value = value;
+      else el.innerText = value;
+    };
+    set('set-sound', settings.soundEnabled);
+    set('set-volume', settings.volume);
+    set('set-voice', settings.voiceAssist);
+    set('set-ticking', settings.tickingSound);
+    set('set-vibration', settings.vibration);
+    set('set-rotation', settings.rotation);
+    set('set-pale', settings.paleColors);
+    set('set-ducking', settings.ducking);
+    set('set-scheme', settings.soundScheme);
+    set('set-timeformat', settings.timeFormat);
+  }
+
   function ensureAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1420,7 +1440,7 @@
 
       if (state.timeLeft > 0 && state.timeLeft <= 5) {
         if (state.lastSpoken !== state.timeLeft) {
-          playBeep('tick');
+          if (settings.tickingSound) playBeep('tick');
           speakCountdown(state.timeLeft);
           state.lastSpoken = state.timeLeft;
         }
@@ -1581,12 +1601,16 @@
       updateRoundsView();
     } else if (name === 'stopwatch') {
       updateStopwatchUI();
+    } else if (name === 'more') {
+      applySettingsToUI();
     } else {
       // pause stopwatch when leaving
       if (swRunning) swToggle();
     }
   }
 
+  loadSettings();
+  applySettingsToUI();
   switchTab('tabata');
 
   function updateRoundsView() {
@@ -1643,6 +1667,42 @@
     swElapsed = 0;
     swLap = 0;
     updateStopwatchUI();
+  }
+
+  function toggleSetting(key, val) {
+    settings[key] = val;
+    persistSettings();
+    applySettingsToUI();
+  }
+
+  function setVolume(val) {
+    const n = Math.max(0, Math.min(100, parseInt(val, 10) || 0));
+    settings.volume = n;
+    persistSettings();
+  }
+
+  function pickSoundScheme() {
+    const choice = window.prompt(`Sound scheme (${SOUND_SCHEMES.join(', ')}):`, settings.soundScheme);
+    if (!choice) return;
+    const normalized = SOUND_SCHEMES.find(s => s.toLowerCase() === choice.trim().toLowerCase());
+    if (normalized) {
+      settings.soundScheme = normalized;
+      persistSettings();
+      applySettingsToUI();
+    }
+  }
+
+  function pickTimeFormat() {
+    const choice = window.prompt('Time format (mm:ss or ss):', settings.timeFormat);
+    if (!choice) return;
+    settings.timeFormat = choice.trim();
+    persistSettings();
+    applySettingsToUI();
+  }
+
+  function saveSettings() {
+    persistSettings();
+    switchTab('tabata');
   }
 
   function parseTimeInput(val, fallbackSec) {
