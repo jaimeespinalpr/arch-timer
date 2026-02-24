@@ -73,6 +73,7 @@
     transition: background 220ms ease, transform 220ms ease;
   }
 
+  html { height: 100%; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
@@ -84,7 +85,9 @@
     color: var(--text-white);
     font-family: 'Roboto', sans-serif;
     margin: 0; padding: 0;
-    height: 100vh;
+    min-height: 100vh;
+    height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
     display: flex; flex-direction: column;
     overflow: hidden;
   }
@@ -117,6 +120,7 @@
     overflow-y: auto;
     display: none;
     flex-direction: column;
+    min-height: 0;
   }
   .editor-brand {
     display: flex;
@@ -516,13 +520,24 @@
   }
   .btn-play-round:active { transform: translateY(1px) scale(0.985); }
 
-  .tab-screen { display: none; flex: 1; flex-direction: column; }
+  .tab-screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+  }
   .tab-bar {
     height: 64px;
     background: linear-gradient(180deg, rgba(9,9,9,0.94), rgba(0,0,0,0.98));
     display: flex;
     border-top: 1px solid #222;
-    margin: 0 clamp(8px, 1.4vh, 12px) clamp(8px, 1.4vh, 12px) clamp(8px, 1.4vh, 12px);
+    flex-shrink: 0;
+    margin:
+      0
+      clamp(8px, 1.4vh, 12px)
+      calc(clamp(8px, 1.4vh, 12px) + env(safe-area-inset-bottom, 0px))
+      clamp(8px, 1.4vh, 12px);
     border-radius: 18px;
     overflow: hidden;
     box-shadow: 0 14px 24px rgba(0,0,0,0.22);
@@ -551,6 +566,7 @@
   /* Stopwatch */
   .sw-container {
     display: flex; flex-direction: column; height: 100%;
+    min-height: 0;
     background: #0d0d0d;
   }
   .sw-header {
@@ -631,14 +647,20 @@
   /* Settings (More) */
   .settings-wrap {
     display: flex; flex-direction: column; height: 100%;
+    flex: 1;
+    min-height: 0;
     background: #0d0d0d; color: #fefefe;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   }
   .settings-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px; background: #111; text-transform: uppercase;
     font-family: 'Oswald', sans-serif; letter-spacing: 0.8px; font-size: 16px; font-weight: 700;
+    position: sticky;
+    top: 0;
+    z-index: 5;
   }
   .settings-title { flex: 1; text-align: center; }
   .settings-btn { background: none; border: none; color: var(--arch-green); font-weight: 700; font-size: 14px; cursor: pointer; }
@@ -904,6 +926,27 @@
     .runner-watermark,
     .phase-label,
     .time-big { transition: none; animation: none !important; }
+  }
+
+  @media (min-width: 768px) {
+    .tab-screen {
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-bar {
+      width: min(980px, calc(100% - 24px));
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .settings-wrap {
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow: auto;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.22);
+    }
   }
 
   @media (orientation: landscape) and (max-height: 520px) {
