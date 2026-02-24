@@ -626,8 +626,28 @@
     font-family: 'Oswald', sans-serif;
     flex-shrink: 0;
   }
+  .sw-lap-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
   .sw-lap-label {
     font-size: 14px; letter-spacing: 0.5px; font-weight: 700; text-transform: uppercase;
+  }
+  .sw-lap-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.18);
+    color: #f9f4d8;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.10);
   }
   .sw-lap-time {
     font-size: clamp(52px, 14vw, 108px); font-weight: 800; line-height: 0.95;
@@ -640,6 +660,111 @@
     background: #0d0d0d;
     gap: 12px;
     padding: 10px 16px calc(22px + env(safe-area-inset-bottom, 0px)) 16px;
+  }
+  .sw-laps-wrap {
+    width: 100%;
+    max-width: 520px;
+    min-height: 0;
+    max-height: 140px;
+    border-radius: 12px;
+    border: 1px solid #202020;
+    background: #121212;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    align-self: center;
+  }
+  .sw-laps-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .sw-lap-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-top: 1px solid #1d1d1d;
+    color: #f2f2f2;
+  }
+  .sw-lap-row:first-child {
+    border-top: none;
+  }
+  .sw-lap-row-num {
+    font-family: 'Oswald', sans-serif;
+    color: var(--arch-gold);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    min-width: 44px;
+    text-align: left;
+  }
+  .sw-lap-row-time {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    justify-self: center;
+  }
+  .sw-lap-row-total {
+    color: #9ea5ab;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    justify-self: end;
+  }
+  .sw-laps-empty {
+    color: #777;
+    font-size: 12px;
+    text-align: center;
+    padding: 12px 10px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .sw-controls-row {
+    width: 100%;
+    max-width: 420px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+  .sw-side-btn {
+    height: clamp(46px, 12vw, 64px);
+    border-radius: 14px;
+    border: 1px solid #2a2a2a;
+    background: #161616;
+    color: #e6e6e6;
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(13px, 3.2vw, 18px);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 14px rgba(0,0,0,0.16);
+  }
+  .sw-side-btn.lap {
+    color: var(--arch-white);
+    border-color: rgba(13,107,60,0.35);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+      linear-gradient(90deg, rgba(13,107,60,0.18), rgba(24,53,67,0.12));
+  }
+  .sw-side-btn.stop {
+    color: #f0cf9a;
+    border-color: rgba(200,168,66,0.30);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+      #141414;
+  }
+  .sw-side-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
   .sw-play {
     width: clamp(78px, 22vw, 120px); height: clamp(78px, 22vw, 120px);
@@ -1622,8 +1747,16 @@
     .sw-lap {
       padding: 8px 8px 10px 8px;
     }
+    .sw-lap-head {
+      gap: 8px;
+      margin-bottom: 0;
+    }
     .sw-lap-label {
       font-size: clamp(11px, 1.8vw, 13px);
+    }
+    .sw-lap-count {
+      font-size: 9px;
+      padding: 2px 6px;
     }
     .sw-lap-time {
       font-size: clamp(48px, 13vw, 92px);
@@ -1631,6 +1764,40 @@
     }
     .sw-actions {
       gap: 8px;
+    }
+    .sw-laps-wrap {
+      max-height: 116px;
+      border-radius: 10px;
+    }
+    .sw-lap-row {
+      padding: 7px 8px;
+      gap: 8px;
+    }
+    .sw-lap-row-num {
+      font-size: 10px;
+      min-width: 38px;
+    }
+    .sw-lap-row-time {
+      font-size: 16px;
+    }
+    .sw-lap-row-total {
+      font-size: 9px;
+    }
+    .sw-laps-empty {
+      font-size: 10px;
+      padding: 10px 8px;
+    }
+    .sw-controls-row {
+      gap: 8px;
+      max-width: 360px;
+    }
+    .sw-side-btn {
+      height: 42px;
+      border-radius: 12px;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 0 8px;
+      gap: 6px;
     }
     .sw-play {
       width: clamp(56px, 15vw, 82px);
@@ -1690,12 +1857,22 @@
     .sw-lap-label {
       font-size: 12px;
     }
+    .sw-lap-count {
+      font-size: 10px;
+      padding: 2px 6px;
+    }
     .sw-lap-time {
       font-size: clamp(42px, 12vw, 86px);
     }
     .sw-actions {
       gap: 10px;
       padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px;
+    }
+    .sw-laps-wrap {
+      max-height: 130px;
+    }
+    .sw-side-btn {
+      height: clamp(48px, 11vw, 62px);
     }
     .sw-play {
       width: clamp(72px, 20vw, 112px);
@@ -1729,6 +1906,10 @@
     .sw-lap {
       padding: 6px 8px 8px 8px;
     }
+    .sw-lap-count {
+      font-size: 9px;
+      padding: 2px 6px;
+    }
     .sw-lap-time {
       font-size: clamp(34px, 10vw, 64px);
       line-height: 1;
@@ -1736,6 +1917,28 @@
     .sw-actions {
       gap: 8px;
       padding: 6px 12px calc(10px + env(safe-area-inset-bottom, 0px)) 12px;
+    }
+    .sw-laps-wrap {
+      max-height: 92px;
+    }
+    .sw-lap-row {
+      padding: 6px 8px;
+    }
+    .sw-lap-row-time {
+      font-size: 15px;
+    }
+    .sw-lap-row-total {
+      font-size: 9px;
+    }
+    .sw-controls-row {
+      max-width: 340px;
+      gap: 8px;
+    }
+    .sw-side-btn {
+      height: 38px;
+      border-radius: 10px;
+      font-size: 10px;
+      padding: 0 8px;
     }
     .sw-play {
       width: 64px;
@@ -2123,14 +2326,29 @@
       <div class="sw-time-main" id="sw-time-main">00:00</div>
 
       <div class="sw-lap">
-        <div class="sw-lap-label">Time Lap</div>
+        <div class="sw-lap-head">
+          <div class="sw-lap-label">Current Lap</div>
+          <div class="sw-lap-count" id="sw-lap-count">0 Laps</div>
+        </div>
         <div class="sw-lap-time" id="sw-lap-time">00:00</div>
       </div>
 
       <div class="sw-actions">
-        <button class="sw-play" id="sw-play" onclick="swToggle()" aria-label="Start/Pause">
-          <i class="fa fa-play"></i>
-        </button>
+        <div class="sw-laps-wrap" id="sw-laps-wrap">
+          <div class="sw-laps-list" id="sw-laps-list"></div>
+          <div class="sw-laps-empty" id="sw-laps-empty">Tap LAP while running to save splits</div>
+        </div>
+        <div class="sw-controls-row">
+          <button class="sw-side-btn lap" id="sw-lap-btn" onclick="swLapMark()" aria-label="Lap">
+            <i class="fa-solid fa-flag-checkered"></i> Lap
+          </button>
+          <button class="sw-play" id="sw-play" onclick="swToggle()" aria-label="Start/Pause">
+            <i class="fa fa-play"></i>
+          </button>
+          <button class="sw-side-btn stop" id="sw-stop-btn" onclick="swStop()" aria-label="Stop">
+            <i class="fa-solid fa-stop"></i> Stop
+          </button>
+        </div>
         <div class="sw-start-label" id="sw-start-label">Start</div>
       </div>
     </div>
@@ -2609,6 +2827,8 @@
   let swStartTs = 0;
   let swElapsed = 0;
   let swLap = 0;
+  let swLapStartElapsed = 0;
+  let swLaps = [];
   let swTimer = null;
 
   const SETTINGS_KEY = 'archmere_tabata_settings_v1';
@@ -4936,17 +5156,73 @@
     return `${m}:${r}`;
   }
 
+  function currentStopwatchElapsedMs() {
+    return swRunning ? Math.max(0, Date.now() - swStartTs) : Math.max(0, swElapsed);
+  }
+
+  function renderStopwatchLaps() {
+    const list = document.getElementById('sw-laps-list');
+    const empty = document.getElementById('sw-laps-empty');
+    const count = document.getElementById('sw-lap-count');
+    if (!list || !empty || !count) return;
+
+    count.innerText = `${swLaps.length} ${swLaps.length === 1 ? 'Lap' : 'Laps'}`;
+    list.innerHTML = '';
+
+    if (!swLaps.length) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    swLaps.slice(0, 30).forEach((lap) => {
+      const row = document.createElement('div');
+      row.className = 'sw-lap-row';
+
+      const num = document.createElement('div');
+      num.className = 'sw-lap-row-num';
+      num.textContent = `L${lap.number}`;
+
+      const time = document.createElement('div');
+      time.className = 'sw-lap-row-time';
+      time.textContent = swFormat((lap.durationMs || 0) / 1000);
+
+      const total = document.createElement('div');
+      total.className = 'sw-lap-row-total';
+      total.textContent = `T ${swFormat((lap.totalMs || 0) / 1000)}`;
+
+      row.appendChild(num);
+      row.appendChild(time);
+      row.appendChild(total);
+      list.appendChild(row);
+    });
+  }
+
   function updateStopwatchUI() {
-    document.getElementById('sw-time-main').innerText = swFormat(swElapsed / 1000);
-    document.getElementById('sw-lap-time').innerText = swFormat(swLap / 1000);
-    document.getElementById('sw-phase').innerText = swRunning ? 'Running' : 'Stopped';
+    const elapsedMs = currentStopwatchElapsedMs();
+    const currentLapMs = Math.max(0, elapsedMs - swLapStartElapsed);
+    swElapsed = elapsedMs;
+    swLap = currentLapMs;
+
+    document.getElementById('sw-time-main').innerText = swFormat(elapsedMs / 1000);
+    document.getElementById('sw-lap-time').innerText = swFormat(currentLapMs / 1000);
+    document.getElementById('sw-phase').innerText = swRunning ? 'Running' : (elapsedMs > 0 ? 'Paused' : 'Stopped');
+
     const play = document.getElementById('sw-play');
     const label = document.getElementById('sw-start-label');
+    const lapBtn = document.getElementById('sw-lap-btn');
+    const stopBtn = document.getElementById('sw-stop-btn');
+
     play.innerHTML = swRunning ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>';
     play.style.color = swRunning ? '#000' : 'var(--dot-yellow)';
     play.style.background = swRunning ? 'var(--dot-yellow)' : '#111';
     play.style.borderColor = swRunning ? 'var(--dot-yellow)' : 'var(--dot-yellow)';
-    label.innerText = swRunning ? 'Pause' : 'Start';
+    label.innerText = swRunning ? 'Pause' : (elapsedMs > 0 ? 'Resume' : 'Start');
+
+    if (lapBtn) lapBtn.disabled = !swRunning;
+    if (stopBtn) stopBtn.disabled = elapsedMs <= 0 && !swRunning;
+
+    renderStopwatchLaps();
   }
 
   function swTick() {
@@ -4955,8 +5231,29 @@
     updateStopwatchUI();
   }
 
+  function swLapMark() {
+    if (!swRunning) return;
+
+    const elapsedMs = currentStopwatchElapsedMs();
+    const lapDurationMs = Math.max(0, elapsedMs - swLapStartElapsed);
+    if (lapDurationMs <= 0) return;
+
+    swLaps.unshift({
+      id: `${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      number: swLaps.length + 1,
+      durationMs: lapDurationMs,
+      totalMs: elapsedMs
+    });
+    swLaps = swLaps.slice(0, 100);
+    swLapStartElapsed = elapsedMs;
+    swElapsed = elapsedMs;
+    swLap = 0;
+    updateStopwatchUI();
+  }
+
   function swToggle() {
     if (swRunning) {
+      swElapsed = currentStopwatchElapsedMs();
       swRunning = false;
       clearInterval(swTimer);
       swTimer = null;
@@ -4968,13 +5265,20 @@
     updateStopwatchUI();
   }
 
-  function swReset() {
+  function swStop() {
     swRunning = false;
     clearInterval(swTimer);
     swTimer = null;
+    swStartTs = 0;
     swElapsed = 0;
     swLap = 0;
+    swLapStartElapsed = 0;
+    swLaps = [];
     updateStopwatchUI();
+  }
+
+  function swReset() {
+    swStop();
   }
 
   function toggleSetting(key, val) {
