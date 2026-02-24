@@ -538,7 +538,12 @@
   .hidden { display: none !important; }
 
   /* Settings (More) */
-  .settings-wrap { display: flex; flex-direction: column; height: 100%; background: #0d0d0d; color: #fefefe; }
+  .settings-wrap {
+    display: flex; flex-direction: column; height: 100%;
+    background: #0d0d0d; color: #fefefe;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   .settings-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px; background: #111; text-transform: uppercase;
@@ -577,6 +582,118 @@
 
   .settings-range {
     width: 100%; accent-color: var(--arch-green);
+  }
+  .settings-item.col {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .settings-input {
+    width: 100%;
+    background: #151515;
+    color: #fff;
+    border: 1px solid #282828;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    outline: none;
+  }
+  .settings-input:focus {
+    border-color: rgba(13,107,60,0.65);
+    box-shadow: 0 0 0 2px rgba(13,107,60,0.18);
+  }
+  .settings-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border-top: 1px solid #1a1a1a;
+  }
+  .settings-action-btn {
+    flex: 1 1 140px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid #2a2a2a;
+    background: #171717;
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .settings-action-btn.primary {
+    background: var(--arch-green);
+    color: var(--arch-white);
+    border-color: rgba(13,107,60,0.9);
+  }
+  .settings-action-btn.secondary {
+    background: #151515;
+    color: var(--arch-gold);
+    border-color: rgba(200,168,66,0.35);
+  }
+  .settings-action-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .settings-note {
+    padding: 0 16px 14px 16px;
+    color: #8d8d8d;
+    font-size: 11px;
+    line-height: 1.35;
+    text-transform: none;
+  }
+  .sync-status {
+    margin: 0 16px 12px 16px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #141414;
+    border: 1px solid #232323;
+    color: #b7b7b7;
+    font-size: 12px;
+  }
+  .sync-status.ok {
+    border-color: rgba(13,107,60,0.45);
+    color: #b7e2c9;
+  }
+  .sync-status.warn {
+    border-color: rgba(200,168,66,0.35);
+    color: #ead79b;
+  }
+  .sync-status.error {
+    border-color: rgba(189,77,77,0.4);
+    color: #f4b5b5;
+  }
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .history-item {
+    background: #131313;
+    border: 1px solid #232323;
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .history-title {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.4px;
+    color: #fff;
+  }
+  .history-meta {
+    color: #9a9a9a;
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    letter-spacing: 0.4px;
+  }
+  .history-empty {
+    color: #777;
+    font-size: 12px;
+    padding: 4px 0 0 0;
+    text-align: left;
   }
 
   /* Picker modal */
@@ -1149,6 +1266,97 @@
           <div class="settings-value" id="set-timeformat">mm:ss</div>
         </div>
       </div>
+
+      <div class="settings-section-title">Workout Log</div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Sessions Saved</div>
+            <div class="settings-sub">Completed workouts stored on this device</div>
+          </div>
+          <div class="settings-value" id="workout-log-count">0</div>
+        </div>
+
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Recent Workouts</div>
+            <div class="settings-sub">Latest completed sessions</div>
+          </div>
+          <div class="history-list" id="workout-log-list"></div>
+          <div class="history-empty" id="workout-log-empty">No workouts recorded yet</div>
+        </div>
+
+        <div class="settings-actions">
+          <button type="button" class="settings-action-btn secondary" onclick="clearWorkoutLog()">Clear Log</button>
+        </div>
+      </div>
+
+      <div class="settings-section-title">Cloud Sync (Free)</div>
+      <div class="settings-list">
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Supabase URL</div>
+            <div class="settings-sub">Free project URL (https://...supabase.co)</div>
+          </div>
+          <input
+            id="set-cloud-url"
+            class="settings-input"
+            type="url"
+            placeholder="https://your-project.supabase.co"
+            oninput="updateCloudField('cloudSupabaseUrl', this.value)"
+          >
+        </div>
+
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Supabase Anon Key</div>
+            <div class="settings-sub">Public anon key (safe for client apps)</div>
+          </div>
+          <input
+            id="set-cloud-key"
+            class="settings-input"
+            type="password"
+            placeholder="eyJ..."
+            oninput="updateCloudField('cloudSupabaseAnonKey', this.value)"
+          >
+        </div>
+
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Sync Code</div>
+            <div class="settings-sub">Use the same code on all your devices</div>
+          </div>
+          <input
+            id="set-cloud-code"
+            class="settings-input"
+            type="text"
+            placeholder="ARCH-2026-TEAM-A"
+            oninput="updateCloudField('cloudSyncCode', this.value)"
+          >
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Auto Sync</div>
+            <div class="settings-sub">Sync after each completed workout</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-cloud-auto" onchange="toggleSetting('cloudAutoSync', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-actions">
+          <button type="button" class="settings-action-btn" onclick="generateSyncCode()">Generate Code</button>
+          <button type="button" class="settings-action-btn primary" id="btn-cloud-sync" onclick="syncCloudNow()">Sync Now</button>
+        </div>
+
+        <div class="sync-status warn" id="cloud-sync-status">Local only. Add Supabase URL, anon key, and sync code to sync across devices.</div>
+
+        <div class="settings-note">
+          Usa el mismo Supabase URL + anon key + sync code en otro dispositivo y toca "Sync Now" para traer los workouts.
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1207,7 +1415,8 @@
     running: false, paused: false, phase: 'IDLE',
     timeLeft: 0, timerId: null,
     currentSet: 1, currentCycle: 1,
-    lastSpoken: null, zeroBeeped: false
+    lastSpoken: null, zeroBeeped: false,
+    sessionStartedAt: null, sessionPlannedSec: 0
   };
 
   // Stopwatch state
@@ -1243,7 +1452,12 @@
     rotation: true,
     tickingSound: true,
     paleColors: false,
-    timeFormat: 'mm:ss'
+    timeFormat: 'mm:ss',
+    cloudSupabaseUrl: '',
+    cloudSupabaseAnonKey: '',
+    cloudSyncCode: '',
+    cloudAutoSync: false,
+    cloudLastSyncAt: ''
   };
 
   const PHASE_COLORS = {
@@ -1260,8 +1474,13 @@
   let audioCtx;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
   const STORAGE_ROUNDS_KEY = 'archmere_rounds_presets_v1';
+  const WORKOUT_LOG_KEY = 'archmere_workout_log_v1';
+  const DEVICE_ID_KEY = 'archmere_device_id_v1';
+  const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
   let presets = [];
   let roundsPresets = [];
+  let workoutLog = [];
+  let cloudSyncBusy = false;
 
   function loadSettings() {
     try {
@@ -1289,12 +1508,331 @@
     localStorage.setItem(STORAGE_ROUNDS_KEY, JSON.stringify(roundsPresets));
   }
 
+  function loadWorkoutLog() {
+    try {
+      const raw = localStorage.getItem(WORKOUT_LOG_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      workoutLog = Array.isArray(parsed) ? parsed : [];
+      workoutLog = workoutLog
+        .filter(Boolean)
+        .sort((a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime())
+        .slice(0, 300);
+    } catch (e) {
+      workoutLog = [];
+    }
+  }
+
+  function persistWorkoutLog() {
+    localStorage.setItem(WORKOUT_LOG_KEY, JSON.stringify(workoutLog.slice(0, 300)));
+  }
+
+  function getDeviceId() {
+    let id = localStorage.getItem(DEVICE_ID_KEY);
+    if (id) return id;
+
+    if (window.crypto && window.crypto.randomUUID) {
+      id = window.crypto.randomUUID();
+    } else {
+      id = `dev_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+    }
+
+    localStorage.setItem(DEVICE_ID_KEY, id);
+    return id;
+  }
+
+  function formatDateTime(iso) {
+    try {
+      return new Date(iso).toLocaleString();
+    } catch (e) {
+      return iso || '';
+    }
+  }
+
+  function renderWorkoutLog() {
+    const list = document.getElementById('workout-log-list');
+    const empty = document.getElementById('workout-log-empty');
+    const count = document.getElementById('workout-log-count');
+    if (!list || !empty || !count) return;
+
+    list.innerHTML = '';
+    count.innerText = String(workoutLog.length);
+
+    if (!workoutLog.length) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    workoutLog.slice(0, 20).forEach((entry) => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+
+      const title = document.createElement('div');
+      title.className = 'history-title';
+      title.textContent = (entry.name || 'Workout').toUpperCase();
+
+      const meta = document.createElement('div');
+      meta.className = 'history-meta';
+      const planned = formatTime(entry.plannedSeconds || 0);
+      const rounds = entry.config?.sets ?? '-';
+      const cycles = entry.config?.cycles ?? '-';
+      meta.textContent = `${formatDateTime(entry.completedAt)} | ${planned} | R ${rounds} | C ${cycles}`;
+
+      item.appendChild(title);
+      item.appendChild(meta);
+      list.appendChild(item);
+    });
+  }
+
+  function clearWorkoutLog() {
+    if (!window.confirm('Clear workout log on this device?')) return;
+    workoutLog = [];
+    persistWorkoutLog();
+    renderWorkoutLog();
+    setCloudStatus('Workout log cleared on this device.', 'warn');
+  }
+
+  function startWorkoutSessionTracking() {
+    state.sessionStartedAt = Date.now();
+    state.sessionPlannedSec = totalSeconds();
+  }
+
+  function clearWorkoutSessionTracking() {
+    state.sessionStartedAt = null;
+    state.sessionPlannedSec = 0;
+  }
+
+  function recordCompletedWorkout() {
+    const completedAt = new Date().toISOString();
+    const entryId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const entry = {
+      id: entryId,
+      name: config.name || 'Workout',
+      startedAt: state.sessionStartedAt ? new Date(state.sessionStartedAt).toISOString() : completedAt,
+      completedAt,
+      plannedSeconds: state.sessionPlannedSec || totalSeconds(),
+      deviceId: getDeviceId(),
+      config: getConfigSnapshot()
+    };
+
+    workoutLog.unshift(entry);
+    workoutLog = workoutLog
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime())
+      .slice(0, 300);
+    persistWorkoutLog();
+    renderWorkoutLog();
+    clearWorkoutSessionTracking();
+    setCloudStatus('Workout saved locally.', 'ok');
+
+    if (settings.cloudAutoSync) {
+      setTimeout(() => syncCloudNow({ silent: true, auto: true }), 0);
+    }
+  }
+
+  function updateCloudField(key, value) {
+    settings[key] = value;
+    persistSettings();
+    refreshCloudStatusHint();
+  }
+
+  function setCloudStatus(message, tone='warn') {
+    const el = document.getElementById('cloud-sync-status');
+    if (!el) return;
+    el.className = `sync-status ${tone}`;
+    el.innerText = message;
+  }
+
+  function refreshCloudStatusHint() {
+    if (cloudSyncBusy) return;
+    const hasConfig = hasCloudSyncConfig();
+    if (!hasConfig) {
+      setCloudStatus('Local only. Add Supabase URL, anon key, and sync code to sync across devices.', 'warn');
+      return;
+    }
+
+    if (settings.cloudLastSyncAt) {
+      setCloudStatus(`Cloud ready. Last sync: ${formatDateTime(settings.cloudLastSyncAt)}`, 'ok');
+    } else {
+      setCloudStatus('Cloud ready. Tap "Sync Now" to connect this device.', 'ok');
+    }
+  }
+
+  function normalizeSupabaseUrl(url) {
+    return String(url || '').trim().replace(/\/+$/, '');
+  }
+
+  function hasCloudSyncConfig() {
+    return Boolean(
+      normalizeSupabaseUrl(settings.cloudSupabaseUrl) &&
+      String(settings.cloudSupabaseAnonKey || '').trim() &&
+      String(settings.cloudSyncCode || '').trim()
+    );
+  }
+
+  function mergeById(localItems, remoteItems) {
+    const map = new Map();
+    const put = (item) => {
+      if (!item || typeof item !== 'object') return;
+      const rawId = item.id ?? item.sync_code ?? `${item.name || 'item'}_${JSON.stringify(item).length}`;
+      map.set(String(rawId), item);
+    };
+
+    (Array.isArray(remoteItems) ? remoteItems : []).forEach(put);
+    (Array.isArray(localItems) ? localItems : []).forEach(put);
+    return Array.from(map.values());
+  }
+
+  function sortByIdDesc(items) {
+    return items.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')));
+  }
+
+  function buildCloudPayload() {
+    return {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      presets: (Array.isArray(presets) ? presets : []).slice(0, 200),
+      roundsPresets: (Array.isArray(roundsPresets) ? roundsPresets : []).slice(0, 200),
+      workoutLog: (Array.isArray(workoutLog) ? workoutLog : []).slice(0, 300)
+    };
+  }
+
+  function applyCloudPayload(payload) {
+    if (!payload || typeof payload !== 'object') return false;
+
+    let changed = false;
+
+    if (Array.isArray(payload.presets)) {
+      const mergedPresets = sortByIdDesc(mergeById(presets, payload.presets)).slice(0, 200);
+      if (JSON.stringify(mergedPresets) !== JSON.stringify(presets)) {
+        presets = mergedPresets;
+        persistPresets();
+        renderPresets();
+        changed = true;
+      }
+    }
+
+    if (Array.isArray(payload.roundsPresets)) {
+      const mergedRounds = sortByIdDesc(mergeById(roundsPresets, payload.roundsPresets)).slice(0, 200);
+      if (JSON.stringify(mergedRounds) !== JSON.stringify(roundsPresets)) {
+        roundsPresets = mergedRounds;
+        persistRoundsPresets();
+        renderRoundsPresets();
+        changed = true;
+      }
+    }
+
+    if (Array.isArray(payload.workoutLog)) {
+      const mergedLog = mergeById(workoutLog, payload.workoutLog)
+        .sort((a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime())
+        .slice(0, 300);
+      if (JSON.stringify(mergedLog) !== JSON.stringify(workoutLog)) {
+        workoutLog = mergedLog;
+        persistWorkoutLog();
+        renderWorkoutLog();
+        changed = true;
+      }
+    }
+
+    return changed;
+  }
+
+  function cloudRequestHeaders(includeJson=false) {
+    const key = String(settings.cloudSupabaseAnonKey || '').trim();
+    const headers = {
+      apikey: key,
+      Authorization: `Bearer ${key}`
+    };
+    if (includeJson) headers['Content-Type'] = 'application/json';
+    return headers;
+  }
+
+  async function fetchCloudPayload() {
+    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const code = encodeURIComponent(String(settings.cloudSyncCode || '').trim());
+    const url = `${baseUrl}/rest/v1/${CLOUD_SYNC_TABLE}?sync_code=eq.${code}&select=sync_code,payload,updated_at`;
+    const resp = await fetch(url, { headers: cloudRequestHeaders(false) });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`Cloud read failed (${resp.status}) ${text.slice(0, 120)}`.trim());
+    }
+    const rows = await resp.json();
+    return Array.isArray(rows) && rows.length ? rows[0] : null;
+  }
+
+  async function upsertCloudPayload(payload) {
+    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const body = [{
+      sync_code: String(settings.cloudSyncCode || '').trim(),
+      payload,
+      updated_at: new Date().toISOString()
+    }];
+    const url = `${baseUrl}/rest/v1/${CLOUD_SYNC_TABLE}`;
+    const headers = cloudRequestHeaders(true);
+    headers.Prefer = 'resolution=merge-duplicates,return=representation';
+
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`Cloud write failed (${resp.status}) ${text.slice(0, 120)}`.trim());
+    }
+    return resp.json().catch(() => []);
+  }
+
+  async function syncCloudNow(options={}) {
+    if (cloudSyncBusy) return;
+    if (!hasCloudSyncConfig()) {
+      setCloudStatus('Missing Supabase URL, anon key, or sync code.', 'error');
+      return;
+    }
+
+    cloudSyncBusy = true;
+    const btn = document.getElementById('btn-cloud-sync');
+    if (btn) btn.disabled = true;
+    if (!options.silent) setCloudStatus('Syncing with cloud...', 'warn');
+
+    try {
+      const remote = await fetchCloudPayload();
+      if (remote && remote.payload) {
+        applyCloudPayload(remote.payload);
+      }
+
+      const mergedPayload = buildCloudPayload();
+      await upsertCloudPayload(mergedPayload);
+
+      settings.cloudLastSyncAt = new Date().toISOString();
+      persistSettings();
+      applySettingsToUI();
+      setCloudStatus(`Sync complete. ${workoutLog.length} workouts available on this device.`, 'ok');
+    } catch (err) {
+      console.error(err);
+      const msg = err && err.message ? err.message : 'Unknown sync error';
+      setCloudStatus(msg, 'error');
+    } finally {
+      cloudSyncBusy = false;
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function generateSyncCode() {
+    const rand = () => Math.random().toString(36).slice(2, 6).toUpperCase();
+    settings.cloudSyncCode = `ARCH-${rand()}-${rand()}-${rand()}`;
+    persistSettings();
+    applySettingsToUI();
+    setCloudStatus('New sync code generated. Use the same code on your other devices.', 'ok');
+  }
+
   function applySettingsToUI() {
     const set = (id, value) => {
       const el = document.getElementById(id);
       if (!el) return;
       if (el.type === 'checkbox') el.checked = value;
       else if (el.type === 'range') el.value = value;
+      else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = value ?? '';
       else el.innerText = value;
     };
     set('set-sound', settings.soundEnabled);
@@ -1307,6 +1845,11 @@
     set('set-ducking', settings.ducking);
     set('set-scheme', settings.soundScheme);
     set('set-timeformat', settings.timeFormat);
+    set('set-cloud-url', settings.cloudSupabaseUrl);
+    set('set-cloud-key', settings.cloudSupabaseAnonKey);
+    set('set-cloud-code', settings.cloudSyncCode);
+    set('set-cloud-auto', settings.cloudAutoSync);
+    refreshCloudStatusHint();
   }
 
   function ensureAudio() {
@@ -1670,6 +2213,7 @@
       state.running = true; state.paused = false;
       if (state.phase === 'IDLE') {
         state.currentSet = 1; state.currentCycle = 1;
+        startWorkoutSessionTracking();
         setPhase('READY', config.ready);
       } else {
         runTicker();
@@ -1682,6 +2226,7 @@
     clearInterval(state.timerId);
     state.running = false; state.paused = false; state.phase = 'IDLE';
     state.lastSpoken = null; state.zeroBeeped = false;
+    clearWorkoutSessionTracking();
     updatePlayButton();
     setPhase('READY', config.ready);
     state.phase = 'IDLE';
@@ -1766,6 +2311,7 @@
     }
 
     if (state.phase === 'COOLDOWN') {
+      recordCompletedWorkout();
       resetTimer();
     }
   }
@@ -1881,8 +2427,10 @@
   applySettingsToUI();
   loadRoundsPresets();
   loadPresets();
+  loadWorkoutLog();
   renderPresets();
   renderRoundsPresets();
+  renderWorkoutLog();
 
   function switchTab(name) {
     const screens = ['tabata','rounds','stopwatch','more'];
@@ -1901,6 +2449,7 @@
       updateStopwatchUI();
     } else if (name === 'more') {
       applySettingsToUI();
+      renderWorkoutLog();
     } else {
       // pause stopwatch when leaving
       if (swRunning) swToggle();
