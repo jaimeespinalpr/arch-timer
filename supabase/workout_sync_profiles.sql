@@ -20,3 +20,22 @@ with check (true);
 
 create index if not exists workout_sync_profiles_updated_at_idx
 on public.workout_sync_profiles (updated_at desc);
+
+-- Simple app accounts (username + hashed 8-digit password)
+create table if not exists public.arch_timer_accounts (
+  username text primary key,
+  password_hash text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.arch_timer_accounts enable row level security;
+
+drop policy if exists "arch_timer_accounts_anon_all" on public.arch_timer_accounts;
+
+create policy "arch_timer_accounts_anon_all"
+on public.arch_timer_accounts
+for all
+to anon, authenticated
+using (true)
+with check (true);

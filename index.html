@@ -1556,6 +1556,54 @@
 
       <div class="settings-section-title">Cloud Sync (Free)</div>
       <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Log in or Sign up</div>
+            <div class="settings-sub">Use username + 8-digit password to share workouts across devices</div>
+          </div>
+          <div class="settings-value" id="account-auth-state">Logged out</div>
+        </div>
+
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Username</div>
+            <div class="settings-sub">Letters, numbers, dot, dash or underscore</div>
+          </div>
+          <input
+            id="set-account-user"
+            class="settings-input"
+            type="text"
+            placeholder="jaime.arch"
+            autocomplete="username"
+            oninput="updateAccountUsernameDraft(this.value)"
+          >
+        </div>
+
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Password (8 digits)</div>
+            <div class="settings-sub">Exactly 8 numbers</div>
+          </div>
+          <input
+            id="set-account-pass"
+            class="settings-input"
+            type="password"
+            placeholder="12345678"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="8"
+            autocomplete="current-password"
+          >
+        </div>
+
+        <div class="settings-actions">
+          <button type="button" class="settings-action-btn" id="btn-account-signup" onclick="signUpAccount()">Sign Up</button>
+          <button type="button" class="settings-action-btn primary" id="btn-account-login" onclick="logInAccount()">Log In</button>
+          <button type="button" class="settings-action-btn secondary" id="btn-account-logout" onclick="logOutAccount()">Log Out</button>
+        </div>
+
+        <div class="sync-status warn" id="account-auth-status">Configure Supabase URL and anon key, then sign up or log in.</div>
+
         <div class="settings-item col">
           <div class="settings-left">
             <div class="settings-label">Supabase URL</div>
@@ -1720,7 +1768,11 @@
     cloudSupabaseAnonKey: '',
     cloudSyncCode: '',
     cloudAutoSync: false,
-    cloudLastSyncAt: ''
+    cloudLastSyncAt: '',
+    cloudManualSyncCodeBackup: '',
+    accountUsername: '',
+    accountUsernameDraft: '',
+    accountLoggedIn: false
   };
 
   const PHASE_COLORS = {
@@ -1741,10 +1793,29 @@
   const WORKOUT_LOG_KEY = 'archmere_workout_log_v1';
   const DEVICE_ID_KEY = 'archmere_device_id_v1';
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
+  const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
+  const ACCOUNT_SYNC_PREFIX = 'acct_v1_';
   let presets = [];
   let roundsPresets = [];
   let workoutLog = [];
   let cloudSyncBusy = false;
+  let accountAuthBusy = false;
+
+  function normalizeAccountUsername(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function isValidAccountUsername(username) {
+    return /^[a-z0-9._-]{3,24}$/.test(normalizeAccountUsername(username));
+  }
+
+  function isValidAccountPin(pin) {
+    return /^\d{8}$/.test(String(pin || '').trim());
+  }
+
+  function accountSyncCode(username) {
+    return `${ACCOUNT_SYNC_PREFIX}${normalizeAccountUsername(username)}`;
+  }
 
   function loadSettings() {
     try {
@@ -1752,6 +1823,13 @@
       if (raw) {
         const parsed = JSON.parse(raw);
         settings = { ...settings, ...parsed };
+      }
+      settings.accountUsername = normalizeAccountUsername(settings.accountUsername);
+      settings.accountUsernameDraft = normalizeAccountUsername(settings.accountUsernameDraft || settings.accountUsername);
+      settings.accountLoggedIn = Boolean(settings.accountLoggedIn && settings.accountUsername);
+      if (settings.accountLoggedIn) {
+        const accountCode = accountSyncCode(settings.accountUsername);
+        settings.cloudSyncCode = accountCode;
       }
     } catch (e) { /* ignore */ }
   }
@@ -1907,11 +1985,234 @@
     el.innerText = message;
   }
 
+  function setAccountAuthStatus(message, tone='warn') {
+    const el = document.getElementById('account-auth-status');
+    if (!el) return;
+    el.className = `sync-status ${tone}`;
+    el.innerText = message;
+  }
+
+  function hasCloudBaseConfig() {
+    return Boolean(
+      normalizeSupabaseUrl(settings.cloudSupabaseUrl) &&
+      String(settings.cloudSupabaseAnonKey || '').trim()
+    );
+  }
+
+  function getAccountUsernameDraft() {
+    const input = document.getElementById('set-account-user');
+    return normalizeAccountUsername(input ? input.value : (settings.accountUsernameDraft || settings.accountUsername));
+  }
+
+  function getAccountPinDraft() {
+    const input = document.getElementById('set-account-pass');
+    return String(input?.value || '').trim();
+  }
+
+  function clearAccountPinDraft() {
+    const input = document.getElementById('set-account-pass');
+    if (input) input.value = '';
+  }
+
+  function updateAccountUsernameDraft(value) {
+    settings.accountUsernameDraft = normalizeAccountUsername(value);
+    persistSettings();
+    refreshAccountAuthHint();
+  }
+
+  function refreshAccountAuthHint() {
+    if (accountAuthBusy) return;
+    if (!hasCloudBaseConfig()) {
+      setAccountAuthStatus('Configure Supabase URL and anon key, then sign up or log in.', 'warn');
+      return;
+    }
+
+    if (settings.accountLoggedIn && settings.accountUsername) {
+      setAccountAuthStatus(`Logged in as ${settings.accountUsername}. Workouts sync to your account.`, 'ok');
+    } else {
+      setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password.', 'ok');
+    }
+  }
+
+  function setAccountAuthBusy(isBusy) {
+    accountAuthBusy = Boolean(isBusy);
+    const loginBtn = document.getElementById('btn-account-login');
+    const signupBtn = document.getElementById('btn-account-signup');
+    const logoutBtn = document.getElementById('btn-account-logout');
+    if (loginBtn) loginBtn.disabled = accountAuthBusy;
+    if (signupBtn) signupBtn.disabled = accountAuthBusy;
+    if (logoutBtn) logoutBtn.disabled = accountAuthBusy || !settings.accountLoggedIn;
+  }
+
+  function applyAccountSession(username) {
+    const normalized = normalizeAccountUsername(username);
+    if (!normalized) return;
+
+    if (!settings.accountLoggedIn && settings.cloudSyncCode && !String(settings.cloudSyncCode).startsWith(ACCOUNT_SYNC_PREFIX)) {
+      settings.cloudManualSyncCodeBackup = settings.cloudSyncCode;
+    }
+
+    settings.accountUsername = normalized;
+    settings.accountUsernameDraft = normalized;
+    settings.accountLoggedIn = true;
+    settings.cloudSyncCode = accountSyncCode(normalized);
+    persistSettings();
+    applySettingsToUI();
+  }
+
+  function logOutAccount() {
+    const currentUsername = settings.accountUsername;
+    const currentAccountCode = accountSyncCode(currentUsername);
+    if (settings.cloudSyncCode === currentAccountCode) {
+      settings.cloudSyncCode = settings.cloudManualSyncCodeBackup || '';
+    }
+    settings.accountLoggedIn = false;
+    settings.accountUsername = '';
+    settings.accountUsernameDraft = '';
+    persistSettings();
+    clearAccountPinDraft();
+    applySettingsToUI();
+    setAccountAuthStatus('Logged out. You can still use manual sync code or log in again.', 'warn');
+  }
+
+  async function hashAccountPin(username, pin) {
+    if (!(window.crypto && window.crypto.subtle)) {
+      throw new Error('This browser does not support secure hashing for login.');
+    }
+    const payload = `arch_timer_auth_v1|${normalizeAccountUsername(username)}|${String(pin).trim()}`;
+    const bytes = new TextEncoder().encode(payload);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function fetchAccountRecord(username) {
+    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const user = encodeURIComponent(normalizeAccountUsername(username));
+    const url = `${baseUrl}/rest/v1/${CLOUD_ACCOUNTS_TABLE}?username=eq.${user}&select=username,password_hash,created_at,updated_at`;
+    const resp = await fetch(url, { headers: cloudRequestHeaders(false) });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`Account lookup failed (${resp.status}) ${text.slice(0, 120)}`.trim());
+    }
+    const rows = await resp.json();
+    return Array.isArray(rows) && rows.length ? rows[0] : null;
+  }
+
+  async function insertAccountRecord(username, passwordHash) {
+    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const now = new Date().toISOString();
+    const body = [{
+      username: normalizeAccountUsername(username),
+      password_hash: passwordHash,
+      created_at: now,
+      updated_at: now
+    }];
+    const headers = cloudRequestHeaders(true);
+    headers.Prefer = 'return=representation';
+    const resp = await fetch(`${baseUrl}/rest/v1/${CLOUD_ACCOUNTS_TABLE}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`Sign up failed (${resp.status}) ${text.slice(0, 160)}`.trim());
+    }
+    return resp.json().catch(() => []);
+  }
+
+  async function signUpAccount() {
+    if (accountAuthBusy) return;
+    if (!hasCloudBaseConfig()) {
+      setAccountAuthStatus('Add Supabase URL and anon key first.', 'error');
+      return;
+    }
+
+    const username = getAccountUsernameDraft();
+    const pin = getAccountPinDraft();
+    if (!isValidAccountUsername(username)) {
+      setAccountAuthStatus('Username must be 3-24 chars: letters, numbers, dot, dash or underscore.', 'error');
+      return;
+    }
+    if (!isValidAccountPin(pin)) {
+      setAccountAuthStatus('Password must be exactly 8 digits.', 'error');
+      return;
+    }
+
+    setAccountAuthBusy(true);
+    setAccountAuthStatus('Creating account...', 'warn');
+    try {
+      const existing = await fetchAccountRecord(username);
+      if (existing) {
+        setAccountAuthStatus('Username already exists. Try Log In or choose another username.', 'error');
+        return;
+      }
+      const passwordHash = await hashAccountPin(username, pin);
+      await insertAccountRecord(username, passwordHash);
+      applyAccountSession(username);
+      clearAccountPinDraft();
+      setAccountAuthStatus(`Account created. Logged in as ${username}.`, 'ok');
+      if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
+    } catch (err) {
+      console.error(err);
+      setAccountAuthStatus(err?.message || 'Sign up failed.', 'error');
+    } finally {
+      setAccountAuthBusy(false);
+    }
+  }
+
+  async function logInAccount() {
+    if (accountAuthBusy) return;
+    if (!hasCloudBaseConfig()) {
+      setAccountAuthStatus('Add Supabase URL and anon key first.', 'error');
+      return;
+    }
+
+    const username = getAccountUsernameDraft();
+    const pin = getAccountPinDraft();
+    if (!isValidAccountUsername(username)) {
+      setAccountAuthStatus('Enter a valid username.', 'error');
+      return;
+    }
+    if (!isValidAccountPin(pin)) {
+      setAccountAuthStatus('Password must be exactly 8 digits.', 'error');
+      return;
+    }
+
+    setAccountAuthBusy(true);
+    setAccountAuthStatus('Logging in...', 'warn');
+    try {
+      const account = await fetchAccountRecord(username);
+      if (!account) {
+        setAccountAuthStatus('Account not found. Tap Sign Up first.', 'error');
+        return;
+      }
+      const passwordHash = await hashAccountPin(username, pin);
+      if (String(account.password_hash || '') !== passwordHash) {
+        setAccountAuthStatus('Incorrect password.', 'error');
+        return;
+      }
+      applyAccountSession(username);
+      clearAccountPinDraft();
+      setAccountAuthStatus(`Logged in as ${username}.`, 'ok');
+      if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
+    } catch (err) {
+      console.error(err);
+      setAccountAuthStatus(err?.message || 'Log in failed.', 'error');
+    } finally {
+      setAccountAuthBusy(false);
+    }
+  }
+
   function refreshCloudStatusHint() {
     if (cloudSyncBusy) return;
     const hasConfig = hasCloudSyncConfig();
     if (!hasConfig) {
-      setCloudStatus('Local only. Add Supabase URL, anon key, and sync code to sync across devices.', 'warn');
+      if (settings.accountLoggedIn && hasCloudBaseConfig()) {
+        setCloudStatus('Account linked. Sync code is managed automatically. Tap "Sync Now" when ready.', 'ok');
+      } else {
+        setCloudStatus('Local only. Add Supabase URL, anon key, and sync code to sync across devices.', 'warn');
+      }
       return;
     }
 
@@ -2049,6 +2350,9 @@
 
   async function syncCloudNow(options={}) {
     if (cloudSyncBusy) return;
+    if (settings.accountLoggedIn && settings.accountUsername) {
+      settings.cloudSyncCode = accountSyncCode(settings.accountUsername);
+    }
     if (!hasCloudSyncConfig()) {
       setCloudStatus('Missing Supabase URL, anon key, or sync code.', 'error');
       return;
@@ -2083,6 +2387,10 @@
   }
 
   function generateSyncCode() {
+    if (settings.accountLoggedIn) {
+      setCloudStatus('Logged-in account manages the sync code automatically. Log out to use a manual sync code.', 'warn');
+      return;
+    }
     const rand = () => Math.random().toString(36).slice(2, 6).toUpperCase();
     settings.cloudSyncCode = `ARCH-${rand()}-${rand()}-${rand()}`;
     persistSettings();
@@ -2109,10 +2417,22 @@
     set('set-ducking', settings.ducking);
     set('set-scheme', settings.soundScheme);
     set('set-timeformat', settings.timeFormat);
+    set('set-account-user', settings.accountUsernameDraft || settings.accountUsername);
     set('set-cloud-url', settings.cloudSupabaseUrl);
     set('set-cloud-key', settings.cloudSupabaseAnonKey);
     set('set-cloud-code', settings.cloudSyncCode);
     set('set-cloud-auto', settings.cloudAutoSync);
+    set('account-auth-state', settings.accountLoggedIn && settings.accountUsername ? `@${settings.accountUsername}` : 'Logged out');
+
+    const syncCodeInput = document.getElementById('set-cloud-code');
+    if (syncCodeInput) {
+      syncCodeInput.readOnly = !!settings.accountLoggedIn;
+      syncCodeInput.style.opacity = settings.accountLoggedIn ? '0.72' : '1';
+      syncCodeInput.title = settings.accountLoggedIn ? 'Managed by account login' : '';
+    }
+
+    setAccountAuthBusy(accountAuthBusy);
+    refreshAccountAuthHint();
     refreshCloudStatusHint();
   }
 
