@@ -1299,6 +1299,7 @@
     transform: rotate(90deg) translateY(-100%);
     z-index: 999;
     background: #050505;
+    padding-bottom: 0;
   }
   body.forced-landscape #screen-tabata > #view-runner,
   body.forced-landscape #screen-tabata > #view-editor {
@@ -1838,6 +1839,45 @@
       border: 1px solid rgba(255,255,255,0.05);
       overflow: auto;
       box-shadow: 0 14px 28px rgba(0,0,0,0.22);
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .tab-bar {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(980px, calc(100% - 12px));
+      bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+      margin: 0;
+      z-index: 90;
+      height: 54px;
+      border-radius: 14px;
+      box-shadow: 0 12px 20px rgba(0,0,0,0.24);
+    }
+    .tab-screen {
+      padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+    }
+    #screen-more,
+    #screen-stopwatch {
+      padding-bottom: 0;
+    }
+    #view-editor {
+      padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+    }
+    .settings-wrap {
+      padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    }
+    .sw-container {
+      padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+    }
+    .tab-icon {
+      font-size: 17px;
+      margin-bottom: 2px;
+    }
+    .tab-label {
+      font-size: 9px;
+      line-height: 1;
     }
   }
 
