@@ -1156,6 +1156,34 @@
   body.pseudo-fullscreen #view-runner {
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   }
+  body.forced-landscape {
+    overflow: hidden;
+    background: #050505;
+  }
+  body.forced-landscape .tab-bar {
+    display: none;
+  }
+  body.forced-landscape #screen-tabata {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100dvh;
+    height: 100dvw;
+    min-height: 0;
+    transform-origin: top left;
+    transform: rotate(90deg) translateY(-100%);
+    z-index: 999;
+    background: #050505;
+  }
+  body.forced-landscape #screen-tabata > #view-runner,
+  body.forced-landscape #screen-tabata > #view-editor {
+    height: 100%;
+    min-height: 0;
+  }
+  body.forced-landscape #view-runner {
+    padding: 8px;
+    gap: 8px;
+  }
 
   @media (max-width: 640px) {
     #view-runner {
@@ -4861,8 +4889,8 @@
 
   function switchTab(name) {
     const screens = ['tabata','rounds','stopwatch','more'];
-    if (name !== 'tabata' && document.body.classList.contains('pseudo-fullscreen')) {
-      document.body.classList.remove('pseudo-fullscreen');
+    if (name !== 'tabata' && isFullscreenModeActive()) {
+      exitRotateFullscreenMode().catch((err) => console.warn(err));
     }
     screens.forEach((s) => {
       const el = document.getElementById(`screen-${s}`);
@@ -5226,13 +5254,63 @@
     return document.body.classList.contains('pseudo-fullscreen');
   }
 
+  function isForcedLandscapeActive() {
+    return document.body.classList.contains('forced-landscape');
+  }
+
   function setPseudoFullscreen(active) {
     document.body.classList.toggle('pseudo-fullscreen', !!active);
     updateFullscreenButtonUI();
   }
 
+  function setForcedLandscape(active) {
+    const next = !!active;
+    document.body.classList.toggle('forced-landscape', next);
+    if (next) {
+      document.body.classList.add('pseudo-fullscreen');
+    }
+    updateFullscreenButtonUI();
+  }
+
+  function getScreenOrientationController() {
+    try {
+      return screen.orientation || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function canLockScreenOrientation() {
+    const ctl = getScreenOrientationController();
+    return Boolean(ctl && typeof ctl.lock === 'function');
+  }
+
+  async function tryLockScreenOrientation(mode) {
+    const ctl = getScreenOrientationController();
+    if (!ctl || typeof ctl.lock !== 'function') return false;
+    try {
+      await ctl.lock(mode);
+      return true;
+    } catch (err) {
+      console.warn(`Orientation lock (${mode}) failed:`, err);
+      return false;
+    }
+  }
+
+  function tryUnlockScreenOrientation() {
+    const ctl = getScreenOrientationController();
+    if (!ctl || typeof ctl.unlock !== 'function') return false;
+    try {
+      ctl.unlock();
+      return true;
+    } catch (err) {
+      console.warn('Orientation unlock failed:', err);
+      return false;
+    }
+  }
+
   function isFullscreenModeActive() {
-    return Boolean(getNativeFullscreenElement()) || isPseudoFullscreenActive();
+    return Boolean(getNativeFullscreenElement()) || isPseudoFullscreenActive() || isForcedLandscapeActive();
   }
 
   function updateFullscreenButtonUI() {
@@ -5241,11 +5319,12 @@
     const active = isFullscreenModeActive();
     btn.classList.toggle('active', active);
     btn.innerHTML = active ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-expand"></i>';
-    const label = active ? 'Exit Fullscreen / Focus Mode' : 'Fullscreen / Focus Mode';
+    const label = active ? 'Exit Rotate Fullscreen / Focus Mode' : 'Rotate + Fullscreen / Focus Mode';
     btn.setAttribute('aria-label', label);
+    const titleBase = active ? 'Exit' : 'Enter';
     btn.title = isIOSDevice()
-      ? (active ? 'Exit Focus Mode' : 'Enter Focus Mode')
-      : (active ? 'Exit Fullscreen' : 'Enter Fullscreen');
+      ? `${titleBase} Rotate Focus Mode`
+      : `${titleBase} Rotate Fullscreen`;
   }
 
   async function requestNativeFullscreen(elem) {
@@ -5265,47 +5344,88 @@
     return undefined;
   }
 
-  async function toggleFullscreen() {
+  async function enterRotateFullscreenMode() {
     const root = document.documentElement;
+    let nativeFullscreenEntered = false;
+
+    if (!isIOSDevice() && hasNativeFullscreenSupport()) {
+      try {
+        await requestNativeFullscreen(root);
+        nativeFullscreenEntered = Boolean(getNativeFullscreenElement());
+      } catch (err) {
+        console.warn('Native fullscreen unavailable, using focus mode fallback:', err);
+      }
+    }
+
+    if (!nativeFullscreenEntered) {
+      setPseudoFullscreen(true);
+    }
+
+    const landscapeLocked = await tryLockScreenOrientation('landscape');
+
+    if (landscapeLocked) {
+      setForcedLandscape(false);
+      updateFullscreenButtonUI();
+      return;
+    }
+
+    // Fallback for browsers (notably iPhone Safari/PWA) that don't expose orientation lock.
+    const isPortraitViewport = window.innerHeight > window.innerWidth;
+    if (isPortraitViewport) {
+      setForcedLandscape(true);
+    } else {
+      setForcedLandscape(false);
+      if (!nativeFullscreenEntered) setPseudoFullscreen(true);
+    }
+    updateFullscreenButtonUI();
+  }
+
+  async function exitRotateFullscreenMode() {
+    setForcedLandscape(false);
 
     if (getNativeFullscreenElement()) {
       try {
         await exitNativeFullscreen();
       } catch (err) {
         console.warn('Exit fullscreen failed:', err);
-      } finally {
-        updateFullscreenButtonUI();
       }
-      return;
     }
 
     if (isPseudoFullscreenActive()) {
       setPseudoFullscreen(false);
-      return;
     }
 
-    const preferPseudoMode = isIOSDevice();
-    if (preferPseudoMode || !hasNativeFullscreenSupport()) {
-      setPseudoFullscreen(true);
-      return;
+    const portraitLocked = await tryLockScreenOrientation('portrait');
+    if (!portraitLocked) {
+      tryUnlockScreenOrientation();
     }
 
-    try {
-      await requestNativeFullscreen(root);
-    } catch (err) {
-      console.warn('Native fullscreen unavailable, using focus mode fallback:', err);
-      setPseudoFullscreen(true);
-      return;
-    }
     updateFullscreenButtonUI();
+  }
+
+  async function toggleFullscreen() {
+    if (isFullscreenModeActive()) {
+      await exitRotateFullscreenMode();
+      return;
+    }
+    await enterRotateFullscreenMode();
   }
 
   document.addEventListener('fullscreenchange', updateFullscreenButtonUI);
   document.addEventListener('webkitfullscreenchange', updateFullscreenButtonUI);
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && isPseudoFullscreenActive()) {
-      setPseudoFullscreen(false);
+    if (event.key === 'Escape' && isFullscreenModeActive()) {
+      exitRotateFullscreenMode().catch((err) => console.warn(err));
     }
+  });
+  window.addEventListener('orientationchange', updateFullscreenButtonUI);
+  window.addEventListener('resize', () => {
+    if (isForcedLandscapeActive() && window.innerWidth > window.innerHeight) {
+      // If user physically rotates to landscape, remove visual rotation fallback.
+      setForcedLandscape(false);
+      if (!getNativeFullscreenElement()) setPseudoFullscreen(true);
+    }
+    updateFullscreenButtonUI();
   });
 
   window.addEventListener('beforeinstallprompt', (event) => {
