@@ -3043,6 +3043,78 @@
     return Math.max(0, Math.floor(num));
   }
 
+  const DIRECT_EDIT_SPECS = {
+    'inp-ready': { field: 'ready', kind: 'seconds', min: 0 },
+    'inp-work': { field: 'work', kind: 'seconds', min: 0 },
+    'inp-rest': { field: 'rest', kind: 'seconds', min: 0 },
+    'inp-sets': { field: 'sets', kind: 'int', min: 1 },
+    'inp-cycles': { field: 'cycles', kind: 'int', min: 1 },
+    'inp-cycleRest': { field: 'cycleRest', kind: 'seconds', min: 0 },
+    'inp-cooldown': { field: 'cooldown', kind: 'seconds', min: 0 },
+
+    'rounds-disp-ready': { field: 'ready', kind: 'timeText', min: 0 },
+    'rounds-disp-work': { field: 'work', kind: 'timeText', min: 0 },
+    'rounds-disp-rest': { field: 'rest', kind: 'timeText', min: 0 },
+    'rounds-disp-sets': { field: 'sets', kind: 'int', min: 1 },
+    'rounds-disp-cooldown': { field: 'cooldown', kind: 'timeText', min: 0 }
+  };
+
+  function commitDirectInputEdit(id) {
+    const spec = DIRECT_EDIT_SPECS[id];
+    const el = document.getElementById(id);
+    if (!spec || !el) return;
+
+    const prev = config[spec.field];
+    let next = prev;
+
+    if (spec.kind === 'int') {
+      const n = parseInt(String(el.value || '').trim(), 10);
+      if (!Number.isNaN(n)) next = Math.max(spec.min ?? 0, n);
+    } else if (spec.kind === 'seconds') {
+      next = clampInt(el.value, spec.min ?? 0, prev);
+    } else if (spec.kind === 'timeText') {
+      next = Math.max(spec.min ?? 0, parseTimeInput(String(el.value || ''), prev));
+    }
+
+    config[spec.field] = next;
+    applyConfigToInputs();
+    updateRoundsView();
+    updateUI();
+  }
+
+  function setupDirectInputEditing() {
+    Object.entries(DIRECT_EDIT_SPECS).forEach(([id, spec]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      el.readOnly = false;
+      el.removeAttribute('readonly');
+      el.inputMode = spec.kind === 'timeText' ? 'tel' : 'numeric';
+      el.autocomplete = 'off';
+      el.spellcheck = false;
+
+      const stop = (e) => e.stopPropagation();
+      el.addEventListener('click', stop);
+      el.addEventListener('mousedown', stop);
+      el.addEventListener('touchstart', stop, { passive: true });
+      el.addEventListener('focus', (e) => {
+        e.stopPropagation();
+        try { el.select(); } catch (_) { /* noop */ }
+      });
+      el.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          el.blur();
+        }
+      });
+      el.addEventListener('change', () => commitDirectInputEdit(id));
+      el.addEventListener('blur', () => commitDirectInputEdit(id));
+    });
+  }
+
+  setupDirectInputEditing();
+
   function editField(field, kind) {
     if (kind === 'time') {
       openPicker(field);
