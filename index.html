@@ -568,6 +568,8 @@
     display: flex; flex-direction: column; height: 100%;
     min-height: 0;
     background: #0d0d0d;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .sw-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -578,6 +580,7 @@
     letter-spacing: 0.6px;
     font-size: 16px;
     text-transform: uppercase;
+    flex-shrink: 0;
   }
   .sw-header .sw-title { font-weight: 700; flex: 1; text-align: center; }
   .sw-header .sw-btn {
@@ -594,6 +597,7 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 700;
+    flex-shrink: 0;
   }
   .sw-time-main {
     background: var(--arch-white);
@@ -606,6 +610,7 @@
     line-height: 0.86;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
   }
   .sw-lap {
     background: var(--dot-green);
@@ -613,6 +618,7 @@
     text-align: center;
     padding: 10px 10px 14px 10px;
     font-family: 'Oswald', sans-serif;
+    flex-shrink: 0;
   }
   .sw-lap-label {
     font-size: 14px; letter-spacing: 0.5px; font-weight: 700; text-transform: uppercase;
@@ -623,6 +629,7 @@
   }
   .sw-actions {
     flex: 1;
+    min-height: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
     background: #0d0d0d;
     gap: 12px;
@@ -950,6 +957,81 @@
       border: 1px solid rgba(255,255,255,0.05);
       overflow: auto;
       box-shadow: 0 14px 28px rgba(0,0,0,0.22);
+    }
+  }
+
+  @media (max-height: 820px) {
+    .sw-phase {
+      padding: 10px 10px 4px 10px;
+      font-size: 13px;
+    }
+    .sw-time-main {
+      padding: 4px 8px 10px 8px;
+      font-size: clamp(72px, 20vw, 156px);
+      line-height: 0.88;
+    }
+    .sw-lap {
+      padding: 8px 10px 10px 10px;
+    }
+    .sw-lap-label {
+      font-size: 12px;
+    }
+    .sw-lap-time {
+      font-size: clamp(42px, 12vw, 86px);
+    }
+    .sw-actions {
+      gap: 10px;
+      padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px;
+    }
+    .sw-play {
+      width: clamp(72px, 20vw, 112px);
+      height: clamp(72px, 20vw, 112px);
+      font-size: clamp(26px, 7vw, 42px);
+    }
+    .sw-start-label {
+      font-size: clamp(13px, 3vw, 18px);
+    }
+  }
+
+  @media (max-height: 700px) {
+    .sw-header {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+    .sw-header .sw-btn {
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+    }
+    .sw-phase {
+      padding: 8px 10px 3px 10px;
+      font-size: 12px;
+    }
+    .sw-time-main {
+      padding: 2px 8px 8px 8px;
+      font-size: clamp(62px, 18vw, 124px);
+      line-height: 0.9;
+    }
+    .sw-lap {
+      padding: 6px 8px 8px 8px;
+    }
+    .sw-lap-time {
+      font-size: clamp(34px, 10vw, 64px);
+      line-height: 1;
+    }
+    .sw-actions {
+      gap: 8px;
+      padding: 6px 12px calc(10px + env(safe-area-inset-bottom, 0px)) 12px;
+    }
+    .sw-play {
+      width: 64px;
+      height: 64px;
+      border-width: 2px;
+      font-size: 24px;
+    }
+    .sw-start-label {
+      font-size: 12px;
+      letter-spacing: 0.8px;
     }
   }
 
