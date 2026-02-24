@@ -1768,7 +1768,7 @@
         <div class="settings-item">
           <div class="settings-left">
             <div class="settings-label">Log in or Sign up</div>
-            <div class="settings-sub">Use username + 8-digit password to share workouts across devices</div>
+            <div class="settings-sub">Use username + 8-digit password to share workouts across devices (no technical setup)</div>
           </div>
           <div class="settings-value" id="account-auth-state">Logged out</div>
         </div>
@@ -1811,9 +1811,17 @@
           <button type="button" class="settings-action-btn secondary" id="btn-account-logout" onclick="logOutAccount()">Log Out</button>
         </div>
 
-        <div class="sync-status warn" id="account-auth-status">Configure Supabase URL and anon key, then sign up or log in.</div>
+        <div class="sync-status warn" id="account-auth-status">Enter a username and 8-digit password to sign up or log in.</div>
 
-        <div class="settings-item col">
+        <div class="settings-item" id="cloud-backend-managed-item">
+          <div class="settings-left">
+            <div class="settings-label">Cloud Backend</div>
+            <div class="settings-sub">Configured inside the app by the admin</div>
+          </div>
+          <div class="settings-value">Ready</div>
+        </div>
+
+        <div class="settings-item col" id="cloud-url-item">
           <div class="settings-left">
             <div class="settings-label">Supabase URL</div>
             <div class="settings-sub">Free project URL (https://...supabase.co)</div>
@@ -1827,7 +1835,7 @@
           >
         </div>
 
-        <div class="settings-item col">
+        <div class="settings-item col" id="cloud-key-item">
           <div class="settings-left">
             <div class="settings-label">Supabase Anon Key</div>
             <div class="settings-sub">Public anon key (safe for client apps)</div>
@@ -1871,10 +1879,10 @@
           <button type="button" class="settings-action-btn primary" id="btn-cloud-sync" onclick="syncCloudNow()">Sync Now</button>
         </div>
 
-        <div class="sync-status warn" id="cloud-sync-status">Local only. Add Supabase URL, anon key, and sync code to sync across devices.</div>
+        <div class="sync-status warn" id="cloud-sync-status">Local only. Log in and tap "Sync Now" to sync across devices.</div>
 
         <div class="settings-note">
-          Usa el mismo Supabase URL + anon key + sync code en otro dispositivo y toca "Sync Now" para traer los workouts.
+          Los usuarios no necesitan configurar Supabase. Solo hacen login con su username + PIN de 8 digitos y tocan "Sync Now".
         </div>
       </div>
 
@@ -1972,7 +1980,7 @@
           </div>
         </div>
 
-        <div class="sync-status warn" id="branding-status">Log in and configure Supabase to upload logos and sync branding across devices.</div>
+        <div class="sync-status warn" id="branding-status">Log in to upload logos and sync branding across devices.</div>
 
         <div class="settings-actions">
           <button type="button" class="settings-action-btn primary" id="btn-branding-save" onclick="saveBrandingProfile()">Save Branding</button>
@@ -2125,6 +2133,9 @@
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
   const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
   const BRANDING_BUCKET = 'arch-timer-branding';
+  const LOCK_SUPABASE_CONFIG = true;
+  const BUILTIN_SUPABASE_URL = 'https://fymysjmpnvxfbfvhaunq.supabase.co';
+  const BUILTIN_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5bXlzam1wbnZ4ZmJmdmhhdW5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4OTUwMTMsImV4cCI6MjA4NzQ3MTAxM30.dZzFKkRKocsPoXRGdK0t-rTr-0Jvlr24ODZRvVhC-ic';
   const ACCOUNT_SYNC_PREFIX = 'acct_v1_';
   let presets = [];
   let roundsPresets = [];
@@ -2176,6 +2187,28 @@
     if (isIOSDevice()) return 'ios';
     if (isAndroidDevice()) return 'android';
     return 'ios';
+  }
+
+  function supabaseConfigManagedByApp() {
+    return Boolean(
+      LOCK_SUPABASE_CONFIG &&
+      String(BUILTIN_SUPABASE_URL || '').trim() &&
+      String(BUILTIN_SUPABASE_ANON_KEY || '').trim()
+    );
+  }
+
+  function getSupabaseBaseUrl() {
+    const value = supabaseConfigManagedByApp()
+      ? BUILTIN_SUPABASE_URL
+      : (settings.cloudSupabaseUrl || '');
+    return normalizeSupabaseUrl(value);
+  }
+
+  function getSupabaseAnonKey() {
+    const value = supabaseConfigManagedByApp()
+      ? BUILTIN_SUPABASE_ANON_KEY
+      : (settings.cloudSupabaseAnonKey || '');
+    return String(value || '').trim();
   }
 
   function sanitizeHexColor(value, fallback) {
@@ -2337,7 +2370,12 @@
       return;
     }
     if (!hasCloudBaseConfig()) {
-      setBrandingStatus('Logged in. Add Supabase URL and anon key to upload logos and sync branding.', 'warn');
+      setBrandingStatus(
+        supabaseConfigManagedByApp()
+          ? 'Logged in. Cloud backend is managed by the app.'
+          : 'Logged in. Add Supabase URL and anon key to upload logos and sync branding.',
+        'warn'
+      );
       return;
     }
 
@@ -2460,6 +2498,11 @@
       if (settings.accountLoggedIn) {
         const accountCode = accountSyncCode(settings.accountUsername);
         settings.cloudSyncCode = accountCode;
+      }
+      if (supabaseConfigManagedByApp()) {
+        // Keep backend credentials out of local editable settings; app uses built-in values.
+        settings.cloudSupabaseUrl = '';
+        settings.cloudSupabaseAnonKey = '';
       }
     } catch (e) { /* ignore */ }
     ensureBrandingSettingsShape();
@@ -2606,6 +2649,10 @@
   }
 
   function updateCloudField(key, value) {
+    if (supabaseConfigManagedByApp() && (key === 'cloudSupabaseUrl' || key === 'cloudSupabaseAnonKey')) {
+      setCloudStatus('Cloud backend is configured inside the app.', 'ok');
+      return;
+    }
     if (key === 'cloudSyncCode' && settings.accountLoggedIn) {
       settings.cloudSyncCode = accountSyncCode(settings.accountUsername);
       persistSettings();
@@ -2761,8 +2808,8 @@
 
   function hasCloudBaseConfig() {
     return Boolean(
-      normalizeSupabaseUrl(settings.cloudSupabaseUrl) &&
-      String(settings.cloudSupabaseAnonKey || '').trim()
+      getSupabaseBaseUrl() &&
+      getSupabaseAnonKey()
     );
   }
 
@@ -2790,7 +2837,12 @@
   function refreshAccountAuthHint() {
     if (accountAuthBusy) return;
     if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus('Configure Supabase URL and anon key, then sign up or log in.', 'warn');
+      setAccountAuthStatus(
+        supabaseConfigManagedByApp()
+          ? 'Cloud backend is managed by the app. Sign up or log in with username + 8-digit password.'
+          : 'Configure Supabase URL and anon key, then sign up or log in.',
+        'warn'
+      );
       return;
     }
 
@@ -2855,7 +2907,7 @@
   }
 
   async function fetchAccountRecord(username) {
-    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const baseUrl = getSupabaseBaseUrl();
     const user = encodeURIComponent(normalizeAccountUsername(username));
     const url = `${baseUrl}/rest/v1/${CLOUD_ACCOUNTS_TABLE}?username=eq.${user}&select=username,password_hash,created_at,updated_at`;
     const resp = await fetch(url, { headers: cloudRequestHeaders(false) });
@@ -2868,7 +2920,7 @@
   }
 
   async function insertAccountRecord(username, passwordHash) {
-    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const baseUrl = getSupabaseBaseUrl();
     const now = new Date().toISOString();
     const body = [{
       username: normalizeAccountUsername(username),
@@ -2893,7 +2945,12 @@
   async function signUpAccount() {
     if (accountAuthBusy) return;
     if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus('Add Supabase URL and anon key first.', 'error');
+      setAccountAuthStatus(
+        supabaseConfigManagedByApp()
+          ? 'Cloud backend is temporarily unavailable. Try again in a moment.'
+          : 'Add Supabase URL and anon key first.',
+        'error'
+      );
       return;
     }
 
@@ -2933,7 +2990,12 @@
   async function logInAccount() {
     if (accountAuthBusy) return;
     if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus('Add Supabase URL and anon key first.', 'error');
+      setAccountAuthStatus(
+        supabaseConfigManagedByApp()
+          ? 'Cloud backend is temporarily unavailable. Try again in a moment.'
+          : 'Add Supabase URL and anon key first.',
+        'error'
+      );
       return;
     }
 
@@ -2980,7 +3042,12 @@
       if (settings.accountLoggedIn && hasCloudBaseConfig()) {
         setCloudStatus('Account linked. Sync code is managed automatically. Tap "Sync Now" when ready.', 'ok');
       } else {
-        setCloudStatus('Local only. Add Supabase URL, anon key, and sync code to sync across devices.', 'warn');
+        setCloudStatus(
+          supabaseConfigManagedByApp()
+            ? 'Local only. Log in and tap "Sync Now" to sync across devices.'
+            : 'Local only. Add Supabase URL, anon key, and sync code to sync across devices.',
+          'warn'
+        );
       }
       return;
     }
@@ -2998,8 +3065,8 @@
 
   function hasCloudSyncConfig() {
     return Boolean(
-      normalizeSupabaseUrl(settings.cloudSupabaseUrl) &&
-      String(settings.cloudSupabaseAnonKey || '').trim() &&
+      getSupabaseBaseUrl() &&
+      getSupabaseAnonKey() &&
       String(settings.cloudSyncCode || '').trim()
     );
   }
@@ -3079,7 +3146,7 @@
   }
 
   function cloudRequestHeaders(includeJson=false) {
-    const key = String(settings.cloudSupabaseAnonKey || '').trim();
+    const key = getSupabaseAnonKey();
     const headers = {
       apikey: key,
       Authorization: `Bearer ${key}`
@@ -3121,10 +3188,14 @@
       throw new Error('Log in first to upload logos.');
     }
     if (!hasCloudBaseConfig()) {
-      throw new Error('Add Supabase URL and anon key before uploading logos.');
+      throw new Error(
+        supabaseConfigManagedByApp()
+          ? 'Cloud backend is not available right now. Try again in a moment.'
+          : 'Add Supabase URL and anon key before uploading logos.'
+      );
     }
 
-    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const baseUrl = getSupabaseBaseUrl();
     const username = normalizeAccountUsername(settings.accountUsername);
     const ext = inferImageExtension(file);
     const ts = Date.now();
@@ -3167,7 +3238,12 @@
     }
 
     if (hasPendingUploads && !hasCloudBaseConfig()) {
-      setBrandingStatus('Add Supabase URL and anon key before uploading logos.', 'error');
+      setBrandingStatus(
+        supabaseConfigManagedByApp()
+          ? 'Cloud backend is not available right now. Try again in a moment.'
+          : 'Add Supabase URL and anon key before uploading logos.',
+        'error'
+      );
       return;
     }
 
@@ -3199,7 +3275,12 @@
       } else if (hasCloudBaseConfig()) {
         setBrandingStatus('Branding saved locally. Cloud sync code missing (account sync code should fill automatically after login).', 'warn');
       } else {
-        setBrandingStatus('Branding colors saved locally. Add Supabase config to sync.', 'warn');
+        setBrandingStatus(
+          supabaseConfigManagedByApp()
+            ? 'Branding colors saved locally. Log in and tap "Sync Now" to sync.'
+            : 'Branding colors saved locally. Add Supabase config to sync.',
+          'warn'
+        );
       }
     } catch (err) {
       console.error(err);
@@ -3244,7 +3325,7 @@
   }
 
   async function fetchCloudPayload() {
-    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const baseUrl = getSupabaseBaseUrl();
     const code = encodeURIComponent(String(settings.cloudSyncCode || '').trim());
     const url = `${baseUrl}/rest/v1/${CLOUD_SYNC_TABLE}?sync_code=eq.${code}&select=sync_code,payload,updated_at`;
     const resp = await fetch(url, { headers: cloudRequestHeaders(false) });
@@ -3257,7 +3338,7 @@
   }
 
   async function upsertCloudPayload(payload) {
-    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const baseUrl = getSupabaseBaseUrl();
     const body = [{
       sync_code: String(settings.cloudSyncCode || '').trim(),
       payload,
@@ -3285,7 +3366,12 @@
       settings.cloudSyncCode = accountSyncCode(settings.accountUsername);
     }
     if (!hasCloudSyncConfig()) {
-      setCloudStatus('Missing Supabase URL, anon key, or sync code.', 'error');
+      setCloudStatus(
+        supabaseConfigManagedByApp()
+          ? 'Missing sync code. Log in or generate a sync code first.'
+          : 'Missing Supabase URL, anon key, or sync code.',
+        'error'
+      );
       return;
     }
 
@@ -3349,8 +3435,8 @@
     set('set-scheme', settings.soundScheme);
     set('set-timeformat', settings.timeFormat);
     set('set-account-user', settings.accountUsernameDraft || settings.accountUsername);
-    set('set-cloud-url', settings.cloudSupabaseUrl);
-    set('set-cloud-key', settings.cloudSupabaseAnonKey);
+    set('set-cloud-url', supabaseConfigManagedByApp() ? '' : settings.cloudSupabaseUrl);
+    set('set-cloud-key', supabaseConfigManagedByApp() ? '' : settings.cloudSupabaseAnonKey);
     set('set-cloud-code', settings.cloudSyncCode);
     set('set-cloud-auto', settings.cloudAutoSync);
     set('account-auth-state', settings.accountLoggedIn && settings.accountUsername ? `@${settings.accountUsername}` : 'Logged out');
@@ -3366,6 +3452,14 @@
       syncCodeInput.style.opacity = settings.accountLoggedIn ? '0.72' : '1';
       syncCodeInput.title = settings.accountLoggedIn ? 'Managed by account login' : '';
     }
+
+    const managedCloud = supabaseConfigManagedByApp();
+    const cloudUrlItem = document.getElementById('cloud-url-item');
+    const cloudKeyItem = document.getElementById('cloud-key-item');
+    const cloudManagedItem = document.getElementById('cloud-backend-managed-item');
+    if (cloudUrlItem) cloudUrlItem.style.display = managedCloud ? 'none' : '';
+    if (cloudKeyItem) cloudKeyItem.style.display = managedCloud ? 'none' : '';
+    if (cloudManagedItem) cloudManagedItem.style.display = managedCloud ? '' : 'none';
 
     setAccountAuthBusy(accountAuthBusy);
     setBrandingBusy(brandingBusy);
