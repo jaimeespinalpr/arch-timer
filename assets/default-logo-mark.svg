@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Arch Timer default mark">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0d6b3c"/>
+      <stop offset="100%" stop-color="#183543"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="28" fill="#0b0d0c" stroke="#2a353d" stroke-width="2"/>
+  <rect x="12" y="12" width="104" height="104" rx="24" fill="url(#g)" opacity=".96"/>
+  <circle cx="64" cy="64" r="28" fill="none" stroke="#f3f6f0" stroke-width="5"/>
+  <line x1="64" y1="64" x2="64" y2="40" stroke="#f3f6f0" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="64" y1="64" x2="84" y2="70" stroke="#c8a842" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="64" cy="64" r="3.5" fill="#f3f6f0"/>
+</svg>

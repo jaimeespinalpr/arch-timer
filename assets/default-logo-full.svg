@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="140" viewBox="0 0 520 140" role="img" aria-label="Arch Timer default logo">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0d6b3c"/>
+      <stop offset="100%" stop-color="#183543"/>
+    </linearGradient>
+  </defs>
+  <rect width="520" height="140" rx="22" fill="#0b0d0c"/>
+  <rect x="6" y="6" width="508" height="128" rx="18" fill="none" stroke="rgba(255,255,255,0.10)"/>
+  <g transform="translate(24 18)">
+    <rect x="0" y="0" width="104" height="104" rx="18" fill="url(#g)" stroke="#c8a842" stroke-width="3"/>
+    <circle cx="52" cy="52" r="30" fill="none" stroke="#f3f6f0" stroke-width="6" opacity=".92"/>
+    <line x1="52" y1="52" x2="52" y2="28" stroke="#f3f6f0" stroke-width="5" stroke-linecap="round"/>
+    <line x1="52" y1="52" x2="72" y2="58" stroke="#c8a842" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="52" cy="52" r="4" fill="#f3f6f0"/>
+  </g>
+  <g transform="translate(144 34)" fill="#f3f6f0">
+    <text x="0" y="38" font-family="Oswald, Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="2">ARCH TIMER</text>
+    <text x="2" y="72" font-family="Roboto, Arial, sans-serif" font-size="14" font-weight="500" letter-spacing="3" opacity=".85">TRAINING CLOCK</text>
+    <rect x="2" y="84" width="180" height="4" rx="2" fill="#0d6b3c"/>
+    <rect x="188" y="84" width="52" height="4" rx="2" fill="#c8a842"/>
+  </g>
+</svg>

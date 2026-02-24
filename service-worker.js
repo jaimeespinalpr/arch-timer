@@ -1,9 +1,12 @@
-const CACHE_NAME = 'arch-timer-pwa-v1';
+const CACHE_NAME = 'arch-timer-pwa-v2';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './assets/default-logo-full.svg',
+  './assets/default-logo-mark.svg',
+  './assets/default-watermark.svg',
   './assets/archmere-a-auks-green-original.png',
   './assets/archmere-auks-greeniii-original.png',
   './assets/auks-old-school2.png',

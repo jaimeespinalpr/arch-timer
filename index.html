@@ -930,6 +930,46 @@
     grid-template-columns: 1fr;
     gap: 10px;
   }
+  .branding-pack-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .branding-pack-btn {
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    background: #151515;
+    color: #e3e3e3;
+    min-height: 52px;
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+  }
+  .branding-pack-btn.active {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)),
+      linear-gradient(90deg, rgba(13,107,60,0.14), rgba(24,53,67,0.14));
+    border-color: rgba(13,107,60,0.45);
+    color: #fff;
+  }
+  .branding-pack-name {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+  }
+  .branding-pack-sub {
+    display: block;
+    margin-top: 3px;
+    font-size: 11px;
+    color: #a0a0a0;
+    letter-spacing: 0.3px;
+  }
+  .branding-pack-btn.active .branding-pack-sub {
+    color: #d2e6db;
+  }
   .branding-upload-card {
     padding: 12px;
     border-radius: 12px;
@@ -1285,9 +1325,9 @@
     <div class="editor-brand">
       <img
         id="brand-logo-full"
-        src="assets/logo-full.png"
+        src="assets/default-logo-full.svg"
         alt="Archmere Auks"
-        data-default-src="assets/logo-full.png"
+        data-default-src="assets/default-logo-full.svg"
         data-fallback-src="assets/archmere-auks-greeniii-original.png"
         onerror="this.onerror=null;this.src='assets/archmere-auks-greeniii-original.png';"
       >
@@ -1416,9 +1456,9 @@
         <img
           id="brand-logo-mark"
           class="brand-icon"
-          src="assets/logo-mark.png"
+          src="assets/default-logo-mark.svg"
           alt="Archmere Auks"
-          data-default-src="assets/logo-mark.png"
+          data-default-src="assets/default-logo-mark.svg"
           data-fallback-src="assets/archmere-a-auks-green-original.png"
           onerror="this.onerror=null;this.src='assets/archmere-a-auks-green-original.png';"
         >
@@ -1440,9 +1480,9 @@
       <img
         id="brand-watermark"
         class="runner-watermark"
-        src="assets/watermark.png"
+        src="assets/default-watermark.svg"
         alt="Auks Old School"
-        data-default-src="assets/watermark.png"
+        data-default-src="assets/default-watermark.svg"
         data-fallback-src="assets/auks-old-school2.png"
         onerror="this.onerror=null;this.src='assets/auks-old-school2.png';"
       >
@@ -1955,6 +1995,16 @@
             <div class="settings-label">Upload Your Logos</div>
             <div class="settings-sub">iPhone/Android: usa Photos o Files. Se guardan en la nube (Supabase Storage)</div>
           </div>
+          <div class="branding-pack-row">
+            <button type="button" class="branding-pack-btn" id="btn-logo-pack-default" onclick="selectBuiltinLogoPack('default')">
+              <span class="branding-pack-name">Default</span>
+              <span class="branding-pack-sub">Nuevo pack incluido en la app</span>
+            </button>
+            <button type="button" class="branding-pack-btn" id="btn-logo-pack-archmere" onclick="selectBuiltinLogoPack('archmere')">
+              <span class="branding-pack-name">Archmere</span>
+              <span class="branding-pack-sub">Pack original de Archmere / Auks</span>
+            </button>
+          </div>
           <div class="branding-upload-grid">
             <div class="branding-upload-card">
               <div class="branding-upload-top">
@@ -1988,7 +2038,7 @@
         </div>
 
         <div class="branding-help">
-          Option 2 (cloud): las fotos se guardan en Supabase Storage en un bucket publico para branding del usuario. No se guardan en la carpeta local <code>assets/</code> del proyecto.
+          Incluye 2 packs de logos integrados (Default y Archmere). Si subes tus propios logos, se guardan en Supabase Storage (no en <code>assets/</code> del proyecto).
         </div>
       </div>
     </div>
@@ -2097,6 +2147,7 @@
     accountUsernameDraft: '',
     accountLoggedIn: false,
     brandingColors: {},
+    brandingLogoPack: 'default',
     brandingLogos: {},
     brandingUpdatedAt: ''
   };
@@ -2119,6 +2170,25 @@
     rest: PHASE_COLORS.REST,
     cycleRest: PHASE_COLORS.CYCLE_REST,
     cooldown: PHASE_COLORS.COOLDOWN
+  };
+  const DEFAULT_LOGO_PACK_ID = 'default';
+  const BUILTIN_LOGO_PACKS = {
+    default: {
+      label: 'Default',
+      logos: {
+        full: 'assets/default-logo-full.svg',
+        mark: 'assets/default-logo-mark.svg',
+        watermark: 'assets/default-watermark.svg'
+      }
+    },
+    archmere: {
+      label: 'Archmere',
+      logos: {
+        full: 'assets/archmere-auks-greeniii-original.png',
+        mark: 'assets/archmere-a-auks-green-original.png',
+        watermark: 'assets/auks-old-school2.png'
+      }
+    }
   };
 
   let phaseColors = { ...PHASE_COLORS };
@@ -2276,9 +2346,60 @@
     };
   }
 
+  function normalizeBrandingLogoPack(value) {
+    const raw = String(value || '').trim().toLowerCase();
+    if (!raw) return DEFAULT_LOGO_PACK_ID;
+    if (raw === 'custom') return 'custom';
+    return BUILTIN_LOGO_PACKS[raw] ? raw : DEFAULT_LOGO_PACK_ID;
+  }
+
+  function getBuiltinLogoPack(packId) {
+    const id = normalizeBrandingLogoPack(packId);
+    return BUILTIN_LOGO_PACKS[id] || BUILTIN_LOGO_PACKS[DEFAULT_LOGO_PACK_ID];
+  }
+
+  function normalizeLogoPathForCompare(url) {
+    const raw = String(url || '').trim();
+    if (!raw) return '';
+    return raw.split('?')[0];
+  }
+
+  function inferBrandingLogoPack(logos) {
+    const current = normalizeBrandingLogos(logos);
+    if (!current.full && !current.mark && !current.watermark) return DEFAULT_LOGO_PACK_ID;
+    for (const [packId, pack] of Object.entries(BUILTIN_LOGO_PACKS)) {
+      const expected = pack.logos || {};
+      if (
+        normalizeLogoPathForCompare(current.full) === normalizeLogoPathForCompare(expected.full) &&
+        normalizeLogoPathForCompare(current.mark) === normalizeLogoPathForCompare(expected.mark) &&
+        normalizeLogoPathForCompare(current.watermark) === normalizeLogoPathForCompare(expected.watermark)
+      ) {
+        return packId;
+      }
+    }
+    return 'custom';
+  }
+
+  function applyBuiltinLogoPackToSettings(packId, options={}) {
+    const normalizedPackId = normalizeBrandingLogoPack(packId);
+    const pack = getBuiltinLogoPack(normalizedPackId);
+    settings.brandingLogoPack = normalizedPackId;
+    settings.brandingLogos = normalizeBrandingLogos({
+      ...(pack.logos || {})
+    });
+    if (!options.skipTimestamp) {
+      settings.brandingUpdatedAt = new Date().toISOString();
+    }
+  }
+
   function ensureBrandingSettingsShape() {
     settings.brandingColors = normalizeBrandingColors(settings.brandingColors);
     settings.brandingLogos = normalizeBrandingLogos(settings.brandingLogos);
+    settings.brandingLogoPack = normalizeBrandingLogoPack(settings.brandingLogoPack || inferBrandingLogoPack(settings.brandingLogos));
+    if (!settings.brandingLogos.full && !settings.brandingLogos.mark && !settings.brandingLogos.watermark) {
+      const pack = getBuiltinLogoPack(settings.brandingLogoPack);
+      settings.brandingLogos = normalizeBrandingLogos(pack.logos);
+    }
     settings.brandingUpdatedAt = String(settings.brandingUpdatedAt || '').trim();
     phaseColors = {
       READY: settings.brandingColors.ready,
@@ -2349,7 +2470,10 @@
     targets.forEach(({ id, url }) => {
       const img = document.getElementById(id);
       if (!img) return;
-      const desired = url ? appendCacheStamp(url, stamp) : (img.dataset.defaultSrc || img.getAttribute('src') || '');
+      const isRemote = /^https?:\/\//i.test(String(url || '').trim());
+      const desired = url
+        ? (isRemote ? appendCacheStamp(url, stamp) : String(url))
+        : (img.dataset.defaultSrc || img.getAttribute('src') || '');
       if (desired && img.getAttribute('src') !== desired) {
         img.src = desired;
       }
@@ -2402,6 +2526,13 @@
     const pending = brandingPendingFiles[slot];
     if (pending) return 'Selected';
     const url = settings.brandingLogos && settings.brandingLogos[slot];
+    const packId = normalizeBrandingLogoPack(settings.brandingLogoPack);
+    if (packId !== 'custom') {
+      const pack = getBuiltinLogoPack(packId);
+      if (normalizeLogoPathForCompare(url) === normalizeLogoPathForCompare(pack.logos?.[slot])) {
+        return pack.label;
+      }
+    }
     return url ? 'Custom' : 'Default';
   }
 
@@ -2423,10 +2554,31 @@
     setText('brand-file-mark-state', brandFileStateLabel('mark'));
     setText('brand-file-watermark-state', brandFileStateLabel('watermark'));
 
+    const packId = normalizeBrandingLogoPack(settings.brandingLogoPack);
+    const btnDefault = document.getElementById('btn-logo-pack-default');
+    const btnArchmere = document.getElementById('btn-logo-pack-archmere');
+    if (btnDefault) btnDefault.classList.toggle('active', packId === 'default');
+    if (btnArchmere) btnArchmere.classList.toggle('active', packId === 'archmere');
+
     const acctState = document.getElementById('branding-account-state');
     if (acctState) {
       acctState.innerText = settings.accountLoggedIn && settings.accountUsername ? `@${settings.accountUsername}` : 'Local only';
     }
+  }
+
+  function selectBuiltinLogoPack(packId) {
+    const normalizedPackId = normalizeBrandingLogoPack(packId);
+    if (!BUILTIN_LOGO_PACKS[normalizedPackId]) return;
+
+    brandingPendingFiles = { full: null, mark: null, watermark: null };
+    clearBrandingFileInputs();
+    applyBuiltinLogoPackToSettings(normalizedPackId);
+    ensureBrandingSettingsShape();
+    persistSettings();
+    applyBrandingImages();
+    refreshBrandingInputsUI();
+    refreshBrandingStatusHint();
+    if (typeof updateUI === 'function') updateUI();
   }
 
   function updateBrandingColor(key, value) {
@@ -2447,6 +2599,8 @@
   function queueBrandingFile(slot, file) {
     if (!['full','mark','watermark'].includes(slot)) return;
     brandingPendingFiles[slot] = file || null;
+    settings.brandingLogoPack = 'custom';
+    persistSettings();
     refreshBrandingInputsUI();
     refreshBrandingStatusHint();
   }
@@ -2456,6 +2610,7 @@
     return {
       version: 1,
       updatedAt: settings.brandingUpdatedAt || '',
+      logoPack: settings.brandingLogoPack || DEFAULT_LOGO_PACK_ID,
       colors: { ...settings.brandingColors },
       logos: { ...settings.brandingLogos }
     };
@@ -2471,6 +2626,7 @@
       ...(settings.brandingColors || {}),
       ...((payload.colors && typeof payload.colors === 'object') ? payload.colors : {})
     });
+    settings.brandingLogoPack = normalizeBrandingLogoPack(payload.logoPack || inferBrandingLogoPack(payload.logos));
     settings.brandingLogos = normalizeBrandingLogos({
       ...(settings.brandingLogos || {}),
       ...((payload.logos && typeof payload.logos === 'object') ? payload.logos : {})
@@ -3294,10 +3450,9 @@
     if (!window.confirm('Reset colors and logos back to default branding?')) return;
 
     settings.brandingColors = normalizeBrandingColors(DEFAULT_BRANDING_COLORS);
-    settings.brandingLogos = normalizeBrandingLogos({});
-    settings.brandingUpdatedAt = new Date().toISOString();
     brandingPendingFiles = { full: null, mark: null, watermark: null };
     clearBrandingFileInputs();
+    applyBuiltinLogoPackToSettings(DEFAULT_LOGO_PACK_ID);
 
     ensureBrandingSettingsShape();
     persistSettings();
