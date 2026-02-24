@@ -788,6 +788,74 @@
     border-color: rgba(189,77,77,0.4);
     color: #f4b5b5;
   }
+  .install-choice-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid #1a1a1a;
+  }
+  .install-choice-btn {
+    border-radius: 12px;
+    padding: 12px 10px;
+    border: 1px solid #2b2b2b;
+    background: #151515;
+    color: #d8d8d8;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  }
+  .install-choice-btn.active {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)),
+      linear-gradient(90deg, rgba(13,107,60,0.16), rgba(24,53,67,0.14));
+    border-color: rgba(13,107,60,0.45);
+    color: #fff;
+  }
+  .install-guide-card {
+    margin: 0 16px 14px 16px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #242424;
+    background: #131313;
+  }
+  .install-guide-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--arch-gold);
+    margin-bottom: 8px;
+  }
+  .install-guide-steps {
+    color: #c7c7c7;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .install-guide-steps ol {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .install-guide-steps li + li {
+    margin-top: 4px;
+  }
+  .install-inline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.03);
+    color: #e5e5e5;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
   .history-list {
     display: flex;
     flex-direction: column;
@@ -1530,6 +1598,33 @@
         </div>
       </div>
 
+      <div class="settings-section-title">Install App</div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Download / Install</div>
+            <div class="settings-sub">Choose iPhone or Android and follow the steps</div>
+          </div>
+          <div class="install-inline-badge" id="install-platform-badge">IPHONE</div>
+        </div>
+
+        <div class="install-choice-row">
+          <button type="button" class="install-choice-btn" id="btn-choose-ios" onclick="setInstallTarget('ios')">iPhone (iOS)</button>
+          <button type="button" class="install-choice-btn" id="btn-choose-android" onclick="setInstallTarget('android')">Android</button>
+        </div>
+
+        <div class="sync-status warn" id="install-app-status">Choose your device to see install steps.</div>
+
+        <div class="settings-actions">
+          <button type="button" class="settings-action-btn primary" id="btn-install-app-main" onclick="installAppNow()">Install / Download</button>
+        </div>
+
+        <div class="install-guide-card">
+          <div class="install-guide-title" id="install-guide-title">Install Steps</div>
+          <div class="install-guide-steps" id="install-guide-steps"></div>
+        </div>
+      </div>
+
       <div class="settings-section-title">Workout Log</div>
       <div class="settings-list">
         <div class="settings-item">
@@ -1800,6 +1895,8 @@
   let workoutLog = [];
   let cloudSyncBusy = false;
   let accountAuthBusy = false;
+  let deferredInstallPrompt = null;
+  let installTarget = null;
 
   function normalizeAccountUsername(value) {
     return String(value || '').trim().toLowerCase();
@@ -1815,6 +1912,32 @@
 
   function accountSyncCode(username) {
     return `${ACCOUNT_SYNC_PREFIX}${normalizeAccountUsername(username)}`;
+  }
+
+  function isIOSDevice() {
+    const ua = navigator.userAgent || '';
+    const isIOS = /iphone|ipad|ipod/i.test(ua);
+    const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    return isIOS || isIPadOS;
+  }
+
+  function isAndroidDevice() {
+    return /android/i.test(navigator.userAgent || '');
+  }
+
+  function isSafariBrowser() {
+    const ua = navigator.userAgent || '';
+    return /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+  }
+
+  function isStandaloneInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  function getDefaultInstallTarget() {
+    if (isIOSDevice()) return 'ios';
+    if (isAndroidDevice()) return 'android';
+    return 'ios';
   }
 
   function loadSettings() {
@@ -1973,7 +2096,16 @@
   }
 
   function updateCloudField(key, value) {
+    if (key === 'cloudSyncCode' && settings.accountLoggedIn) {
+      settings.cloudSyncCode = accountSyncCode(settings.accountUsername);
+      persistSettings();
+      refreshCloudStatusHint();
+      return;
+    }
     settings[key] = value;
+    if (key === 'cloudSyncCode' && !settings.accountLoggedIn) {
+      settings.cloudManualSyncCodeBackup = String(value || '').trim();
+    }
     persistSettings();
     refreshCloudStatusHint();
   }
@@ -1990,6 +2122,131 @@
     if (!el) return;
     el.className = `sync-status ${tone}`;
     el.innerText = message;
+  }
+
+  function setInstallTarget(target) {
+    installTarget = target === 'android' ? 'android' : 'ios';
+    updateInstallUI();
+  }
+
+  function installGuideHtml(target) {
+    if (target === 'android') {
+      return `
+        <ol>
+          <li>Abre la app en <strong>Chrome</strong> en Android.</li>
+          <li>Toca <strong>Install / Download</strong> (si aparece).</li>
+          <li>Si no aparece, usa el menu del navegador y toca <strong>Install app</strong> o <strong>Add to Home screen</strong>.</li>
+        </ol>
+      `;
+    }
+
+    return `
+      <ol>
+        <li>Abre este enlace en <strong>Safari</strong> (no dentro de Instagram/Facebook ni otro navegador).</li>
+        <li>Toca el boton <strong>Compartir</strong> (cuadro con flecha hacia arriba).</li>
+        <li>Desliza y toca <strong>Añadir a pantalla de inicio</strong>.</li>
+        <li>Confirma con <strong>Añadir</strong>.</li>
+      </ol>
+    `;
+  }
+
+  function updateInstallUI() {
+    if (!installTarget) installTarget = getDefaultInstallTarget();
+
+    const isInstalled = isStandaloneInstalled();
+    const badge = document.getElementById('install-platform-badge');
+    const btnIOS = document.getElementById('btn-choose-ios');
+    const btnAndroid = document.getElementById('btn-choose-android');
+    const status = document.getElementById('install-app-status');
+    const mainBtn = document.getElementById('btn-install-app-main');
+    const guideTitle = document.getElementById('install-guide-title');
+    const guideSteps = document.getElementById('install-guide-steps');
+
+    if (badge) badge.innerText = installTarget === 'android' ? 'ANDROID' : 'IPHONE';
+    if (btnIOS) btnIOS.classList.toggle('active', installTarget === 'ios');
+    if (btnAndroid) btnAndroid.classList.toggle('active', installTarget === 'android');
+    if (guideTitle) guideTitle.innerText = installTarget === 'android' ? 'Android Install Steps' : 'iPhone (iOS) Install Steps';
+    if (guideSteps) guideSteps.innerHTML = installGuideHtml(installTarget);
+
+    if (!status || !mainBtn) return;
+
+    if (isInstalled) {
+      status.className = 'sync-status ok';
+      status.innerText = 'App already installed on this device.';
+      mainBtn.disabled = true;
+      mainBtn.innerText = 'Installed';
+      return;
+    }
+
+    mainBtn.disabled = false;
+
+    if (installTarget === 'android') {
+      if (deferredInstallPrompt) {
+        status.className = 'sync-status ok';
+        status.innerText = 'Android install is ready. Tap "Install / Download".';
+        mainBtn.innerText = 'Install on Android';
+      } else {
+        status.className = 'sync-status warn';
+        status.innerText = 'If no install popup appears, use Chrome menu -> Install app / Add to Home screen.';
+        mainBtn.innerText = 'Show Android Steps';
+      }
+      return;
+    }
+
+    if (!isSafariBrowser()) {
+      status.className = 'sync-status warn';
+      status.innerText = 'On iPhone, install works from Safari. Open this page in Safari to add it to your Home Screen.';
+      mainBtn.innerText = 'Show iPhone Steps';
+    } else {
+      status.className = 'sync-status ok';
+      status.innerText = 'Use Safari Share -> Add to Home Screen to install on iPhone.';
+      mainBtn.innerText = 'Show iPhone Steps';
+    }
+  }
+
+  async function installAppNow() {
+    updateInstallUI();
+
+    if (isStandaloneInstalled()) return;
+
+    if ((installTarget || getDefaultInstallTarget()) === 'android' && deferredInstallPrompt) {
+      try {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        if (choice?.outcome === 'accepted') {
+          const status = document.getElementById('install-app-status');
+          if (status) {
+            status.className = 'sync-status ok';
+            status.innerText = 'Android install accepted. Finish the system prompt to complete installation.';
+          }
+        } else {
+          const status = document.getElementById('install-app-status');
+          if (status) {
+            status.className = 'sync-status warn';
+            status.innerText = 'Install was dismissed. You can try again from the browser menu.';
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        const status = document.getElementById('install-app-status');
+        if (status) {
+          status.className = 'sync-status error';
+          status.innerText = 'Could not open Android install prompt. Use browser menu -> Install app.';
+        }
+      } finally {
+        updateInstallUI();
+      }
+      return;
+    }
+
+    const status = document.getElementById('install-app-status');
+    if (status) {
+      status.className = 'sync-status warn';
+      status.innerText = installTarget === 'android'
+        ? 'Use Chrome menu -> Install app / Add to Home screen.'
+        : 'On iPhone: Safari -> Share -> Add to Home Screen.';
+    }
   }
 
   function hasCloudBaseConfig() {
@@ -2434,6 +2691,7 @@
     setAccountAuthBusy(accountAuthBusy);
     refreshAccountAuthHint();
     refreshCloudStatusHint();
+    updateInstallUI();
   }
 
   function ensureAudio() {
@@ -3214,6 +3472,7 @@
     } else if (name === 'more') {
       applySettingsToUI();
       renderWorkoutLog();
+      updateInstallUI();
     } else {
       // pause stopwatch when leaving
       if (swRunning) swToggle();
@@ -3546,6 +3805,23 @@
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
   }
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (isAndroidDevice()) installTarget = 'android';
+    updateInstallUI();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    const status = document.getElementById('install-app-status');
+    if (status) {
+      status.className = 'sync-status ok';
+      status.innerText = 'App installed successfully on this device.';
+    }
+    updateInstallUI();
+  });
 
   if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
     window.addEventListener('load', () => {
