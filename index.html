@@ -362,6 +362,12 @@
     background: linear-gradient(180deg, #151515, #090909);
     color: var(--arch-gold);
   }
+  .btn-fullscreen.active {
+    background: linear-gradient(180deg, rgba(200,168,66,0.22), rgba(200,168,66,0.12));
+    color: #f7e29d;
+    border-color: rgba(200,168,66,0.42);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 16px rgba(200,168,66,0.12);
+  }
   .btn-toggle-top { display: none; }
 
   .runner-main {
@@ -1140,6 +1146,439 @@
   #view-runner.phase-rest .runner-watermark { transform: translate(-50%, -50%) scale(0.98); opacity: 0.12; }
   #view-runner.phase-cycle .runner-watermark { transform: translate(-50%, -50%) scale(1.04); opacity: 0.15; }
   #view-runner.phase-cool .runner-watermark { transform: translate(-50%, -50%) scale(1); opacity: 0.12; }
+
+  body.pseudo-fullscreen .tab-bar {
+    display: none;
+  }
+  body.pseudo-fullscreen #screen-tabata {
+    min-height: 100dvh;
+  }
+  body.pseudo-fullscreen #view-runner {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (max-width: 640px) {
+    #view-runner {
+      gap: 6px;
+      padding: 6px;
+    }
+    .runner-top {
+      height: 46px;
+      gap: 6px;
+      padding: 0 8px;
+      border-radius: 16px;
+    }
+    .runner-top-center {
+      gap: 6px;
+    }
+    .brand-icon {
+      width: 22px;
+    }
+    .runner-title {
+      font-size: 13px;
+      max-width: 36vw;
+      letter-spacing: 0.35px;
+    }
+    .runner-total {
+      font-size: 11px;
+      padding: 3px 6px;
+    }
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      font-size: 13px;
+    }
+    .runner-main {
+      padding: 2px 6px;
+      border-radius: 18px;
+    }
+    .runner-watermark {
+      width: clamp(108px, 30vw, 180px);
+      max-width: 42vw;
+      opacity: 0.13;
+    }
+    .phase-label {
+      font-size: clamp(16px, 4.6vw, 24px);
+      margin-top: 0;
+      letter-spacing: 0.4px;
+    }
+    .time-big {
+      font-size: clamp(48px, 15vw, 88px);
+      line-height: 0.92;
+    }
+    .quote-strip {
+      min-height: 40px;
+      padding: 6px 10px;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      border-radius: 14px;
+      gap: 6px;
+    }
+    .runner-next {
+      height: 52px;
+      border-radius: 16px;
+      padding: 0 8px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.18);
+    }
+    #disp-next-core {
+      font-size: clamp(15px, 4.6vw, 20px);
+      letter-spacing: 0.2px;
+      text-align: center;
+    }
+    .runner-bottom {
+      height: 76px;
+      border-radius: 16px;
+    }
+    .stat-box {
+      min-width: 82px;
+      padding: 5px 6px;
+      border-radius: 12px;
+    }
+    .stat-value {
+      font-size: clamp(20px, 5.6vw, 28px);
+      line-height: 0.95;
+    }
+    .stat-label {
+      font-size: 8px;
+      letter-spacing: 0.5px;
+    }
+    .btn-play-round {
+      width: 46px;
+      height: 46px;
+      font-size: 17px;
+      box-shadow:
+        0 10px 18px rgba(0,0,0,0.26),
+        0 0 0 4px rgba(13,107,60,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.14);
+    }
+    .tab-bar {
+      height: 56px;
+      border-radius: 14px;
+      margin:
+        0
+        6px
+        calc(6px + env(safe-area-inset-bottom, 0px))
+        6px;
+    }
+    .tab-icon {
+      font-size: 17px;
+      margin-bottom: 2px;
+    }
+    .tab-label {
+      font-size: 9px;
+    }
+
+    .nav-header {
+      height: 38px;
+      padding: 0 8px;
+    }
+    .nav-btn {
+      font-size: 13px;
+    }
+    .btn-center {
+      font-size: 15px;
+    }
+    .section-title {
+      padding: 12px 12px 6px 12px;
+    }
+    .list-item {
+      min-height: 54px;
+      padding: 8px 12px;
+    }
+    .item-title {
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .item-sub {
+      font-size: 9px;
+    }
+    .input-display {
+      width: 58px;
+      font-size: 16px;
+    }
+    .bottom-action-area {
+      padding: 18px 12px;
+    }
+    .saved-section {
+      padding: 0 12px 18px 12px;
+    }
+    .saved-item {
+      padding: 10px 12px;
+    }
+    .saved-name {
+      font-size: 14px;
+    }
+    .saved-meta {
+      font-size: 10px;
+    }
+
+    .sw-header {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .sw-header .sw-btn {
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+    }
+    .sw-phase {
+      padding: 8px 10px 4px 10px;
+      font-size: 12px;
+      letter-spacing: 0.8px;
+    }
+    .sw-time-main {
+      font-size: clamp(64px, 18vw, 104px);
+      padding: 2px 8px 10px 8px;
+      line-height: 0.88;
+    }
+    .sw-lap {
+      padding: 6px 8px 10px 8px;
+    }
+    .sw-lap-label {
+      font-size: 12px;
+    }
+    .sw-lap-time {
+      font-size: clamp(34px, 10vw, 54px);
+    }
+    .sw-actions {
+      gap: 8px;
+      padding: 6px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 12px;
+    }
+    .sw-play {
+      width: 58px;
+      height: 58px;
+      font-size: 22px;
+      border-width: 2px;
+    }
+    .sw-start-label {
+      font-size: 12px;
+      letter-spacing: 0.7px;
+    }
+
+    .settings-wrap {
+      padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    }
+    .settings-header {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .settings-btn {
+      font-size: 12px;
+    }
+    .settings-section-title {
+      font-size: 11px;
+      padding: 10px 12px 4px 12px;
+    }
+    .settings-item {
+      padding: 10px 12px;
+    }
+    .settings-item.col {
+      gap: 8px;
+    }
+    .settings-label {
+      font-size: 12px;
+    }
+    .settings-sub {
+      font-size: 10px;
+      letter-spacing: 0.35px;
+    }
+    .settings-value {
+      font-size: 12px;
+    }
+    .settings-input {
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 9px;
+    }
+    .settings-actions {
+      padding: 10px 12px;
+      gap: 8px;
+    }
+    .settings-action-btn {
+      padding: 8px 10px;
+      font-size: 12px;
+      flex: 1 1 120px;
+      border-radius: 9px;
+    }
+    .sync-status {
+      margin: 0 12px 10px 12px;
+      padding: 8px 10px;
+      font-size: 11px;
+      border-radius: 9px;
+    }
+    .settings-note {
+      padding: 0 12px 10px 12px;
+      font-size: 10px;
+    }
+    .install-choice-row {
+      gap: 8px;
+      padding: 10px 12px;
+    }
+    .install-choice-btn {
+      padding: 10px 8px;
+      font-size: 12px;
+    }
+    .install-guide-card {
+      margin: 0 12px 10px 12px;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .history-item {
+      padding: 8px 10px;
+    }
+    .history-title {
+      font-size: 12px;
+    }
+    .history-meta {
+      font-size: 10px;
+    }
+    .branding-pack-row {
+      gap: 8px;
+    }
+    .branding-pack-btn {
+      min-height: 46px;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+    .branding-pack-name {
+      font-size: 12px;
+    }
+    .branding-pack-sub {
+      font-size: 10px;
+      margin-top: 2px;
+    }
+    .branding-color-row {
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+    .branding-color-label {
+      font-size: 12px;
+    }
+    .branding-color-input {
+      width: 38px;
+      height: 28px;
+    }
+    .branding-upload-card {
+      padding: 10px;
+      border-radius: 10px;
+      gap: 6px;
+    }
+    .branding-upload-title {
+      font-size: 12px;
+    }
+    .branding-upload-pill {
+      font-size: 9px;
+      padding: 2px 6px;
+    }
+    .branding-file-input {
+      font-size: 11px;
+    }
+    .branding-file-input::file-selector-button {
+      padding: 6px 8px;
+      margin-right: 8px;
+      font-size: 11px;
+    }
+    .branding-help {
+      margin: 0 12px 10px 12px;
+      font-size: 10px;
+    }
+  }
+
+  @media (min-width: 641px) and (max-width: 1024px) {
+    #view-runner {
+      padding: 8px;
+      gap: 8px;
+    }
+    .runner-top {
+      height: clamp(46px, 7vh, 64px);
+      padding: 0 10px;
+      border-radius: 18px;
+    }
+    .runner-title {
+      max-width: 34vw;
+      font-size: clamp(13px, 2.2vw, 18px);
+    }
+    .icon-btn {
+      width: clamp(30px, 4.8vw, 40px);
+      height: clamp(30px, 4.8vw, 40px);
+      font-size: clamp(13px, 2.2vw, 17px);
+    }
+    .phase-label {
+      font-size: clamp(18px, 3.6vw, 30px);
+    }
+    .time-big {
+      font-size: clamp(58px, 12vw, 108px);
+    }
+    .quote-strip {
+      min-height: 46px;
+      padding: 8px 12px;
+      font-size: clamp(12px, 1.8vw, 15px);
+      border-radius: 16px;
+    }
+    .runner-next {
+      height: clamp(54px, 8vh, 74px);
+      border-radius: 18px;
+    }
+    #disp-next-core {
+      font-size: clamp(16px, 2.8vw, 24px);
+    }
+    .runner-bottom {
+      height: clamp(78px, 11vh, 104px);
+      border-radius: 18px;
+    }
+    .stat-box {
+      min-width: 92px;
+      padding: 6px 8px;
+    }
+    .stat-value {
+      font-size: clamp(22px, 4vw, 34px);
+    }
+    .stat-label {
+      font-size: clamp(8px, 1.4vw, 11px);
+    }
+    .btn-play-round {
+      width: clamp(46px, 7vw, 62px);
+      height: clamp(46px, 7vw, 62px);
+      font-size: clamp(16px, 2.4vw, 22px);
+    }
+    .tab-bar {
+      height: 58px;
+      border-radius: 16px;
+      margin:
+        0
+        8px
+        calc(8px + env(safe-area-inset-bottom, 0px))
+        8px;
+    }
+    .tab-icon { font-size: 18px; margin-bottom: 2px; }
+    .tab-label { font-size: 9px; }
+    .sw-time-main {
+      font-size: clamp(74px, 14vw, 132px);
+    }
+    .sw-lap-time {
+      font-size: clamp(40px, 8vw, 68px);
+    }
+    .sw-play {
+      width: clamp(62px, 10vw, 84px);
+      height: clamp(62px, 10vw, 84px);
+      font-size: clamp(22px, 3.4vw, 30px);
+    }
+    .settings-header {
+      padding: 10px 14px;
+      font-size: 15px;
+    }
+    .settings-item {
+      padding: 10px 14px;
+    }
+    .settings-actions {
+      padding: 10px 14px;
+    }
+    .sync-status {
+      margin-left: 14px;
+      margin-right: 14px;
+    }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .icon-btn,
@@ -4350,6 +4789,7 @@
 
     document.getElementById('disp-total').innerText = formatTime(totalSeconds());
     updateCoachCue();
+    updateFullscreenButtonUI();
   }
 
   function updatePlayButton() {
@@ -4387,6 +4827,9 @@
 
   function switchTab(name) {
     const screens = ['tabata','rounds','stopwatch','more'];
+    if (name !== 'tabata' && document.body.classList.contains('pseudo-fullscreen')) {
+      document.body.classList.remove('pseudo-fullscreen');
+    }
     screens.forEach((s) => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.style.display = s === name ? 'flex' : 'none';
@@ -4408,6 +4851,8 @@
       // pause stopwatch when leaving
       if (swRunning) swToggle();
     }
+
+    updateFullscreenButtonUI();
   }
 
   loadSettings();
@@ -4731,16 +5176,103 @@
     }
   }
 
-  function toggleFullscreen() {
-    const elem = document.documentElement;
-    if (!document.fullscreenElement) {
-      if (elem.requestFullscreen) elem.requestFullscreen();
-      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    }
+  function getNativeFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
   }
+
+  function hasNativeFullscreenSupport() {
+    const elem = document.documentElement;
+    return Boolean(
+      elem &&
+      (elem.requestFullscreen || elem.webkitRequestFullscreen)
+    );
+  }
+
+  function isPseudoFullscreenActive() {
+    return document.body.classList.contains('pseudo-fullscreen');
+  }
+
+  function setPseudoFullscreen(active) {
+    document.body.classList.toggle('pseudo-fullscreen', !!active);
+    updateFullscreenButtonUI();
+  }
+
+  function isFullscreenModeActive() {
+    return Boolean(getNativeFullscreenElement()) || isPseudoFullscreenActive();
+  }
+
+  function updateFullscreenButtonUI() {
+    const btn = document.getElementById('btn-fullscreen');
+    if (!btn) return;
+    const active = isFullscreenModeActive();
+    btn.classList.toggle('active', active);
+    btn.innerHTML = active ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-expand"></i>';
+    const label = active ? 'Exit Fullscreen / Focus Mode' : 'Fullscreen / Focus Mode';
+    btn.setAttribute('aria-label', label);
+    btn.title = isIOSDevice()
+      ? (active ? 'Exit Focus Mode' : 'Enter Focus Mode')
+      : (active ? 'Exit Fullscreen' : 'Enter Fullscreen');
+  }
+
+  async function requestNativeFullscreen(elem) {
+    if (!elem) throw new Error('No element for fullscreen');
+    if (elem.requestFullscreen) {
+      return elem.requestFullscreen();
+    }
+    if (elem.webkitRequestFullscreen) {
+      return elem.webkitRequestFullscreen();
+    }
+    throw new Error('Fullscreen API not supported');
+  }
+
+  async function exitNativeFullscreen() {
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    return undefined;
+  }
+
+  async function toggleFullscreen() {
+    const root = document.documentElement;
+
+    if (getNativeFullscreenElement()) {
+      try {
+        await exitNativeFullscreen();
+      } catch (err) {
+        console.warn('Exit fullscreen failed:', err);
+      } finally {
+        updateFullscreenButtonUI();
+      }
+      return;
+    }
+
+    if (isPseudoFullscreenActive()) {
+      setPseudoFullscreen(false);
+      return;
+    }
+
+    const preferPseudoMode = isIOSDevice();
+    if (preferPseudoMode || !hasNativeFullscreenSupport()) {
+      setPseudoFullscreen(true);
+      return;
+    }
+
+    try {
+      await requestNativeFullscreen(root);
+    } catch (err) {
+      console.warn('Native fullscreen unavailable, using focus mode fallback:', err);
+      setPseudoFullscreen(true);
+      return;
+    }
+    updateFullscreenButtonUI();
+  }
+
+  document.addEventListener('fullscreenchange', updateFullscreenButtonUI);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenButtonUI);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isPseudoFullscreenActive()) {
+      setPseudoFullscreen(false);
+    }
+  });
 
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
