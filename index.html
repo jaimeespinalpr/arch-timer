@@ -887,6 +887,111 @@
     padding: 4px 0 0 0;
     text-align: left;
   }
+  .branding-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .branding-color-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #131313;
+    border: 1px solid #232323;
+  }
+  .branding-color-label {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+    color: #f0f0f0;
+  }
+  .branding-color-chip {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .branding-color-input {
+    width: 44px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #2f2f2f;
+    border-radius: 8px;
+    background: #101010;
+    cursor: pointer;
+  }
+  .branding-upload-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .branding-upload-card {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #232323;
+    background: #131313;
+    display: grid;
+    gap: 8px;
+  }
+  .branding-upload-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .branding-upload-title {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+    color: #f0f0f0;
+  }
+  .branding-upload-pill {
+    font-size: 10px;
+    color: #d8d8d8;
+    border: 1px solid #2e2e2e;
+    border-radius: 999px;
+    padding: 2px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .branding-file-input {
+    width: 100%;
+    color: #d8d8d8;
+    font-size: 12px;
+  }
+  .branding-file-input::file-selector-button {
+    border-radius: 8px;
+    border: 1px solid #2d2d2d;
+    background: #181818;
+    color: #fff;
+    padding: 8px 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .branding-help {
+    margin: 0 16px 14px 16px;
+    color: #8d8d8d;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  @media (min-width: 700px) {
+    .branding-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .branding-upload-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
 
   /* Picker modal */
   .picker-overlay {
@@ -1179,8 +1284,11 @@
 
     <div class="editor-brand">
       <img
+        id="brand-logo-full"
         src="assets/logo-full.png"
         alt="Archmere Auks"
+        data-default-src="assets/logo-full.png"
+        data-fallback-src="assets/archmere-auks-greeniii-original.png"
         onerror="this.onerror=null;this.src='assets/archmere-auks-greeniii-original.png';"
       >
     </div>
@@ -1306,9 +1414,12 @@
 
       <div class="runner-top-center">
         <img
+          id="brand-logo-mark"
           class="brand-icon"
           src="assets/logo-mark.png"
           alt="Archmere Auks"
+          data-default-src="assets/logo-mark.png"
+          data-fallback-src="assets/archmere-a-auks-green-original.png"
           onerror="this.onerror=null;this.src='assets/archmere-a-auks-green-original.png';"
         >
         <div class="runner-title" id="runner-title">WORKOUT</div>
@@ -1327,9 +1438,12 @@
 
     <div class="runner-main" id="runner-main">
       <img
+        id="brand-watermark"
         class="runner-watermark"
         src="assets/watermark.png"
         alt="Auks Old School"
+        data-default-src="assets/watermark.png"
+        data-fallback-src="assets/auks-old-school2.png"
         onerror="this.onerror=null;this.src='assets/auks-old-school2.png';"
       >
       <div class="phase-label" id="disp-phase">PREPARE</div>
@@ -1763,6 +1877,112 @@
           Usa el mismo Supabase URL + anon key + sync code en otro dispositivo y toca "Sync Now" para traer los workouts.
         </div>
       </div>
+
+      <div class="settings-section-title">Branding (Account)</div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Custom Colors + Logos</div>
+            <div class="settings-sub">Personaliza el reloj para tu escuela o club y sincroniza por usuario</div>
+          </div>
+          <div class="settings-value" id="branding-account-state">Local only</div>
+        </div>
+
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Theme Colors</div>
+            <div class="settings-sub">Colores de interfaz y fases del timer</div>
+          </div>
+          <div class="branding-grid">
+            <label class="branding-color-row">
+              <span class="branding-color-label">Primary Green</span>
+              <span class="branding-color-chip" id="brand-chip-primary"></span>
+              <input class="branding-color-input" id="brand-color-primary" type="color" oninput="updateBrandingColor('primary', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Gold Accent</span>
+              <span class="branding-color-chip" id="brand-chip-gold"></span>
+              <input class="branding-color-input" id="brand-color-gold" type="color" oninput="updateBrandingColor('gold', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Slate</span>
+              <span class="branding-color-chip" id="brand-chip-slate"></span>
+              <input class="branding-color-input" id="brand-color-slate" type="color" oninput="updateBrandingColor('slate', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Navy</span>
+              <span class="branding-color-chip" id="brand-chip-navy"></span>
+              <input class="branding-color-input" id="brand-color-navy" type="color" oninput="updateBrandingColor('navy', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Prepare Phase</span>
+              <span class="branding-color-chip" id="brand-chip-ready"></span>
+              <input class="branding-color-input" id="brand-color-ready" type="color" oninput="updateBrandingColor('ready', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Work Phase</span>
+              <span class="branding-color-chip" id="brand-chip-work"></span>
+              <input class="branding-color-input" id="brand-color-work" type="color" oninput="updateBrandingColor('work', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Rest Phase</span>
+              <span class="branding-color-chip" id="brand-chip-rest"></span>
+              <input class="branding-color-input" id="brand-color-rest" type="color" oninput="updateBrandingColor('rest', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Cycle Rest</span>
+              <span class="branding-color-chip" id="brand-chip-cycleRest"></span>
+              <input class="branding-color-input" id="brand-color-cycleRest" type="color" oninput="updateBrandingColor('cycleRest', this.value)">
+            </label>
+            <label class="branding-color-row">
+              <span class="branding-color-label">Cooldown Phase</span>
+              <span class="branding-color-chip" id="brand-chip-cooldown"></span>
+              <input class="branding-color-input" id="brand-color-cooldown" type="color" oninput="updateBrandingColor('cooldown', this.value)">
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Upload Your Logos</div>
+            <div class="settings-sub">iPhone/Android: usa Photos o Files. Se guardan en la nube (Supabase Storage)</div>
+          </div>
+          <div class="branding-upload-grid">
+            <div class="branding-upload-card">
+              <div class="branding-upload-top">
+                <div class="branding-upload-title">Logo Full</div>
+                <div class="branding-upload-pill" id="brand-file-full-state">Default</div>
+              </div>
+              <input id="brand-upload-full" class="branding-file-input" type="file" accept="image/*" onchange="queueBrandingFile('full', this.files && this.files[0])">
+            </div>
+            <div class="branding-upload-card">
+              <div class="branding-upload-top">
+                <div class="branding-upload-title">Logo Mark</div>
+                <div class="branding-upload-pill" id="brand-file-mark-state">Default</div>
+              </div>
+              <input id="brand-upload-mark" class="branding-file-input" type="file" accept="image/*" onchange="queueBrandingFile('mark', this.files && this.files[0])">
+            </div>
+            <div class="branding-upload-card">
+              <div class="branding-upload-top">
+                <div class="branding-upload-title">Watermark</div>
+                <div class="branding-upload-pill" id="brand-file-watermark-state">Default</div>
+              </div>
+              <input id="brand-upload-watermark" class="branding-file-input" type="file" accept="image/*" onchange="queueBrandingFile('watermark', this.files && this.files[0])">
+            </div>
+          </div>
+        </div>
+
+        <div class="sync-status warn" id="branding-status">Log in and configure Supabase to upload logos and sync branding across devices.</div>
+
+        <div class="settings-actions">
+          <button type="button" class="settings-action-btn primary" id="btn-branding-save" onclick="saveBrandingProfile()">Save Branding</button>
+          <button type="button" class="settings-action-btn secondary" onclick="resetBrandingProfile()">Reset Branding</button>
+        </div>
+
+        <div class="branding-help">
+          Option 2 (cloud): las fotos se guardan en Supabase Storage en un bucket publico para branding del usuario. No se guardan en la carpeta local <code>assets/</code> del proyecto.
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1867,7 +2087,10 @@
     cloudManualSyncCodeBackup: '',
     accountUsername: '',
     accountUsernameDraft: '',
-    accountLoggedIn: false
+    accountLoggedIn: false,
+    brandingColors: {},
+    brandingLogos: {},
+    brandingUpdatedAt: ''
   };
 
   const PHASE_COLORS = {
@@ -1876,6 +2099,18 @@
     REST: '#2a353d',       // Auk slate
     CYCLE_REST: '#c8a842', // Beak gold
     COOLDOWN: '#183543'    // Auk navy
+  };
+  const DEFAULT_BRANDING_COLORS = {
+    primary: '#0d6b3c',
+    gold: '#c8a842',
+    slate: '#2a353d',
+    navy: '#183543',
+    white: '#f3f6f0',
+    ready: PHASE_COLORS.READY,
+    work: PHASE_COLORS.WORK,
+    rest: PHASE_COLORS.REST,
+    cycleRest: PHASE_COLORS.CYCLE_REST,
+    cooldown: PHASE_COLORS.COOLDOWN
   };
 
   let phaseColors = { ...PHASE_COLORS };
@@ -1889,12 +2124,15 @@
   const DEVICE_ID_KEY = 'archmere_device_id_v1';
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
   const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
+  const BRANDING_BUCKET = 'arch-timer-branding';
   const ACCOUNT_SYNC_PREFIX = 'acct_v1_';
   let presets = [];
   let roundsPresets = [];
   let workoutLog = [];
   let cloudSyncBusy = false;
   let accountAuthBusy = false;
+  let brandingBusy = false;
+  let brandingPendingFiles = { full: null, mark: null, watermark: null };
   let deferredInstallPrompt = null;
   let installTarget = null;
 
@@ -1940,6 +2178,275 @@
     return 'ios';
   }
 
+  function sanitizeHexColor(value, fallback) {
+    const raw = String(value || '').trim();
+    if (/^#[0-9a-f]{6}$/i.test(raw)) return raw.toLowerCase();
+    if (/^#[0-9a-f]{3}$/i.test(raw)) {
+      const c = raw.slice(1).toLowerCase();
+      return `#${c[0]}${c[0]}${c[1]}${c[1]}${c[2]}${c[2]}`;
+    }
+    return fallback;
+  }
+
+  function hexToRgb(hex) {
+    const safe = sanitizeHexColor(hex, '#000000');
+    return {
+      r: parseInt(safe.slice(1, 3), 16),
+      g: parseInt(safe.slice(3, 5), 16),
+      b: parseInt(safe.slice(5, 7), 16)
+    };
+  }
+
+  function rgbToHex(r, g, b) {
+    const clamp = (n) => Math.max(0, Math.min(255, Math.round(Number(n) || 0)));
+    return `#${[clamp(r), clamp(g), clamp(b)].map((n) => n.toString(16).padStart(2, '0')).join('')}`;
+  }
+
+  function mixHex(a, b, ratio=0.5) {
+    const aa = hexToRgb(a);
+    const bb = hexToRgb(b);
+    const t = Math.max(0, Math.min(1, Number(ratio) || 0));
+    return rgbToHex(
+      aa.r + (bb.r - aa.r) * t,
+      aa.g + (bb.g - aa.g) * t,
+      aa.b + (bb.b - aa.b) * t
+    );
+  }
+
+  function darkenHex(hex, ratio=0.28) {
+    return mixHex(hex, '#000000', Math.max(0, Math.min(1, ratio)));
+  }
+
+  function normalizeBrandingColors(colors) {
+    const src = (colors && typeof colors === 'object') ? colors : {};
+    return {
+      primary: sanitizeHexColor(src.primary, DEFAULT_BRANDING_COLORS.primary),
+      gold: sanitizeHexColor(src.gold, DEFAULT_BRANDING_COLORS.gold),
+      slate: sanitizeHexColor(src.slate, DEFAULT_BRANDING_COLORS.slate),
+      navy: sanitizeHexColor(src.navy, DEFAULT_BRANDING_COLORS.navy),
+      white: sanitizeHexColor(src.white, DEFAULT_BRANDING_COLORS.white),
+      ready: sanitizeHexColor(src.ready, DEFAULT_BRANDING_COLORS.ready),
+      work: sanitizeHexColor(src.work, DEFAULT_BRANDING_COLORS.work),
+      rest: sanitizeHexColor(src.rest, DEFAULT_BRANDING_COLORS.rest),
+      cycleRest: sanitizeHexColor(src.cycleRest, DEFAULT_BRANDING_COLORS.cycleRest),
+      cooldown: sanitizeHexColor(src.cooldown, DEFAULT_BRANDING_COLORS.cooldown)
+    };
+  }
+
+  function normalizeBrandingLogos(logos) {
+    const src = (logos && typeof logos === 'object') ? logos : {};
+    const clean = (v) => String(v || '').trim();
+    return {
+      full: clean(src.full),
+      mark: clean(src.mark),
+      watermark: clean(src.watermark)
+    };
+  }
+
+  function ensureBrandingSettingsShape() {
+    settings.brandingColors = normalizeBrandingColors(settings.brandingColors);
+    settings.brandingLogos = normalizeBrandingLogos(settings.brandingLogos);
+    settings.brandingUpdatedAt = String(settings.brandingUpdatedAt || '').trim();
+    phaseColors = {
+      READY: settings.brandingColors.ready,
+      WORK: settings.brandingColors.work,
+      REST: settings.brandingColors.rest,
+      CYCLE_REST: settings.brandingColors.cycleRest,
+      COOLDOWN: settings.brandingColors.cooldown
+    };
+  }
+
+  function syncBrandingColorsFromPhasePalette() {
+    settings.brandingColors = normalizeBrandingColors({
+      ...(settings.brandingColors || {}),
+      ready: phaseColors.READY,
+      work: phaseColors.WORK,
+      rest: phaseColors.REST,
+      cycleRest: phaseColors.CYCLE_REST,
+      cooldown: phaseColors.COOLDOWN
+    });
+  }
+
+  function appendCacheStamp(url, stamp) {
+    const raw = String(url || '').trim();
+    if (!raw) return '';
+    const token = encodeURIComponent(String(stamp || '').trim() || Date.now());
+    return raw.includes('?') ? `${raw}&v=${token}` : `${raw}?v=${token}`;
+  }
+
+  function setMetaThemeColor(color) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', color);
+  }
+
+  function applyBrandingTheme() {
+    ensureBrandingSettingsShape();
+    const c = settings.brandingColors;
+    const root = document.documentElement;
+    root.style.setProperty('--arch-green', c.primary);
+    root.style.setProperty('--arch-green-deep', darkenHex(c.primary, 0.34));
+    root.style.setProperty('--arch-white', c.white);
+    root.style.setProperty('--arch-gold', c.gold);
+    root.style.setProperty('--auk-slate', c.slate);
+    root.style.setProperty('--auk-navy', c.navy);
+    root.style.setProperty('--auk-mist', mixHex(c.white, c.slate, 0.22));
+    root.style.setProperty('--dot-green', c.work);
+    root.style.setProperty('--dot-red', c.rest);
+    root.style.setProperty('--dot-yellow', c.cycleRest);
+    root.style.setProperty('--dot-blue', c.cooldown);
+    setMetaThemeColor(c.primary);
+    phaseColors = {
+      READY: c.ready,
+      WORK: c.work,
+      REST: c.rest,
+      CYCLE_REST: c.cycleRest,
+      COOLDOWN: c.cooldown
+    };
+  }
+
+  function applyBrandingImages() {
+    const logos = normalizeBrandingLogos(settings.brandingLogos);
+    const stamp = settings.brandingUpdatedAt || '';
+    const targets = [
+      { id: 'brand-logo-full', url: logos.full },
+      { id: 'brand-logo-mark', url: logos.mark },
+      { id: 'brand-watermark', url: logos.watermark }
+    ];
+
+    targets.forEach(({ id, url }) => {
+      const img = document.getElementById(id);
+      if (!img) return;
+      const desired = url ? appendCacheStamp(url, stamp) : (img.dataset.defaultSrc || img.getAttribute('src') || '');
+      if (desired && img.getAttribute('src') !== desired) {
+        img.src = desired;
+      }
+    });
+  }
+
+  function setBrandingStatus(message, tone='warn') {
+    const el = document.getElementById('branding-status');
+    if (!el) return;
+    el.className = `sync-status ${tone}`;
+    el.innerText = message;
+  }
+
+  function refreshBrandingStatusHint() {
+    if (brandingBusy) return;
+    if (!(settings.accountLoggedIn && settings.accountUsername)) {
+      setBrandingStatus('Log in first to save branding to your account and use it on other devices.', 'warn');
+      return;
+    }
+    if (!hasCloudBaseConfig()) {
+      setBrandingStatus('Logged in. Add Supabase URL and anon key to upload logos and sync branding.', 'warn');
+      return;
+    }
+
+    const pending = Object.values(brandingPendingFiles).filter(Boolean).length;
+    if (pending) {
+      setBrandingStatus(`${pending} logo file(s) selected. Tap "Save Branding" to upload and sync.`, 'ok');
+      return;
+    }
+
+    if (settings.brandingUpdatedAt) {
+      setBrandingStatus(`Branding ready. Last saved: ${formatDateTime(settings.brandingUpdatedAt)}.`, 'ok');
+    } else {
+      setBrandingStatus('Branding controls ready. Pick colors or upload logos, then tap "Save Branding".', 'ok');
+    }
+  }
+
+  function setBrandingBusy(isBusy) {
+    brandingBusy = Boolean(isBusy);
+    const btn = document.getElementById('btn-branding-save');
+    if (btn) btn.disabled = brandingBusy;
+  }
+
+  function brandFileStateLabel(slot) {
+    const pending = brandingPendingFiles[slot];
+    if (pending) return 'Selected';
+    const url = settings.brandingLogos && settings.brandingLogos[slot];
+    return url ? 'Custom' : 'Default';
+  }
+
+  function refreshBrandingInputsUI() {
+    const c = normalizeBrandingColors(settings.brandingColors);
+    const colorKeys = ['primary','gold','slate','navy','ready','work','rest','cycleRest','cooldown'];
+    colorKeys.forEach((key) => {
+      const input = document.getElementById(`brand-color-${key}`);
+      const chip = document.getElementById(`brand-chip-${key}`);
+      if (input && input.value !== c[key]) input.value = c[key];
+      if (chip) chip.style.background = c[key];
+    });
+
+    const setText = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = text;
+    };
+    setText('brand-file-full-state', brandFileStateLabel('full'));
+    setText('brand-file-mark-state', brandFileStateLabel('mark'));
+    setText('brand-file-watermark-state', brandFileStateLabel('watermark'));
+
+    const acctState = document.getElementById('branding-account-state');
+    if (acctState) {
+      acctState.innerText = settings.accountLoggedIn && settings.accountUsername ? `@${settings.accountUsername}` : 'Local only';
+    }
+  }
+
+  function updateBrandingColor(key, value) {
+    settings.brandingColors = normalizeBrandingColors({
+      ...(settings.brandingColors || {}),
+      [key]: value
+    });
+    settings.brandingUpdatedAt = new Date().toISOString();
+    ensureBrandingSettingsShape();
+    applyBrandingTheme();
+    applyBrandingImages();
+    if (typeof updateUI === 'function') updateUI();
+    persistSettings();
+    refreshBrandingInputsUI();
+    refreshBrandingStatusHint();
+  }
+
+  function queueBrandingFile(slot, file) {
+    if (!['full','mark','watermark'].includes(slot)) return;
+    brandingPendingFiles[slot] = file || null;
+    refreshBrandingInputsUI();
+    refreshBrandingStatusHint();
+  }
+
+  function buildBrandingPayload() {
+    ensureBrandingSettingsShape();
+    return {
+      version: 1,
+      updatedAt: settings.brandingUpdatedAt || '',
+      colors: { ...settings.brandingColors },
+      logos: { ...settings.brandingLogos }
+    };
+  }
+
+  function applyBrandingPayload(payload, options={}) {
+    if (!payload || typeof payload !== 'object') return false;
+    const remoteTs = new Date(payload.updatedAt || 0).getTime() || 0;
+    const localTs = new Date(settings.brandingUpdatedAt || 0).getTime() || 0;
+    if (!options.force && remoteTs && localTs && remoteTs < localTs) return false;
+
+    settings.brandingColors = normalizeBrandingColors({
+      ...(settings.brandingColors || {}),
+      ...((payload.colors && typeof payload.colors === 'object') ? payload.colors : {})
+    });
+    settings.brandingLogos = normalizeBrandingLogos({
+      ...(settings.brandingLogos || {}),
+      ...((payload.logos && typeof payload.logos === 'object') ? payload.logos : {})
+    });
+    settings.brandingUpdatedAt = String(payload.updatedAt || settings.brandingUpdatedAt || '').trim();
+    ensureBrandingSettingsShape();
+    persistSettings();
+    applyBrandingTheme();
+    applyBrandingImages();
+    refreshBrandingInputsUI();
+    if (typeof updateUI === 'function') updateUI();
+    return true;
+  }
+
   function loadSettings() {
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
@@ -1955,6 +2462,9 @@
         settings.cloudSyncCode = accountCode;
       }
     } catch (e) { /* ignore */ }
+    ensureBrandingSettingsShape();
+    applyBrandingTheme();
+    applyBrandingImages();
   }
 
   function persistSettings() {
@@ -2326,7 +2836,9 @@
     settings.accountLoggedIn = false;
     settings.accountUsername = '';
     settings.accountUsernameDraft = '';
+    brandingPendingFiles = { full: null, mark: null, watermark: null };
     persistSettings();
+    clearBrandingFileInputs();
     clearAccountPinDraft();
     applySettingsToUI();
     setAccountAuthStatus('Logged out. You can still use manual sync code or log in again.', 'warn');
@@ -2513,6 +3025,7 @@
     return {
       version: 1,
       exportedAt: new Date().toISOString(),
+      branding: buildBrandingPayload(),
       presets: (Array.isArray(presets) ? presets : []).slice(0, 200),
       roundsPresets: (Array.isArray(roundsPresets) ? roundsPresets : []).slice(0, 200),
       workoutLog: (Array.isArray(workoutLog) ? workoutLog : []).slice(0, 300)
@@ -2523,6 +3036,12 @@
     if (!payload || typeof payload !== 'object') return false;
 
     let changed = false;
+
+    if (payload.branding && typeof payload.branding === 'object') {
+      if (applyBrandingPayload(payload.branding)) {
+        changed = true;
+      }
+    }
 
     if (Array.isArray(payload.presets)) {
       const mergedPresets = sortByIdDesc(mergeById(presets, payload.presets)).slice(0, 200);
@@ -2567,6 +3086,161 @@
     };
     if (includeJson) headers['Content-Type'] = 'application/json';
     return headers;
+  }
+
+  function encodeStoragePath(path) {
+    return String(path || '')
+      .split('/')
+      .filter(Boolean)
+      .map((part) => encodeURIComponent(part))
+      .join('/');
+  }
+
+  function inferImageExtension(file) {
+    const type = String(file?.type || '').toLowerCase();
+    if (type.includes('png')) return 'png';
+    if (type.includes('jpeg') || type.includes('jpg')) return 'jpg';
+    if (type.includes('webp')) return 'webp';
+    if (type.includes('gif')) return 'gif';
+    if (type.includes('svg')) return 'svg';
+    const name = String(file?.name || '');
+    const ext = name.split('.').pop()?.toLowerCase();
+    return /^[a-z0-9]{2,5}$/.test(ext || '') ? ext : 'png';
+  }
+
+  function clearBrandingFileInputs() {
+    ['full','mark','watermark'].forEach((slot) => {
+      const input = document.getElementById(`brand-upload-${slot}`);
+      if (input) input.value = '';
+    });
+  }
+
+  async function uploadBrandingAsset(slot, file) {
+    if (!file) return settings.brandingLogos?.[slot] || '';
+    if (!(settings.accountLoggedIn && settings.accountUsername)) {
+      throw new Error('Log in first to upload logos.');
+    }
+    if (!hasCloudBaseConfig()) {
+      throw new Error('Add Supabase URL and anon key before uploading logos.');
+    }
+
+    const baseUrl = normalizeSupabaseUrl(settings.cloudSupabaseUrl);
+    const username = normalizeAccountUsername(settings.accountUsername);
+    const ext = inferImageExtension(file);
+    const ts = Date.now();
+    const objectPath = `branding/${username}/${slot}-${ts}.${ext}`;
+    const encodedPath = encodeStoragePath(objectPath);
+    const uploadUrl = `${baseUrl}/storage/v1/object/${encodeURIComponent(BRANDING_BUCKET)}/${encodedPath}`;
+    const publicUrl = `${baseUrl}/storage/v1/object/public/${encodeURIComponent(BRANDING_BUCKET)}/${encodedPath}`;
+
+    const headers = cloudRequestHeaders(false);
+    headers['Content-Type'] = file.type || 'application/octet-stream';
+    headers['x-upsert'] = 'true';
+
+    const resp = await fetch(uploadUrl, {
+      method: 'POST',
+      headers,
+      body: file
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`Logo upload failed (${resp.status}) ${text.slice(0, 160)}`.trim());
+    }
+    return publicUrl;
+  }
+
+  async function saveBrandingProfile() {
+    if (brandingBusy) return;
+
+    ensureBrandingSettingsShape();
+    syncBrandingColorsFromPhasePalette();
+    persistSettings();
+    applyBrandingTheme();
+    applyBrandingImages();
+    refreshBrandingInputsUI();
+    if (typeof updateUI === 'function') updateUI();
+
+    const hasPendingUploads = Object.values(brandingPendingFiles).some(Boolean);
+    if (!(settings.accountLoggedIn && settings.accountUsername)) {
+      setBrandingStatus('Branding colors saved on this device. Log in to sync and upload logos.', hasPendingUploads ? 'warn' : 'ok');
+      return;
+    }
+
+    if (hasPendingUploads && !hasCloudBaseConfig()) {
+      setBrandingStatus('Add Supabase URL and anon key before uploading logos.', 'error');
+      return;
+    }
+
+    setBrandingBusy(true);
+    setBrandingStatus('Saving branding...', 'warn');
+
+    try {
+      settings.brandingLogos = normalizeBrandingLogos(settings.brandingLogos);
+
+      for (const slot of ['full','mark','watermark']) {
+        const file = brandingPendingFiles[slot];
+        if (!file) continue;
+        settings.brandingLogos[slot] = await uploadBrandingAsset(slot, file);
+      }
+
+      settings.brandingUpdatedAt = new Date().toISOString();
+      brandingPendingFiles = { full: null, mark: null, watermark: null };
+      clearBrandingFileInputs();
+
+      persistSettings();
+      applyBrandingTheme();
+      applyBrandingImages();
+      refreshBrandingInputsUI();
+      if (typeof updateUI === 'function') updateUI();
+
+      if (hasCloudSyncConfig()) {
+        await syncCloudNow({ silent: true });
+        setBrandingStatus('Branding saved and synced to your account. Open on another device and tap Sync Now.', 'ok');
+      } else if (hasCloudBaseConfig()) {
+        setBrandingStatus('Branding saved locally. Cloud sync code missing (account sync code should fill automatically after login).', 'warn');
+      } else {
+        setBrandingStatus('Branding colors saved locally. Add Supabase config to sync.', 'warn');
+      }
+    } catch (err) {
+      console.error(err);
+      setBrandingStatus(err?.message || 'Branding save failed.', 'error');
+    } finally {
+      setBrandingBusy(false);
+    }
+  }
+
+  async function resetBrandingProfile() {
+    if (!window.confirm('Reset colors and logos back to default branding?')) return;
+
+    settings.brandingColors = normalizeBrandingColors(DEFAULT_BRANDING_COLORS);
+    settings.brandingLogos = normalizeBrandingLogos({});
+    settings.brandingUpdatedAt = new Date().toISOString();
+    brandingPendingFiles = { full: null, mark: null, watermark: null };
+    clearBrandingFileInputs();
+
+    ensureBrandingSettingsShape();
+    persistSettings();
+    applyBrandingTheme();
+    applyBrandingImages();
+    refreshBrandingInputsUI();
+    if (typeof updateUI === 'function') updateUI();
+
+    if (settings.accountLoggedIn && hasCloudSyncConfig()) {
+      try {
+        setBrandingBusy(true);
+        setBrandingStatus('Resetting branding and syncing defaults...', 'warn');
+        await syncCloudNow({ silent: true });
+        setBrandingStatus('Branding reset to defaults and synced to your account.', 'ok');
+      } catch (err) {
+        console.error(err);
+        setBrandingStatus(err?.message || 'Branding reset saved locally, but sync failed.', 'error');
+      } finally {
+        setBrandingBusy(false);
+      }
+      return;
+    }
+
+    setBrandingStatus('Branding reset to defaults on this device.', 'ok');
   }
 
   async function fetchCloudPayload() {
@@ -2681,6 +3355,11 @@
     set('set-cloud-auto', settings.cloudAutoSync);
     set('account-auth-state', settings.accountLoggedIn && settings.accountUsername ? `@${settings.accountUsername}` : 'Logged out');
 
+    ensureBrandingSettingsShape();
+    applyBrandingTheme();
+    applyBrandingImages();
+    refreshBrandingInputsUI();
+
     const syncCodeInput = document.getElementById('set-cloud-code');
     if (syncCodeInput) {
       syncCodeInput.readOnly = !!settings.accountLoggedIn;
@@ -2689,9 +3368,12 @@
     }
 
     setAccountAuthBusy(accountAuthBusy);
+    setBrandingBusy(brandingBusy);
     refreshAccountAuthHint();
     refreshCloudStatusHint();
+    refreshBrandingStatusHint();
     updateInstallUI();
+    if (typeof updateUI === 'function') updateUI();
   }
 
   function ensureAudio() {
@@ -3672,6 +4354,11 @@
     config[pickerContext.field] = total;
     const phase = fieldToPhase(pickerContext.field);
     phaseColors[phase] = pickerContext.color || phaseColors[phase];
+    syncBrandingColorsFromPhasePalette();
+    settings.brandingUpdatedAt = new Date().toISOString();
+    applyBrandingTheme();
+    applyBrandingImages();
+    refreshBrandingInputsUI();
     applyConfigToInputs();
     updateRoundsView();
     updateUI();
