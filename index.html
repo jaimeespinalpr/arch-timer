@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Archmere Tabata Pro</title>
+<meta name="theme-color" content="#0f7d3b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arch Timer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -14,6 +20,8 @@
     --text-white: #ffffff;
     --text-gray: #8e8e93;
     --border-color: #2c2c2e;
+    --panel-edge: rgba(255,255,255,0.07);
+    --panel-shadow: 0 12px 30px rgba(0,0,0,0.28);
 
     --arch-green: #0f7d3b;
     --arch-gold: #f3c744;
@@ -28,22 +36,32 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 12px;
-    background: transparent;
-    color: #fff;
-    font-family: 'Comic Sans MS', 'Comic Neue', cursive, 'Oswald', sans-serif;
-    font-size: clamp(20px, 5vw, 32px);
-    letter-spacing: 0.4px;
-    text-transform: none;
+    gap: 10px;
+    min-height: clamp(52px, 8.8vh, 80px);
+    padding: 10px 14px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)),
+      linear-gradient(90deg, rgba(15,125,59,0.22), rgba(243,199,68,0.18));
+    color: #f8f8f8;
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(14px, 3.8vw, 20px);
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
     font-weight: 700;
     text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.45);
+    line-height: 1.15;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
-    background-color: var(--bg-dark);
+    background:
+      radial-gradient(circle at 20% -10%, rgba(243,199,68,0.12), transparent 40%),
+      radial-gradient(circle at 100% 10%, rgba(15,125,59,0.15), transparent 45%),
+      linear-gradient(180deg, #101112 0%, #0b0b0c 100%);
     color: var(--text-white);
     font-family: 'Roboto', sans-serif;
     margin: 0; padding: 0;
@@ -54,10 +72,12 @@
 
   .nav-header {
     height: 42px;
-    background-color: var(--bg-card);
+    background:
+      linear-gradient(180deg, rgba(28,28,30,0.98), rgba(17,17,18,0.98));
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 10px;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #111;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
     z-index: 50;
   }
   .nav-btn {
@@ -70,7 +90,10 @@
 
   #view-editor {
     flex: 1;
-    background-color: #000;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(15,125,59,0.10), transparent 35%),
+      radial-gradient(circle at 90% 0%, rgba(243,199,68,0.08), transparent 36%),
+      #060606;
     overflow-y: auto;
     display: none;
     flex-direction: column;
@@ -79,12 +102,12 @@
     display: flex;
     justify-content: center;
     padding: clamp(6px, 1.4vh, 12px) 12px clamp(3px, 0.6vh, 7px) 12px;
-    background: #000;
+    background: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.55));
   }
   .editor-brand img {
     width: clamp(120px, 38vw, 220px);
     height: auto;
-    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 8px 18px rgba(0,0,0,0.45));
   }
 
   .section-title {
@@ -99,18 +122,24 @@
 
   .options-list {
     display: flex; flex-direction: column;
-    background-color: var(--bg-dark);
+    background: rgba(19,19,20,0.92);
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .list-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 14px;
     border-bottom: 1px solid var(--border-color);
-    background: var(--bg-dark);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0)),
+      rgba(18,18,18,0.92);
     min-height: 60px;
+    transition: background-color 120ms ease, border-color 120ms ease;
   }
+  .list-item:hover { background-color: rgba(24,24,24,0.96); }
+  .list-item:active { background-color: rgba(32,32,32,0.96); }
   .list-item:last-child { border-bottom: none; }
 
   .item-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; }
@@ -132,7 +161,7 @@
     color: var(--text-white); margin-bottom: 4px;
   }
   .item-sub {
-    font-size: clamp(10px, 2vw, 12px); color: #666; font-weight: 600; text-transform: uppercase;
+    font-size: clamp(10px, 2vw, 12px); color: #7a7a7a; font-weight: 600; text-transform: uppercase;
   }
 
   .item-right { display: flex; align-items: center; gap: 10px; }
@@ -153,12 +182,20 @@
   .bottom-action-area { padding: 30px 20px; }
   .btn-pill-gray {
     width: 100%; padding: 13px;
-    background-color: #333; color: white;
-    border: none; border-radius: 12px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0)),
+      linear-gradient(90deg, #232323, #2f2f2f);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
     font-family: 'Oswald', sans-serif; font-size: clamp(13px, 3.4vw, 16px); font-weight: bold;
     text-transform: uppercase;
     display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: var(--panel-shadow);
+    cursor: pointer;
   }
+  .btn-pill-gray:hover { border-color: rgba(243,199,68,0.28); }
+  .btn-pill-gray:active { transform: translateY(1px); }
   .saved-section {
     padding: 0 16px 24px 16px;
   }
@@ -181,15 +218,20 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    background: #141414;
-    border: 1px solid #2a2a2a;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
+      #121212;
+    border: 1px solid #272727;
     border-radius: 12px;
     padding: 12px 14px;
     color: #fff;
     text-align: left;
     cursor: pointer;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    transition: border-color 120ms ease, transform 120ms ease;
   }
-  .saved-item:hover { border-color: #3a3a3a; }
+  .saved-item:hover { border-color: rgba(15,125,59,0.45); }
+  .saved-item:active { transform: translateY(1px); }
   .saved-name {
     font-family: 'Oswald', sans-serif;
     font-size: 16px;
@@ -217,13 +259,15 @@
 
   .runner-top {
     height: clamp(50px, 10vh, 76px);
-    background: var(--bar-dark);
+    background:
+      linear-gradient(180deg, rgba(45,45,46,0.98), rgba(31,31,31,0.98));
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 8px;
     padding: 0 clamp(8px, 2.8vw, 14px);
     border-bottom: 1px solid #1a1a1a;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.22);
   }
   .runner-top-center {
     display: grid;
@@ -264,14 +308,14 @@
     width: clamp(34px, 7vw, 48px); height: clamp(34px, 7vw, 48px);
     border-radius: 50%;
     border: none;
-    background: #1f1f1f;
+    background: linear-gradient(180deg, #262626, #171717);
     color: var(--arch-green);
     font-size: clamp(15px, 4vw, 20px);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
   }
   .btn-fullscreen {
-    background: #0d0d0d;
+    background: linear-gradient(180deg, #151515, #090909);
     color: #f3c744;
   }
   .btn-toggle-top { display: none; }
@@ -288,6 +332,16 @@
     position: relative;
     overflow: hidden;
   }
+  .runner-main::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 18%, rgba(255,255,255,0.12), transparent 40%),
+      radial-gradient(circle at 80% 85%, rgba(0,0,0,0.12), transparent 52%);
+    pointer-events: none;
+    z-index: 0;
+  }
   .runner-watermark {
     position: absolute;
     left: 50%;
@@ -296,7 +350,7 @@
     width: clamp(140px, 34vw, 360px);
     max-width: 46vw;
     height: auto;
-    opacity: 0.18;
+    opacity: 0.16;
     filter: saturate(1.05) drop-shadow(0 6px 12px rgba(0,0,0,0.25));
     pointer-events: none;
     z-index: 0;
@@ -324,7 +378,7 @@
 
   .runner-next {
     height: clamp(60px, 11vh, 110px);
-    background: #222;
+    background: linear-gradient(180deg, #232323, #1a1a1a);
     color: #fff;
     display: grid;
     grid-template-columns: 1fr;
@@ -332,7 +386,7 @@
     justify-items: center;
     text-transform: uppercase;
     font-family: 'Oswald', sans-serif;
-    border-top: 2px solid #000;
+    border-top: 1px solid rgba(255,255,255,0.04);
     padding: 0 clamp(10px, 3vw, 18px);
   }
   .next-label { display: none; }
@@ -343,7 +397,7 @@
 
   .runner-bottom {
     height: clamp(96px, 15vh, 140px);
-    background: #222;
+    background: linear-gradient(180deg, #222, #181818);
     display: flex; align-items: center; justify-content: space-around;
     color: #fff;
   }
@@ -377,7 +431,7 @@
 
   .tab-screen { display: none; flex: 1; flex-direction: column; }
   .tab-bar {
-    height: 60px; background-color: #000;
+    height: 60px; background: linear-gradient(180deg, #090909, #000);
     display: flex; border-top: 1px solid #222;
   }
   .tab-item {
@@ -386,6 +440,7 @@
     color: #555; background: none; border: none; cursor: pointer;
   }
   .tab-item.active { color: var(--text-white); }
+  .tab-item.active .tab-icon { color: var(--arch-gold); }
   .tab-icon { font-size: 20px; margin-bottom: 4px; }
   .tab-label { font-size: 10px; font-weight: 500; }
 
@@ -667,7 +722,11 @@
     </div>
 
     <div class="editor-brand">
-      <img src="assets/archmere-auks-greeniii-original.png" alt="Archmere Auks">
+      <img
+        src="assets/logo-full.png"
+        alt="Archmere Auks"
+        onerror="this.onerror=null;this.src='assets/archmere-auks-greeniii-original.png';"
+      >
     </div>
 
     <div class="section-title">Intervals</div>
@@ -729,7 +788,7 @@
         </div>
       </div>
 
-      <div class="list-item" onclick="openPicker('cycleRest')">
+      <div class="list-item" onclick="editField('cycles','int')">
         <div class="item-left">
           <div class="dot d-yellow"></div>
           <div class="text-group">
@@ -738,7 +797,7 @@
           </div>
         </div>
         <div class="item-right">
-          <input type="number" id="inp-cycles" class="input-display" value="2" min="1">
+          <input type="number" id="inp-cycles" class="input-display" value="2" min="1" readonly>
           <i class="fa fa-chevron-right chevron"></i>
         </div>
       </div>
@@ -790,7 +849,12 @@
       <button class="icon-btn" onclick="openEditor()" aria-label="Settings"><i class="fa-solid fa-gear"></i></button>
 
       <div class="runner-top-center">
-        <img class="brand-icon" src="assets/archmere-a-auks-green-original.png" alt="Archmere Auks">
+        <img
+          class="brand-icon"
+          src="assets/logo-mark.png"
+          alt="Archmere Auks"
+          onerror="this.onerror=null;this.src='assets/archmere-a-auks-green-original.png';"
+        >
         <div class="runner-title" id="runner-title">WORKOUT</div>
         <div class="runner-total" id="disp-total">00:00</div>
       </div>
@@ -806,7 +870,12 @@
     </div>
 
     <div class="runner-main" id="runner-main">
-      <img class="runner-watermark" src="assets/auks-old-school2.png" alt="Auks Old School">
+      <img
+        class="runner-watermark"
+        src="assets/watermark.png"
+        alt="Auks Old School"
+        onerror="this.onerror=null;this.src='assets/auks-old-school2.png';"
+      >
       <div class="phase-label" id="disp-phase">PREPARE</div>
       <div class="time-big" id="disp-time">00:00</div>
     </div>
@@ -1145,6 +1214,14 @@
     'Censor','Boxing Bell','Gym Whistle','Digital Beep','Wood Block',
     'Cowbell','Claves','Click','Ping','Buzzer','Ride Cymbal','Clap'
   ];
+  const COACH_CUES = {
+    READY: 'SET YOUR STANCE. OWN THE FIRST REP.',
+    WORK: 'DRIVE THROUGH THE WORK. CLEAN REPS ONLY.',
+    REST: 'BREATHE. RESET. STAY SHARP.',
+    CYCLE_REST: 'SHAKE IT OUT. RESET FOR THE NEXT CYCLE.',
+    COOLDOWN: 'CONTROLLED BREATHING. FINISH STRONG.',
+    DONE: 'SESSION COMPLETE. NICE WORK.'
+  };
 
   let settings = {
     soundEnabled: true,
@@ -1710,6 +1787,12 @@
     return Math.max(0, config.cycles - state.currentCycle + 1);
   }
 
+  function updateCoachCue() {
+    const el = document.getElementById('quote-strip');
+    if (!el) return;
+    el.innerText = '“Yeah you right”';
+  }
+
   function updateUI() {
     document.getElementById('runner-title').innerText = (config.name || 'Workout').toUpperCase();
     document.getElementById('disp-time').innerText = formatTime(state.timeLeft);
@@ -1765,6 +1848,7 @@
     document.getElementById('disp-cycles-land').innerText = cLeft;
 
     document.getElementById('disp-total').innerText = formatTime(totalSeconds());
+    updateCoachCue();
   }
 
   function updatePlayButton() {
@@ -1956,7 +2040,7 @@
       el.addEventListener('scroll', () => {
         clearTimeout(el._t);
         el._t = setTimeout(() => {
-          const itemHeight = 44;
+          const itemHeight = 50;
           const idx = Math.round(el.scrollTop / itemHeight);
           el.scrollTo({ top: idx * itemHeight, behavior: 'smooth' });
           highlightWheel(el);
@@ -2060,6 +2144,14 @@
       if (document.exitFullscreen) document.exitFullscreen();
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
+  }
+
+  if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch((err) => {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
   }
 </script>
 </body>
