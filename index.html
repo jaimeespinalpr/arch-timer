@@ -22,6 +22,11 @@
     --border-color: #2c2c2e;
     --panel-edge: rgba(255,255,255,0.07);
     --panel-shadow: 0 12px 30px rgba(0,0,0,0.28);
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --glass-line: rgba(255,255,255,0.08);
+    --glass-fill: rgba(18,18,19,0.65);
 
     /* Archmere-inspired palette: Forest Green + White, with Auks accents */
     --arch-green: #0d6b3c;
@@ -59,6 +64,13 @@
     border-bottom: 1px solid rgba(0,0,0,0.45);
     line-height: 1.15;
     text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+    border-radius: var(--radius-lg);
+    border-left: 1px solid rgba(255,255,255,0.05);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: background 220ms ease, transform 220ms ease;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -262,20 +274,31 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--bg-dark);
+    gap: clamp(8px, 1.4vh, 12px);
+    padding: clamp(8px, 1.4vh, 12px);
+    background:
+      radial-gradient(circle at 15% 8%, rgba(13,107,60,0.15), transparent 38%),
+      radial-gradient(circle at 85% 16%, rgba(200,168,66,0.10), transparent 42%),
+      radial-gradient(circle at 60% 100%, rgba(24,53,67,0.18), transparent 42%),
+      #070808;
+    min-height: 0;
   }
 
   .runner-top {
     height: clamp(50px, 10vh, 76px);
     background:
-      linear-gradient(180deg, rgba(45,45,46,0.98), rgba(31,31,31,0.98));
+      linear-gradient(180deg, rgba(43,43,44,0.84), rgba(22,22,23,0.80));
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 8px;
     padding: 0 clamp(8px, 2.8vw, 14px);
-    border-bottom: 1px solid #1a1a1a;
+    border: 1px solid var(--glass-line);
+    border-radius: var(--radius-xl);
     box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+    backdrop-filter: blur(14px) saturate(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(1.05);
+    overflow: hidden;
   }
   .runner-top-center {
     display: grid;
@@ -308,23 +331,32 @@
     color: #000;
     background: var(--arch-gold);
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: 999px;
     white-space: nowrap;
+    border: 1px solid rgba(0,0,0,0.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
   }
 
   .icon-btn {
     width: clamp(34px, 7vw, 48px); height: clamp(34px, 7vw, 48px);
     border-radius: 50%;
-    border: none;
+    border: 1px solid rgba(255,255,255,0.05);
     background: linear-gradient(180deg, #262626, #171717);
     color: var(--arch-green);
     font-size: clamp(15px, 4vw, 20px);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 14px rgba(0,0,0,0.22);
+    transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
   }
+  .icon-btn:hover {
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 18px rgba(0,0,0,0.28);
+  }
+  .icon-btn:active { transform: translateY(1px) scale(0.985); }
   .btn-fullscreen {
     background: linear-gradient(180deg, #151515, #090909);
-    color: #f3c744;
+    color: var(--arch-gold);
   }
   .btn-toggle-top { display: none; }
 
@@ -339,6 +371,10 @@
     padding: clamp(3px, 1.4vh, 10px) 8px;
     position: relative;
     overflow: hidden;
+    border-radius: calc(var(--radius-xl) + 2px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 18px 36px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: background 240ms ease, box-shadow 240ms ease, transform 240ms ease;
   }
   .runner-main::before {
     content: "";
@@ -347,6 +383,14 @@
     background:
       radial-gradient(circle at 20% 18%, rgba(255,255,255,0.12), transparent 40%),
       radial-gradient(circle at 80% 85%, rgba(0,0,0,0.12), transparent 52%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .runner-main::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent 32%, transparent 68%, rgba(0,0,0,0.10));
     pointer-events: none;
     z-index: 0;
   }
@@ -362,6 +406,7 @@
     filter: saturate(1.05) drop-shadow(0 6px 12px rgba(0,0,0,0.25));
     pointer-events: none;
     z-index: 0;
+    transition: transform 240ms ease, opacity 240ms ease;
   }
   .runner-watermark-text {
     display: none;
@@ -374,6 +419,9 @@
     margin-top: clamp(2px, 1vh, 8px);
     position: relative;
     z-index: 1;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.16);
+    letter-spacing: 0.6px;
+    animation: phasePop 260ms ease;
   }
   .time-big {
     font-family: 'Oswald', sans-serif;
@@ -382,6 +430,10 @@
     line-height: 0.95;
     position: relative;
     z-index: 1;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.16);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    animation: phasePop 280ms ease;
   }
 
   .runner-next {
@@ -394,8 +446,14 @@
     justify-items: center;
     text-transform: uppercase;
     font-family: 'Oswald', sans-serif;
-    border-top: 1px solid rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
     padding: 0 clamp(10px, 3vw, 18px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.20);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow: hidden;
+    transition: background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
   }
   .next-label { display: none; }
   .next-time { display: none; }
@@ -408,10 +466,19 @@
     background: linear-gradient(180deg, #222, #181818);
     display: flex; align-items: center; justify-content: space-around;
     color: #fff;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.20);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   .stat-box {
     text-align: center;
     min-width: 110px;
+    padding: 8px 10px;
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.03);
   }
   .stat-value {
     font-size: clamp(26px, 7vw, 48px);
@@ -429,25 +496,49 @@
   .btn-play-round {
     width: clamp(54px, 14vw, 78px); height: clamp(54px, 14vw, 78px);
     border-radius: 50%;
-    border: 3px solid #2a2a2a;
+    border: 2px solid rgba(255,255,255,0.10);
     background: var(--arch-green);
     color: var(--arch-white);
     font-size: clamp(18px, 5.6vw, 28px);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
+    box-shadow:
+      0 14px 26px rgba(0,0,0,0.30),
+      0 0 0 6px rgba(13,107,60,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 140ms ease, box-shadow 180ms ease, background 180ms ease, color 180ms ease;
   }
+  .btn-play-round:hover {
+    box-shadow:
+      0 16px 30px rgba(0,0,0,0.32),
+      0 0 0 8px rgba(13,107,60,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .btn-play-round:active { transform: translateY(1px) scale(0.985); }
 
   .tab-screen { display: none; flex: 1; flex-direction: column; }
   .tab-bar {
-    height: 60px; background: linear-gradient(180deg, #090909, #000);
-    display: flex; border-top: 1px solid #222;
+    height: 64px;
+    background: linear-gradient(180deg, rgba(9,9,9,0.94), rgba(0,0,0,0.98));
+    display: flex;
+    border-top: 1px solid #222;
+    margin: 0 clamp(8px, 1.4vh, 12px) clamp(8px, 1.4vh, 12px) clamp(8px, 1.4vh, 12px);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 14px 24px rgba(0,0,0,0.22);
   }
   .tab-item {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     color: #555; background: none; border: none; cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
   }
-  .tab-item.active { color: var(--text-white); }
+  .tab-item.active {
+    color: var(--text-white);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)),
+      linear-gradient(90deg, rgba(13,107,60,0.16), rgba(24,53,67,0.12));
+  }
   .tab-item.active .tab-icon { color: var(--arch-gold); }
   .tab-icon { font-size: 20px; margin-bottom: 4px; }
   .tab-label { font-size: 10px; font-weight: 500; }
@@ -771,6 +862,49 @@
 .next-cycle { background: var(--dot-yellow) !important; color: #000 !important; }
 .next-cool { background: var(--dot-blue) !important; color: #fff !important; }
 .next-ready { background: var(--arch-white) !important; color: var(--arch-green-deep) !important; }
+
+  @keyframes phasePop {
+    0% { transform: scale(0.985); opacity: 0.88; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(13,107,60,0.24); }
+    70% { box-shadow: 0 0 0 12px rgba(13,107,60,0.0); }
+    100% { box-shadow: 0 0 0 0 rgba(13,107,60,0.0); }
+  }
+
+  #view-runner:not(.hidden) .btn-play-round {
+    animation: pulseGlow 2.4s ease-out infinite;
+  }
+
+  #view-runner.phase-work .runner-main {
+    box-shadow: 0 20px 36px rgba(13,107,60,0.24), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+  #view-runner.phase-rest .runner-main {
+    box-shadow: 0 20px 36px rgba(42,53,61,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  #view-runner.phase-cycle .runner-main {
+    box-shadow: 0 20px 36px rgba(200,168,66,0.24), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  #view-runner.phase-cool .runner-main {
+    box-shadow: 0 20px 36px rgba(24,53,67,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  #view-runner.phase-work .runner-watermark { transform: translate(-50%, -50%) scale(1.02); }
+  #view-runner.phase-rest .runner-watermark { transform: translate(-50%, -50%) scale(0.98); opacity: 0.12; }
+  #view-runner.phase-cycle .runner-watermark { transform: translate(-50%, -50%) scale(1.04); opacity: 0.15; }
+  #view-runner.phase-cool .runner-watermark { transform: translate(-50%, -50%) scale(1); opacity: 0.12; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .icon-btn,
+    .btn-play-round,
+    .runner-main,
+    .runner-next,
+    .quote-strip,
+    .runner-watermark,
+    .phase-label,
+    .time-big { transition: none; animation: none !important; }
+  }
 
   @media (orientation: landscape) and (max-height: 520px) {
     .btn-toggle-top { display: inline-flex; }
@@ -1428,7 +1562,7 @@
 
   const SETTINGS_KEY = 'archmere_tabata_settings_v1';
   const SOUND_SCHEMES = [
-    'Censor','Boxing Bell','Gym Whistle','Digital Beep','Wood Block',
+    'Auks Chime','Modern Arena','Censor','Boxing Bell','Gym Whistle','Digital Beep','Wood Block',
     'Cowbell','Claves','Click','Ping','Buzzer','Ride Cymbal','Clap'
   ];
   const COACH_CUES = {
@@ -1442,7 +1576,7 @@
 
   let settings = {
     soundEnabled: true,
-    soundScheme: 'Censor',
+    soundScheme: 'Auks Chime',
     volume: 80, // 0-100
     voiceAssist: true,
     vibration: true,
@@ -1472,6 +1606,7 @@
   let pickerContext = { field: 'ready', kind: 'time' };
 
   let audioCtx;
+  let speechVoiceCache = null;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
   const STORAGE_ROUNDS_KEY = 'archmere_rounds_presets_v1';
   const WORKOUT_LOG_KEY = 'archmere_workout_log_v1';
@@ -1857,104 +1992,277 @@
     if (audioCtx.state === 'suspended') audioCtx.resume();
   }
 
+  function playTone(freq, duration, opts={}) {
+    if (!audioCtx) return;
+
+    const now = audioCtx.currentTime + (opts.start || 0);
+    const end = now + Math.max(0.04, duration);
+    const volume = Math.max(0.0001, (settings.volume / 100) * (opts.gain ?? 0.7));
+    const attack = opts.attack ?? 0.004;
+    const release = Math.min(opts.release ?? Math.max(0.04, duration * 0.8), duration);
+
+    const gain = audioCtx.createGain();
+    gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(volume, now + attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+    const osc = audioCtx.createOscillator();
+    osc.type = opts.shape || 'sine';
+    osc.frequency.setValueAtTime(Math.max(40, freq), now);
+    if (opts.slideTo) {
+      osc.frequency.exponentialRampToValueAtTime(Math.max(40, opts.slideTo), end - 0.005);
+    }
+    if (opts.detune) osc.detune.setValueAtTime(opts.detune, now);
+
+    if (opts.filter) {
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = opts.filter.type || 'lowpass';
+      filter.frequency.setValueAtTime(opts.filter.freq || 1800, now);
+      if (opts.filter.q) filter.Q.setValueAtTime(opts.filter.q, now);
+      osc.connect(filter);
+      filter.connect(gain);
+    } else {
+      osc.connect(gain);
+    }
+
+    osc.start(now);
+    osc.stop(end + release);
+
+    if (opts.harmonic) {
+      playTone(freq * (opts.harmonic.ratio || 2), duration * (opts.harmonic.durationScale || 0.9), {
+        ...opts,
+        start: opts.start,
+        shape: opts.harmonic.shape || 'sine',
+        gain: (opts.gain ?? 0.7) * (opts.harmonic.gainScale || 0.35),
+        harmonic: null
+      });
+    }
+  }
+
+  function playPattern(steps) {
+    steps.forEach((s) => {
+      playTone(s.freq, s.duration, s);
+    });
+  }
+
   function playBeep(type) {
     if (!settings.soundEnabled) return;
     if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-
-    const now = audioCtx.currentTime;
-    const vol = settings.volume / 100;
-    gain.gain.setValueAtTime(vol, now);
 
     const scheme = settings.soundScheme;
-    const setTone = (freq, duration, shape='sine') => {
-      osc.frequency.value = freq;
-      osc.type = shape;
-      osc.start(now);
-      osc.stop(now + duration);
-    };
+    const tone = (freq, duration, shape='sine', extra={}) => playTone(freq, duration, { shape, ...extra });
+
+    if (scheme === 'Auks Chime') {
+      if (type === 'go') {
+        playPattern([
+          { freq: 660, duration: 0.13, shape: 'triangle', gain: 0.48, harmonic: { ratio: 2, gainScale: 0.18 }, filter: { type: 'lowpass', freq: 2400 }, start: 0.00 },
+          { freq: 990, duration: 0.22, shape: 'sine', gain: 0.55, slideTo: 1040, harmonic: { ratio: 2, gainScale: 0.22 }, start: 0.10 }
+        ]);
+        return;
+      }
+      if (type === 'rest') {
+        playPattern([
+          { freq: 420, duration: 0.12, shape: 'triangle', gain: 0.42, filter: { type: 'lowpass', freq: 1800 }, start: 0.00 },
+          { freq: 360, duration: 0.14, shape: 'sine', gain: 0.30, start: 0.08 }
+        ]);
+        return;
+      }
+      if (type === 'tick') { tone(780, 0.06, 'sine', { gain: 0.25, filter: { type: 'lowpass', freq: 2200 } }); return; }
+      if (type === 'end') {
+        playPattern([
+          { freq: 1040, duration: 0.14, shape: 'sine', gain: 0.40, start: 0.00 },
+          { freq: 780, duration: 0.18, shape: 'triangle', gain: 0.42, start: 0.11 },
+          { freq: 520, duration: 0.28, shape: 'triangle', gain: 0.55, harmonic: { ratio: 2, gainScale: 0.16 }, start: 0.24 }
+        ]);
+        return;
+      }
+    }
+
+    if (scheme === 'Modern Arena') {
+      if (type === 'go') {
+        playPattern([
+          { freq: 520, duration: 0.10, shape: 'square', gain: 0.34, filter: { type: 'lowpass', freq: 1400 }, start: 0.00 },
+          { freq: 760, duration: 0.11, shape: 'square', gain: 0.34, filter: { type: 'lowpass', freq: 1600 }, start: 0.08 },
+          { freq: 980, duration: 0.16, shape: 'triangle', gain: 0.42, harmonic: { ratio: 2, gainScale: 0.12 }, start: 0.16 }
+        ]);
+        return;
+      }
+      if (type === 'rest') { tone(300, 0.16, 'triangle', { gain: 0.35, filter: { type: 'lowpass', freq: 900 } }); return; }
+      if (type === 'tick') { tone(950, 0.04, 'square', { gain: 0.22, filter: { type: 'lowpass', freq: 1800 } }); return; }
+      if (type === 'end') {
+        playPattern([
+          { freq: 380, duration: 0.12, shape: 'sawtooth', gain: 0.28, filter: { type: 'lowpass', freq: 1100 }, start: 0.00 },
+          { freq: 320, duration: 0.14, shape: 'sawtooth', gain: 0.30, filter: { type: 'lowpass', freq: 1000 }, start: 0.10 },
+          { freq: 240, duration: 0.40, shape: 'triangle', gain: 0.40, filter: { type: 'lowpass', freq: 800 }, start: 0.22 }
+        ]);
+        return;
+      }
+    }
 
     if (scheme === 'Boxing Bell') {
-      if (type === 'go') { setTone(620, 0.45, 'triangle'); return; }
-      if (type === 'rest' || type === 'tick') { setTone(440, 0.25, 'triangle'); return; }
-      if (type === 'end') { setTone(260, 0.8, 'sawtooth'); return; }
+      if (type === 'go') { tone(620, 0.45, 'triangle', { gain: 0.55, harmonic: { ratio: 2, gainScale: 0.15 } }); return; }
+      if (type === 'rest') { tone(440, 0.23, 'triangle', { gain: 0.42 }); return; }
+      if (type === 'tick') { tone(520, 0.08, 'triangle', { gain: 0.22 }); return; }
+      if (type === 'end') {
+        playPattern([
+          { freq: 300, duration: 0.22, shape: 'triangle', gain: 0.34, start: 0.00 },
+          { freq: 250, duration: 0.60, shape: 'sawtooth', gain: 0.38, start: 0.14, filter: { type: 'lowpass', freq: 900 } }
+        ]);
+        return;
+      }
     }
 
     if (scheme === 'Gym Whistle') {
-      if (type === 'go') { setTone(1500, 0.35, 'sine'); return; }
-      if (type === 'rest' || type === 'tick') { setTone(1100, 0.25, 'sine'); return; }
-      if (type === 'end') { setTone(600, 0.9, 'square'); return; }
+      if (type === 'go') { tone(1500, 0.34, 'sine', { gain: 0.45, slideTo: 1650 }); return; }
+      if (type === 'rest') { tone(1100, 0.22, 'sine', { gain: 0.36, slideTo: 1000 }); return; }
+      if (type === 'tick') { tone(1200, 0.06, 'sine', { gain: 0.20 }); return; }
+      if (type === 'end') { tone(600, 0.65, 'square', { gain: 0.36, filter: { type: 'lowpass', freq: 1200 } }); return; }
     }
 
     if (scheme === 'Censor') {
-      if (type === 'go') { setTone(1000, 0.25, 'square'); return; }
-      if (type === 'rest' || type === 'tick') { setTone(600, 0.18, 'square'); return; }
-      if (type === 'end') { setTone(300, 0.9, 'sawtooth'); return; }
+      if (type === 'go') { tone(1000, 0.20, 'square', { gain: 0.35, filter: { type: 'lowpass', freq: 1800 } }); return; }
+      if (type === 'rest') { tone(600, 0.15, 'square', { gain: 0.28, filter: { type: 'lowpass', freq: 1200 } }); return; }
+      if (type === 'tick') { tone(700, 0.04, 'square', { gain: 0.18, filter: { type: 'lowpass', freq: 1500 } }); return; }
+      if (type === 'end') { tone(300, 0.55, 'sawtooth', { gain: 0.32, filter: { type: 'lowpass', freq: 700 } }); return; }
     }
 
     if (scheme === 'Digital Beep') {
-      if (type === 'go') { setTone(1200, 0.2, 'sine'); return; }
-      if (type === 'rest' || type === 'tick') { setTone(900, 0.1, 'sine'); return; }
-      if (type === 'end') { setTone(500, 0.6, 'triangle'); return; }
+      if (type === 'go') { tone(1200, 0.18, 'sine', { gain: 0.40, harmonic: { ratio: 2, gainScale: 0.12 } }); return; }
+      if (type === 'rest') { tone(900, 0.10, 'sine', { gain: 0.28 }); return; }
+      if (type === 'tick') { tone(980, 0.035, 'sine', { gain: 0.16 }); return; }
+      if (type === 'end') { tone(500, 0.45, 'triangle', { gain: 0.35, slideTo: 420 }); return; }
     }
 
     if (scheme === 'Wood Block') {
-      if (type === 'go') { setTone(800, 0.15, 'square'); return; }
-      if (type === 'rest' || type === 'tick') { setTone(500, 0.08, 'square'); return; }
-      if (type === 'end') { setTone(300, 0.45, 'sawtooth'); return; }
+      if (type === 'go') { tone(800, 0.11, 'square', { gain: 0.28, filter: { type: 'bandpass', freq: 1200, q: 3 } }); return; }
+      if (type === 'rest') { tone(500, 0.08, 'square', { gain: 0.24, filter: { type: 'bandpass', freq: 900, q: 3 } }); return; }
+      if (type === 'tick') { tone(700, 0.03, 'square', { gain: 0.14, filter: { type: 'bandpass', freq: 1000, q: 4 } }); return; }
+      if (type === 'end') { tone(300, 0.30, 'triangle', { gain: 0.28, filter: { type: 'bandpass', freq: 650, q: 2 } }); return; }
     }
 
     if (scheme === 'Cowbell') {
-      if (type === 'go') { setTone(700, 0.3, 'triangle'); return; }
-      if (type === 'rest' || type === 'tick') { setTone(520, 0.12, 'triangle'); return; }
-      if (type === 'end') { setTone(320, 0.7, 'sawtooth'); return; }
+      if (type === 'go') { tone(700, 0.24, 'triangle', { gain: 0.44, harmonic: { ratio: 1.42, gainScale: 0.18 } }); return; }
+      if (type === 'rest') { tone(520, 0.12, 'triangle', { gain: 0.30 }); return; }
+      if (type === 'tick') { tone(620, 0.04, 'triangle', { gain: 0.16 }); return; }
+      if (type === 'end') { tone(320, 0.50, 'sawtooth', { gain: 0.32, filter: { type: 'lowpass', freq: 1000 } }); return; }
     }
 
     if (scheme === 'Claves') {
-      if (type === 'go') { setTone(1300, 0.12, 'square'); return; }
-      if (type === 'rest' || type === 'tick') { setTone(1000, 0.08, 'square'); return; }
-      if (type === 'end') { setTone(600, 0.4, 'square'); return; }
+      if (type === 'go') { tone(1300, 0.09, 'square', { gain: 0.24, filter: { type: 'bandpass', freq: 1800, q: 5 } }); return; }
+      if (type === 'rest') { tone(1000, 0.07, 'square', { gain: 0.20, filter: { type: 'bandpass', freq: 1400, q: 5 } }); return; }
+      if (type === 'tick') { tone(1100, 0.03, 'square', { gain: 0.14, filter: { type: 'bandpass', freq: 1600, q: 6 } }); return; }
+      if (type === 'end') { tone(600, 0.25, 'square', { gain: 0.26, filter: { type: 'bandpass', freq: 900, q: 4 } }); return; }
     }
 
     if (scheme === 'Click') {
-      setTone(type === 'end' ? 400 : 900, type === 'end' ? 0.4 : 0.05, 'square'); return;
+      tone(type === 'end' ? 400 : 900, type === 'end' ? 0.28 : 0.03, 'square', { gain: type === 'end' ? 0.22 : 0.12 }); return;
     }
 
     if (scheme === 'Ping') {
-      setTone(type === 'end' ? 500 : 1500, type === 'end' ? 0.6 : 0.15, 'sine'); return;
+      tone(type === 'end' ? 500 : 1500, type === 'end' ? 0.42 : 0.10, 'sine', { gain: type === 'end' ? 0.32 : 0.20, harmonic: { ratio: 2, gainScale: 0.10 } }); return;
     }
 
     if (scheme === 'Buzzer') {
-      setTone(type === 'end' ? 220 : 800, type === 'end' ? 1.0 : 0.25, 'sawtooth'); return;
+      tone(type === 'end' ? 220 : 800, type === 'end' ? 0.70 : 0.16, 'sawtooth', { gain: type === 'end' ? 0.28 : 0.22, filter: { type: 'lowpass', freq: type === 'end' ? 700 : 1200 } }); return;
     }
 
     if (scheme === 'Ride Cymbal') {
-      setTone(type === 'end' ? 500 : 900, type === 'end' ? 0.7 : 0.18, 'triangle'); return;
+      tone(type === 'end' ? 500 : 900, type === 'end' ? 0.45 : 0.12, 'triangle', { gain: type === 'end' ? 0.24 : 0.18, harmonic: { ratio: 2.4, gainScale: 0.10 } }); return;
     }
 
     if (scheme === 'Clap') {
-      setTone(type === 'end' ? 400 : 1000, type === 'end' ? 0.6 : 0.12, 'square'); return;
+      if (type === 'end') {
+        playPattern([
+          { freq: 820, duration: 0.025, shape: 'square', gain: 0.14, start: 0.00 },
+          { freq: 640, duration: 0.03, shape: 'square', gain: 0.13, start: 0.04 },
+          { freq: 460, duration: 0.08, shape: 'square', gain: 0.18, start: 0.09, filter: { type: 'lowpass', freq: 1000 } }
+        ]);
+        return;
+      }
+      tone(1000, type === 'tick' ? 0.025 : 0.05, 'square', { gain: type === 'tick' ? 0.10 : 0.16 }); return;
     }
 
     // default
-    setTone(type === 'end' ? 220 : 880, type === 'end' ? 1.0 : 0.2, 'sine');
+    tone(type === 'end' ? 220 : 880, type === 'end' ? 0.65 : 0.12, 'sine', { gain: type === 'end' ? 0.28 : 0.20 });
+  }
+
+  function getPreferredSpeechVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+
+    const lang = (navigator.language || 'en-US').toLowerCase();
+    const langBase = lang.split('-')[0];
+    const cacheKey = `${lang}|${voices.length}`;
+    if (speechVoiceCache && speechVoiceCache.key === cacheKey) return speechVoiceCache.voice;
+
+    const scoreVoice = (v) => {
+      let score = 0;
+      const vLang = String(v.lang || '').toLowerCase();
+      const vName = String(v.name || '').toLowerCase();
+      if (v.localService) score += 4;
+      if (v.default) score += 3;
+      if (vLang === lang) score += 8;
+      else if (vLang.startsWith(`${langBase}-`) || vLang === langBase) score += 5;
+      else if (vLang.startsWith('en')) score += 1;
+      if (vName.includes('enhanced') || vName.includes('premium') || vName.includes('natural')) score += 2;
+      if (vName.includes('compact')) score -= 1;
+      return score;
+    };
+
+    const best = [...voices].sort((a, b) => scoreVoice(b) - scoreVoice(a))[0] || voices[0];
+    speechVoiceCache = { key: cacheKey, voice: best };
+    return best;
+  }
+
+  function speakText(text, opts={}) {
+    if (!settings.voiceAssist) return;
+    if (!('speechSynthesis' in window)) return;
+    const content = String(text || '').trim();
+    if (!content) return;
+
+    const synth = window.speechSynthesis;
+    const voice = getPreferredSpeechVoice();
+    const utter = new SpeechSynthesisUtterance(content);
+    utter.lang = voice?.lang || navigator.language || 'en-US';
+    if (voice) utter.voice = voice;
+    utter.rate = Math.max(0.75, Math.min(1.2, opts.rate ?? 0.96));
+    utter.pitch = Math.max(0.7, Math.min(1.3, opts.pitch ?? 0.98));
+    utter.volume = Math.max(0, Math.min(1, opts.volume ?? 1));
+
+    if (opts.interrupt !== false) synth.cancel();
+    synth.speak(utter);
+  }
+
+  function phaseVoiceText(phase) {
+    const isSpanish = (navigator.language || '').toLowerCase().startsWith('es');
+    if (isSpanish) {
+      if (phase === 'READY') return 'Prepárate';
+      if (phase === 'WORK') return 'Trabajo';
+      if (phase === 'REST') return 'Descanso';
+      if (phase === 'CYCLE_REST') return 'Descanso de ciclo';
+      if (phase === 'COOLDOWN') return 'Enfriamiento';
+      return '';
+    }
+    if (phase === 'READY') return 'Prepare';
+    if (phase === 'WORK') return 'Work';
+    if (phase === 'REST') return 'Rest';
+    if (phase === 'CYCLE_REST') return 'Cycle rest';
+    if (phase === 'COOLDOWN') return 'Cooldown';
+    return '';
+  }
+
+  function speakPhaseCue(phase) {
+    const text = phaseVoiceText(phase);
+    if (!text) return;
+    speakText(text, { rate: 0.94, pitch: 0.94, interrupt: true });
   }
 
   function speakCountdown(n) {
     if (!settings.voiceAssist) return;
     if (!('speechSynthesis' in window)) return;
-    const voices = window.speechSynthesis.getVoices();
-    const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-    const utter = new SpeechSynthesisUtterance(String(n));
-    utter.lang = enVoice?.lang || 'en-US';
-    if (enVoice) utter.voice = enVoice;
-    utter.rate = 1.0;
-    utter.pitch = 1.0;
-    utter.volume = 1.0;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utter);
+    speakText(String(n), { rate: 0.90, pitch: 0.98, interrupt: true });
   }
 
   function clampInt(value, min, fallback) {
@@ -2242,6 +2550,7 @@
     if (state.running) {
       if (phase === 'WORK') playBeep('go');
       else playBeep('rest');
+      if (state.timeLeft > 0) speakPhaseCue(phase);
 
       if (state.timeLeft <= 0) {
         setTimeout(() => nextPhase(), 0);
@@ -2420,6 +2729,12 @@
       btnTop.style.background = state.running ? 'var(--dot-yellow)' : '#1f1f1f';
       btnTop.style.color = state.running ? '#000' : 'var(--arch-green)';
     }
+  }
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      speechVoiceCache = null;
+    };
   }
 
   updateUI();
