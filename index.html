@@ -525,6 +525,44 @@
       inset 0 1px 0 rgba(255,255,255,0.18);
   }
   .btn-play-round:active { transform: translateY(1px) scale(0.985); }
+  .runner-controls {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 2vw, 14px);
+  }
+  .btn-round-control {
+    width: clamp(44px, 10vw, 58px);
+    height: clamp(44px, 10vw, 58px);
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: #fff;
+    font-size: clamp(14px, 3.6vw, 18px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 120ms ease, background 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  }
+  .btn-round-control:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .btn-round-control:active { transform: translateY(1px) scale(0.98); }
+  .btn-round-control:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  #phase-flash {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9999;
+    background: rgba(255,255,255,0.7);
+    transition: opacity 130ms ease;
+  }
+  #phase-flash.active { opacity: 1; }
 
   .tab-screen {
     display: none;
@@ -2252,9 +2290,17 @@
         <div class="stat-label">ROUNDS LEFT</div>
       </div>
 
-      <button class="btn-play-round" id="btn-toggle" onclick="toggleTimer()" aria-label="Play/Pause">
-        <i class="fa fa-play"></i>
-      </button>
+      <div class="runner-controls">
+        <button class="btn-round-control" id="btn-prev-phase" onclick="skipPhaseBack()" aria-label="Previous phase">
+          <i class="fa-solid fa-backward-step"></i>
+        </button>
+        <button class="btn-play-round" id="btn-toggle" onclick="toggleTimer()" aria-label="Play/Pause">
+          <i class="fa fa-play"></i>
+        </button>
+        <button class="btn-round-control" id="btn-next-phase" onclick="skipPhaseForward()" aria-label="Next phase">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+      </div>
 
       <div class="stat-box">
         <div class="stat-value stat-right" id="disp-cycles">2</div>
@@ -2451,6 +2497,17 @@
             <span class="slider"></span>
           </label>
         </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Halfway Alert</div>
+            <div class="settings-sub">Single cue at 50% of each interval</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-halfway" onchange="toggleSetting('halfwayAlert', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
       </div>
 
       <div class="settings-section-title">Device</div>
@@ -2484,6 +2541,28 @@
           </div>
           <label class="switch">
             <input type="checkbox" id="set-pale" onchange="toggleSetting('paleColors', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Keep Screen Awake</div>
+            <div class="settings-sub">Use wake lock during active workouts</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-keep-awake" onchange="toggleSetting('keepAwake', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-left">
+            <div class="settings-label">Screen Flash</div>
+            <div class="settings-sub">Visual flash on phase changes</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-screen-flash" onchange="toggleSetting('screenFlash', this.checked)">
             <span class="slider"></span>
           </label>
         </div>
@@ -2847,6 +2926,8 @@
     </button>
   </div>
 
+  <div id="phase-flash" aria-hidden="true"></div>
+
 <script>
   let config = {
     name: 'Workout',
@@ -2859,6 +2940,9 @@
     timeLeft: 0, timerId: null,
     currentSet: 1, currentCycle: 1,
     lastSpoken: null, zeroBeeped: false,
+    halfwayCueSec: null,
+    phaseStartedAt: 0, phaseEndAt: 0, phaseDurationSec: 0,
+    phaseHistory: [],
     sessionStartedAt: null, sessionPlannedSec: 0
   };
 
@@ -2896,7 +2980,9 @@
     ducking: false,
     rotation: true,
     tickingSound: true,
+    halfwayAlert: true,
     paleColors: false,
+    keepAwake: true,
     timeFormat: 'mm:ss',
     cloudSupabaseUrl: '',
     cloudSupabaseAnonKey: '',
@@ -2956,6 +3042,7 @@
   let pickerContext = { field: 'ready', kind: 'time' };
 
   let audioCtx;
+  let wakeLockSentinel = null;
   let speechVoiceCache = null;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
   const STORAGE_ROUNDS_KEY = 'archmere_rounds_presets_v1';
@@ -4344,9 +4431,12 @@
     set('set-volume', settings.volume);
     set('set-voice', settings.voiceAssist);
     set('set-ticking', settings.tickingSound);
+    set('set-halfway', settings.halfwayAlert);
     set('set-vibration', settings.vibration);
     set('set-rotation', settings.rotation);
     set('set-pale', settings.paleColors);
+    set('set-keep-awake', settings.keepAwake);
+    set('set-screen-flash', settings.screenFlash);
     set('set-ducking', settings.ducking);
     set('set-scheme', settings.soundScheme);
     set('set-timeformat', settings.timeFormat);
@@ -4914,17 +5004,28 @@
     ensureAudio();
     if (state.running) {
       state.running = false; state.paused = true;
+      if (state.phase !== 'IDLE') {
+        const now = Date.now();
+        const remain = Math.max(0, Math.ceil((state.phaseEndAt - now) / 1000));
+        state.timeLeft = remain;
+      }
       clearInterval(state.timerId);
+      releaseWakeLock();
       updatePlayButton();
+      updateUI();
     } else {
       state.running = true; state.paused = false;
       if (state.phase === 'IDLE') {
         state.currentSet = 1; state.currentCycle = 1;
+        state.phaseHistory = [];
         startWorkoutSessionTracking();
         setPhase('READY', config.ready);
       } else {
+        state.phaseStartedAt = Date.now();
+        state.phaseEndAt = state.phaseStartedAt + (state.timeLeft * 1000);
         runTicker();
       }
+      acquireWakeLock();
       updatePlayButton();
     }
   }
@@ -4933,27 +5034,46 @@
     clearInterval(state.timerId);
     state.running = false; state.paused = false; state.phase = 'IDLE';
     state.lastSpoken = null; state.zeroBeeped = false;
+    state.halfwayCueSec = null;
+    state.phaseStartedAt = 0; state.phaseEndAt = 0; state.phaseDurationSec = 0;
+    state.phaseHistory = [];
     clearWorkoutSessionTracking();
+    releaseWakeLock();
     updatePlayButton();
     setPhase('READY', config.ready);
     state.phase = 'IDLE';
   }
 
-  function setPhase(phase, time) {
+  function setPhase(phase, time, opts={}) {
+    const anchorMs = Number.isFinite(opts.anchorMs) ? opts.anchorMs : Date.now();
     state.phase = phase;
     state.timeLeft = Math.max(0, time);
     state.lastSpoken = null;
     state.zeroBeeped = false;
+    state.phaseDurationSec = Math.max(0, time);
+    state.phaseStartedAt = anchorMs;
+    state.phaseEndAt = anchorMs + (state.phaseDurationSec * 1000);
+    state.halfwayCueSec = state.phaseDurationSec >= 12 ? Math.floor(state.phaseDurationSec / 2) : null;
+    if (opts.recordHistory !== false) {
+      state.phaseHistory.push({
+        phase: state.phase,
+        timeLeft: state.phaseDurationSec,
+        currentSet: state.currentSet,
+        currentCycle: state.currentCycle
+      });
+      if (state.phaseHistory.length > 500) state.phaseHistory = state.phaseHistory.slice(-500);
+    }
     updateUI();
 
     if (state.running) {
       if (phase === 'WORK') playBeep('go');
       else playBeep('rest');
+      triggerPhaseFeedback(phase);
       if (state.timeLeft > 0) speakPhaseCue(phase);
 
       if (state.timeLeft <= 0) {
-        setTimeout(() => nextPhase(), 0);
-      } else {
+        setTimeout(() => nextPhase({ anchorMs }), 0);
+      } else if (!opts.skipTicker) {
         runTicker();
       }
     }
@@ -4961,67 +5081,121 @@
 
   function runTicker() {
     clearInterval(state.timerId);
+    tickTimer();
     state.timerId = setInterval(() => {
-      if (!state.running) return;
+      tickTimer();
+    }, 250);
+  }
 
-      state.timeLeft -= 1;
-      if (state.timeLeft < 0) state.timeLeft = 0;
+  function tickTimer() {
+    if (!state.running) return;
+    let now = Date.now();
 
-      if (state.timeLeft > 0 && state.timeLeft <= 5) {
-        if (state.lastSpoken !== state.timeLeft) {
-          if (settings.tickingSound) playBeep('tick');
-          speakCountdown(state.timeLeft);
-          state.lastSpoken = state.timeLeft;
-        }
-      }
-
-      if (state.timeLeft === 0 && !state.zeroBeeped) {
+    while (state.running && state.phase !== 'IDLE' && state.phaseEndAt > 0 && now >= state.phaseEndAt) {
+      state.timeLeft = 0;
+      if (!state.zeroBeeped) {
         playBeep('end');
         state.zeroBeeped = true;
       }
+      const transitionAt = state.phaseEndAt;
+      if (!nextPhase({ anchorMs: transitionAt, skipTicker: true })) {
+        return;
+      }
+      now = Date.now();
+    }
 
-      updateUI();
+    if (!state.running || state.phase === 'IDLE') return;
+    const remain = Math.max(0, Math.ceil((state.phaseEndAt - now) / 1000));
+    if (state.timeLeft !== remain) state.timeLeft = remain;
 
-      if (state.timeLeft <= 0) nextPhase();
-    }, 1000);
+    if (state.timeLeft > 0 && state.timeLeft <= 5) {
+      if (state.lastSpoken !== state.timeLeft) {
+        if (settings.tickingSound) playBeep('tick');
+        speakCountdown(state.timeLeft);
+        state.lastSpoken = state.timeLeft;
+      }
+    }
+
+    if (
+      settings.halfwayAlert &&
+      state.halfwayCueSec &&
+      state.timeLeft === state.halfwayCueSec &&
+      state.lastSpoken !== `half_${state.timeLeft}`
+    ) {
+      playBeep('tick');
+      state.lastSpoken = `half_${state.timeLeft}`;
+    }
+
+    updateUI();
   }
 
-  function nextPhase() {
+  function nextPhase(opts={}) {
+    const anchorMs = Number.isFinite(opts.anchorMs) ? opts.anchorMs : Date.now();
     if (state.phase === 'READY') {
-      setPhase('WORK', config.work);
-      return;
+      setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker });
+      return true;
     }
 
     if (state.phase === 'WORK') {
-      setPhase('REST', config.rest);
-      return;
+      setPhase('REST', config.rest, { anchorMs, skipTicker: opts.skipTicker });
+      return true;
     }
 
     if (state.phase === 'REST') {
       if (state.currentSet < config.sets) {
         state.currentSet++;
-        setPhase('WORK', config.work);
+        setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker });
       } else {
         if (state.currentCycle < config.cycles) {
-          setPhase('CYCLE_REST', config.cycleRest);
+          setPhase('CYCLE_REST', config.cycleRest, { anchorMs, skipTicker: opts.skipTicker });
         } else {
-          setPhase('COOLDOWN', config.cooldown);
+          setPhase('COOLDOWN', config.cooldown, { anchorMs, skipTicker: opts.skipTicker });
         }
       }
-      return;
+      return true;
     }
 
     if (state.phase === 'CYCLE_REST') {
       state.currentCycle++;
       state.currentSet = 1;
-      setPhase('WORK', config.work);
-      return;
+      setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker });
+      return true;
     }
 
     if (state.phase === 'COOLDOWN') {
       recordCompletedWorkout();
       resetTimer();
+      return false;
     }
+    return false;
+  }
+
+  function skipPhaseForward() {
+    if (state.phase === 'IDLE') return;
+    const moved = nextPhase({ anchorMs: Date.now() });
+    if (moved) {
+      state.lastSpoken = null;
+      state.zeroBeeped = false;
+      updateUI();
+    }
+  }
+
+  function skipPhaseBack() {
+    if (state.phase === 'IDLE') return;
+    if (!state.phaseHistory.length) return;
+    if (state.phaseHistory.length === 1) {
+      const first = state.phaseHistory[0];
+      state.currentSet = first.currentSet;
+      state.currentCycle = first.currentCycle;
+      setPhase(first.phase, first.timeLeft, { anchorMs: Date.now(), recordHistory: false });
+      return;
+    }
+    state.phaseHistory.pop();
+    const prev = state.phaseHistory[state.phaseHistory.length - 1];
+    if (!prev) return;
+    state.currentSet = prev.currentSet;
+    state.currentCycle = prev.currentCycle;
+    setPhase(prev.phase, prev.timeLeft, { anchorMs: Date.now(), recordHistory: false });
   }
 
   function computeNextInfo() {
@@ -5052,7 +5226,12 @@
   function updateCoachCue() {
     const el = document.getElementById('quote-strip');
     if (!el) return;
-    el.innerText = '“Yeah you right”';
+    if (state.phase === 'IDLE') {
+      el.innerText = 'READY TO TRAIN';
+      return;
+    }
+    const phaseText = state.phase === 'CYCLE_REST' ? 'CYCLE REST' : state.phase;
+    el.innerText = `CYCLE ${state.currentCycle}/${config.cycles} • ROUND ${state.currentSet}/${config.sets} • ${phaseText}`;
   }
 
   function updateUI() {
@@ -5117,6 +5296,8 @@
   function updatePlayButton() {
     const btn = document.getElementById('btn-toggle');
     const btnTop = document.getElementById('btn-toggle-top');
+    const prevBtn = document.getElementById('btn-prev-phase');
+    const nextBtn = document.getElementById('btn-next-phase');
     const icon = state.running ? '<i class="fa fa-pause"></i>' : '<i class="fa fa-play"></i>';
 
     if (btn) {
@@ -5129,6 +5310,8 @@
       btnTop.style.background = state.running ? 'var(--dot-yellow)' : '#1f1f1f';
       btnTop.style.color = state.running ? '#000' : 'var(--arch-green)';
     }
+    if (prevBtn) prevBtn.disabled = state.phase === 'IDLE';
+    if (nextBtn) nextBtn.disabled = state.phase === 'IDLE';
   }
 
   if ('speechSynthesis' in window) {
@@ -5331,6 +5514,47 @@
     const n = Math.max(0, Math.min(100, parseInt(val, 10) || 0));
     settings.volume = n;
     persistSettings();
+  }
+
+  async function acquireWakeLock() {
+    if (!settings.keepAwake || !state.running) return;
+    if (!('wakeLock' in navigator) || !navigator.wakeLock?.request) return;
+    try {
+      if (wakeLockSentinel) return;
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', () => {
+        wakeLockSentinel = null;
+      });
+    } catch (err) {
+      console.warn('Wake lock request failed:', err);
+      wakeLockSentinel = null;
+    }
+  }
+
+  async function releaseWakeLock() {
+    try {
+      if (wakeLockSentinel) await wakeLockSentinel.release();
+    } catch (_) {
+      // ignore
+    }
+    wakeLockSentinel = null;
+  }
+
+  function triggerPhaseFeedback(phase) {
+    if (settings.vibration && navigator.vibrate) {
+      if (phase === 'WORK') navigator.vibrate([120, 40, 120]);
+      else if (phase === 'COOLDOWN') navigator.vibrate([180, 70, 180, 70, 240]);
+      else navigator.vibrate(90);
+    }
+
+    if (settings.screenFlash) {
+      const flash = document.getElementById('phase-flash');
+      if (flash) {
+        flash.style.background = phase === 'WORK' ? 'rgba(13,107,60,0.5)' : 'rgba(255,255,255,0.75)';
+        flash.classList.add('active');
+        setTimeout(() => flash.classList.remove('active'), 120);
+      }
+    }
   }
 
   function pickSoundScheme() {
@@ -5757,6 +5981,15 @@
 
   document.addEventListener('fullscreenchange', updateFullscreenButtonUI);
   document.addEventListener('webkitfullscreenchange', updateFullscreenButtonUI);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && state.running) {
+      acquireWakeLock();
+      tickTimer();
+    }
+  });
+  window.addEventListener('beforeunload', () => {
+    releaseWakeLock();
+  });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isFullscreenModeActive()) {
       exitRotateFullscreenMode().catch((err) => console.warn(err));

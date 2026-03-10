@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arch-timer-pwa-v2';
+const CACHE_NAME = 'arch-timer-pwa-v3';
 
 const APP_SHELL = [
   './',
