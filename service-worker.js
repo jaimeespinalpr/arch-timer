@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arch-timer-pwa-v5';
+const CACHE_NAME = 'arch-timer-pwa-v6';
 
 const APP_SHELL = [
   './',
@@ -66,4 +66,10 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => caches.match(request))
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

@@ -3042,13 +3042,14 @@
 
         <div class="settings-actions">
           <button type="button" class="settings-action-btn" onclick="generateSyncCode()">Generate Code</button>
+          <button type="button" class="settings-action-btn" id="btn-cloud-test" onclick="testCloudBackend()">Test Cloud</button>
           <button type="button" class="settings-action-btn primary" id="btn-cloud-sync" onclick="syncCloudNow()">Sync Now</button>
         </div>
 
         <div class="sync-status warn" id="cloud-sync-status">Local only. Log in and tap "Sync Now" to sync across devices.</div>
 
         <div class="settings-note">
-          Los usuarios no necesitan configurar Supabase. Solo hacen login con su username + PIN de 8 digitos y tocan "Sync Now".
+          Si el login falla con "Load failed", entra aqui en MORE -> Cloud Sync y configura un Supabase URL + Anon Key validos.
         </div>
       </div>
 
@@ -3351,9 +3352,11 @@
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
   const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
   const BRANDING_BUCKET = 'arch-timer-branding';
-  const LOCK_SUPABASE_CONFIG = true;
+  const LOCK_SUPABASE_CONFIG = false;
   const BUILTIN_SUPABASE_URL = 'https://fymysjmpnvxfbfvhaunq.supabase.co';
   const BUILTIN_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5bXlzam1wbnZ4ZmJmdmhhdW5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4OTUwMTMsImV4cCI6MjA4NzQ3MTAxM30.dZzFKkRKocsPoXRGdK0t-rTr-0Jvlr24ODZRvVhC-ic';
+  const CLOUD_PROBE_TIMEOUT_MS = 7000;
+  const CLOUD_PROBE_CACHE_MS = 45000;
   const ACCOUNT_SYNC_PREFIX = 'acct_v1_';
   let presets = [];
   let roundsPresets = [];
@@ -3367,6 +3370,7 @@
   let activeProfileMode = PROFILE_MODELS.GUEST;
   let activeProfileUsername = '';
   let authFormMode = 'login';
+  let cloudProbeCache = { key: '', ok: null, checkedAt: 0, message: '' };
 
   function normalizeAccountUsername(value) {
     return String(value || '').trim().toLowerCase();
@@ -3412,6 +3416,12 @@
     }
   }
 
+  function openCloudSetupScreen() {
+    switchTab('more');
+    const userInput = document.getElementById('set-cloud-url');
+    if (userInput) userInput.focus();
+  }
+
   function isIOSDevice() {
     const ua = navigator.userAgent || '';
     const isIOS = /iphone|ipad|ipod/i.test(ua);
@@ -3449,15 +3459,118 @@
   function getSupabaseBaseUrl() {
     const value = supabaseConfigManagedByApp()
       ? BUILTIN_SUPABASE_URL
-      : (settings.cloudSupabaseUrl || '');
+      : (settings.cloudSupabaseUrl || BUILTIN_SUPABASE_URL || '');
     return normalizeSupabaseUrl(value);
   }
 
   function getSupabaseAnonKey() {
     const value = supabaseConfigManagedByApp()
       ? BUILTIN_SUPABASE_ANON_KEY
-      : (settings.cloudSupabaseAnonKey || '');
+      : (settings.cloudSupabaseAnonKey || BUILTIN_SUPABASE_ANON_KEY || '');
     return String(value || '').trim();
+  }
+
+  function isLikelySupabaseUrl(url) {
+    const value = normalizeSupabaseUrl(url);
+    return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(value);
+  }
+
+  function isLikelySupabaseAnonKey(key) {
+    const value = String(key || '').trim();
+    return value.startsWith('eyJ') && value.length > 60;
+  }
+
+  function hasCloudConfigShape() {
+    return isLikelySupabaseUrl(getSupabaseBaseUrl()) && isLikelySupabaseAnonKey(getSupabaseAnonKey());
+  }
+
+  function getCloudSetupGuidance() {
+    return 'Open MORE -> Cloud Sync and set a valid Supabase URL + Anon Key, then retry.';
+  }
+
+  function isNetworkLikeErrorMessage(message) {
+    const lower = String(message || '').toLowerCase();
+    return (
+      lower.includes('failed to fetch') ||
+      lower.includes('load failed') ||
+      lower.includes('networkerror') ||
+      lower.includes('network error') ||
+      lower.includes('err_name_not_resolved') ||
+      lower.includes('dns')
+    );
+  }
+
+  async function probeCloudBackend(options={}) {
+    const baseUrl = getSupabaseBaseUrl();
+    const anonKey = getSupabaseAnonKey();
+    const cacheKey = `${baseUrl}|${anonKey.slice(0, 16)}`;
+    const force = Boolean(options.force);
+    const now = Date.now();
+    if (
+      !force &&
+      cloudProbeCache.key === cacheKey &&
+      now - cloudProbeCache.checkedAt < CLOUD_PROBE_CACHE_MS &&
+      cloudProbeCache.ok !== null
+    ) {
+      return cloudProbeCache;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), CLOUD_PROBE_TIMEOUT_MS);
+
+    try {
+      const resp = await fetch(`${baseUrl}/rest/v1/`, {
+        method: 'GET',
+        headers: cloudRequestHeaders(false),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      const ok = resp.status >= 200 && resp.status < 500;
+      cloudProbeCache = {
+        key: cacheKey,
+        ok,
+        checkedAt: now,
+        message: ok ? '' : `Cloud backend error (${resp.status}).`
+      };
+      return cloudProbeCache;
+    } catch (err) {
+      clearTimeout(timeout);
+      const msg = String(err?.message || err || 'Cloud probe failed');
+      cloudProbeCache = {
+        key: cacheKey,
+        ok: false,
+        checkedAt: now,
+        message: msg
+      };
+      return cloudProbeCache;
+    }
+  }
+
+  async function ensureCloudAuthReady(statusWriter) {
+    if (isFileMode()) {
+      statusWriter('Authentication in file mode is blocked by browser network policy. Tap "Open Online App".', 'error');
+      return false;
+    }
+    if (!hasCloudBaseConfig()) {
+      statusWriter(`Cloud auth backend unavailable. ${getCloudSetupGuidance()}`, 'error');
+      openCloudSetupScreen();
+      return false;
+    }
+    if (!hasCloudConfigShape()) {
+      statusWriter(`Cloud credentials format is invalid. ${getCloudSetupGuidance()}`, 'error');
+      openCloudSetupScreen();
+      return false;
+    }
+    const probe = await probeCloudBackend();
+    if (!probe.ok) {
+      const networkNote = isNetworkLikeErrorMessage(probe.message)
+        ? 'Cannot reach cloud backend from this network.'
+        : 'Cloud backend is responding with an error.';
+      statusWriter(`${networkNote} ${getCloudSetupGuidance()}`, 'error');
+      openCloudSetupScreen();
+      return false;
+    }
+    return true;
   }
 
   function sanitizeHexColor(value, fallback) {
@@ -4014,6 +4127,9 @@
       return;
     }
     settings[key] = value;
+    if (key === 'cloudSupabaseUrl' || key === 'cloudSupabaseAnonKey') {
+      cloudProbeCache = { key: '', ok: null, checkedAt: 0, message: '' };
+    }
     if (key === 'cloudSyncCode' && !settings.accountLoggedIn) {
       settings.cloudManualSyncCodeBackup = String(value || '').trim();
     }
@@ -4049,6 +4165,8 @@
     if (form) form.classList.remove('active');
     if (isFileMode()) {
       setAuthGateStatus('You are in local file mode. For cross-device user accounts, tap "Open Online App".', 'error');
+    } else if (!hasCloudBaseConfig() || !hasCloudConfigShape()) {
+      setAuthGateStatus(`Cloud setup is missing or invalid. ${getCloudSetupGuidance()}`, 'error');
     } else {
       setAuthGateStatus('Choose Sign Up, Log In, or Guest.');
     }
@@ -4104,12 +4222,7 @@
       setAuthGateStatus('Password must be exactly 8 digits.', 'error');
       return;
     }
-    if (isFileMode()) {
-      setAuthGateStatus('Authentication in file mode is blocked by browser network policy. Tap "Open Online App".', 'error');
-      return;
-    }
-    if (!hasCloudBaseConfig()) {
-      setAuthGateStatus('Cloud auth backend unavailable. Open GitHub Pages URL (not file://) and try again.', 'error');
+    if (!(await ensureCloudAuthReady(setAuthGateStatus))) {
       return;
     }
     const submit = document.getElementById('auth-submit-btn');
@@ -4146,11 +4259,11 @@
     } catch (err) {
       console.error(err);
       const msg = String(err?.message || '');
-      const lower = msg.toLowerCase();
-      const guidance = (lower.includes('failed to fetch') || lower.includes('load failed'))
-        ? 'Network/CORS issue. Open GitHub Pages URL and try again.'
+      const guidance = isNetworkLikeErrorMessage(msg)
+        ? `Network/CORS issue. ${getCloudSetupGuidance()}`
         : 'Authentication failed.';
       setAuthGateStatus(`${guidance} ${msg}`.trim(), 'error');
+      if (isNetworkLikeErrorMessage(msg)) openCloudSetupScreen();
     } finally {
       if (submit) submit.disabled = false;
       if (pinInput) pinInput.value = '';
@@ -4314,6 +4427,8 @@
     if (accountAuthBusy) return;
     if (settings.accountLoggedIn && settings.accountUsername) {
       setAccountAuthStatus(`Logged in as ${settings.accountUsername}. Workouts sync to your account.`, 'ok');
+    } else if (!hasCloudBaseConfig() || !hasCloudConfigShape()) {
+      setAccountAuthStatus(`Cloud setup required before account auth. ${getCloudSetupGuidance()}`, 'warn');
     } else {
       setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password (cloud account).', 'ok');
     }
@@ -4412,12 +4527,7 @@
 
   async function signUpAccount() {
     if (accountAuthBusy) return;
-    if (isFileMode()) {
-      setAccountAuthStatus('Sign up requires the online app URL (GitHub Pages), not file://.', 'error');
-      return;
-    }
-    if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus('Cloud auth backend unavailable. Open GitHub Pages URL and try again.', 'error');
+    if (!(await ensureCloudAuthReady(setAccountAuthStatus))) {
       return;
     }
 
@@ -4451,11 +4561,11 @@
     } catch (err) {
       console.error(err);
       const msg = String(err?.message || '');
-      const lower = msg.toLowerCase();
-      const guidance = (lower.includes('failed to fetch') || lower.includes('load failed'))
-        ? 'Network/CORS issue. Use GitHub Pages URL and try again.'
+      const guidance = isNetworkLikeErrorMessage(msg)
+        ? `Network/CORS issue. ${getCloudSetupGuidance()}`
         : 'Sign up failed.';
       setAccountAuthStatus(`${guidance} ${msg}`.trim(), 'error');
+      if (isNetworkLikeErrorMessage(msg)) openCloudSetupScreen();
     } finally {
       setAccountAuthBusy(false);
     }
@@ -4463,12 +4573,7 @@
 
   async function logInAccount() {
     if (accountAuthBusy) return;
-    if (isFileMode()) {
-      setAccountAuthStatus('Log in requires the online app URL (GitHub Pages), not file://.', 'error');
-      return;
-    }
-    if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus('Cloud auth backend unavailable. Open GitHub Pages URL and try again.', 'error');
+    if (!(await ensureCloudAuthReady(setAccountAuthStatus))) {
       return;
     }
 
@@ -4505,11 +4610,11 @@
     } catch (err) {
       console.error(err);
       const msg = String(err?.message || '');
-      const lower = msg.toLowerCase();
-      const guidance = (lower.includes('failed to fetch') || lower.includes('load failed'))
-        ? 'Network/CORS issue. Use GitHub Pages URL and try again.'
+      const guidance = isNetworkLikeErrorMessage(msg)
+        ? `Network/CORS issue. ${getCloudSetupGuidance()}`
         : 'Log in failed.';
       setAccountAuthStatus(`${guidance} ${msg}`.trim(), 'error');
+      if (isNetworkLikeErrorMessage(msg)) openCloudSetupScreen();
     } finally {
       setAccountAuthBusy(false);
     }
@@ -4525,7 +4630,7 @@
         setCloudStatus(
           supabaseConfigManagedByApp()
             ? 'Local only. Log in and tap "Sync Now" to sync across devices.'
-            : 'Local only. Add Supabase URL, anon key, and sync code to sync across devices.',
+            : 'Local only. Add valid Supabase URL, anon key, and sync code to sync across devices.',
           'warn'
         );
       }
@@ -4633,6 +4738,27 @@
     };
     if (includeJson) headers['Content-Type'] = 'application/json';
     return headers;
+  }
+
+  async function testCloudBackend() {
+    if (!hasCloudBaseConfig()) {
+      setCloudStatus(`Missing cloud credentials. ${getCloudSetupGuidance()}`, 'error');
+      return;
+    }
+    if (!hasCloudConfigShape()) {
+      setCloudStatus(`Cloud URL/key format looks invalid. ${getCloudSetupGuidance()}`, 'error');
+      return;
+    }
+    setCloudStatus('Testing cloud backend...', 'warn');
+    const probe = await probeCloudBackend({ force: true });
+    if (probe.ok) {
+      setCloudStatus('Cloud backend reachable. You can sign up or log in now.', 'ok');
+    } else {
+      const networkNote = isNetworkLikeErrorMessage(probe.message)
+        ? 'Cannot reach cloud backend from this network.'
+        : 'Cloud backend returned an error.';
+      setCloudStatus(`${networkNote} ${getCloudSetupGuidance()}`, 'error');
+    }
   }
 
   function encodeStoragePath(path) {
@@ -4917,8 +5043,8 @@
     set('set-scheme', settings.soundScheme);
     set('set-timeformat', settings.timeFormat);
     set('set-account-user', settings.accountUsernameDraft || settings.accountUsername);
-    set('set-cloud-url', supabaseConfigManagedByApp() ? '' : settings.cloudSupabaseUrl);
-    set('set-cloud-key', supabaseConfigManagedByApp() ? '' : settings.cloudSupabaseAnonKey);
+    set('set-cloud-url', supabaseConfigManagedByApp() ? '' : (settings.cloudSupabaseUrl || BUILTIN_SUPABASE_URL || ''));
+    set('set-cloud-key', supabaseConfigManagedByApp() ? '' : (settings.cloudSupabaseAnonKey || BUILTIN_SUPABASE_ANON_KEY || ''));
     set('set-cloud-code', settings.cloudSyncCode);
     set('set-cloud-auto', settings.cloudAutoSync);
     set('account-auth-state', settings.accountLoggedIn && settings.accountUsername ? `@${settings.accountUsername}` : 'Logged out');
@@ -7152,7 +7278,26 @@
 
   if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch((err) => {
+      navigator.serviceWorker.register('./service-worker.js').then((registration) => {
+        let refreshTriggered = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshTriggered) return;
+          refreshTriggered = true;
+          window.location.reload();
+        });
+
+        registration.addEventListener('updatefound', () => {
+          const worker = registration.installing;
+          if (!worker) return;
+          worker.addEventListener('statechange', () => {
+            if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+              worker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+
+        registration.update().catch(() => {});
+      }).catch((err) => {
         console.warn('Service worker registration failed:', err);
       });
     });
