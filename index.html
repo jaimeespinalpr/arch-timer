@@ -256,6 +256,43 @@
   }
   .saved-item:hover { border-color: rgba(15,125,59,0.45); }
   .saved-item:active { transform: translateY(1px); }
+  .saved-item-left {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 4px;
+  }
+  .saved-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .saved-item-action {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
+    color: #d3d3d3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .saved-item-action.warn {
+    color: #f3b2b2;
+    border-color: rgba(189,77,77,0.45);
+  }
+  .saved-mode-chip {
+    align-self: flex-start;
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 2px 8px;
+    border: 1px solid rgba(255,255,255,0.10);
+    color: #d7d7d7;
+  }
   .saved-name {
     font-family: 'Oswald', sans-serif;
     font-size: 16px;
@@ -272,6 +309,160 @@
     color: #777;
     text-align: center;
     padding: 10px 0 0 0;
+  }
+  .auth-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(13,107,60,0.28), transparent 42%),
+      radial-gradient(circle at 80% 90%, rgba(200,168,66,0.20), transparent 44%),
+      linear-gradient(180deg, rgba(5,6,6,0.96), rgba(2,2,2,0.98));
+  }
+  .auth-gate.hidden { display: none; }
+  .auth-card {
+    width: min(460px, 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    background: rgba(16,16,16,0.94);
+    box-shadow: 0 24px 50px rgba(0,0,0,0.45);
+    overflow: hidden;
+  }
+  .auth-head {
+    padding: 20px 18px 12px 18px;
+    text-align: center;
+  }
+  .auth-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .auth-sub {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #b0b0b0;
+    line-height: 1.35;
+  }
+  .auth-body {
+    padding: 12px 16px 18px 16px;
+    display: grid;
+    gap: 10px;
+  }
+  .auth-btn {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    background: #171717;
+    color: #f3f3f3;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    cursor: pointer;
+  }
+  .auth-btn.primary {
+    background: var(--arch-green);
+    border-color: rgba(13,107,60,0.72);
+    color: var(--arch-white);
+  }
+  .auth-form {
+    display: none;
+    gap: 10px;
+  }
+  .auth-form.active { display: grid; }
+  .auth-input {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #2d2d2d;
+    background: #101010;
+    color: #fff;
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+  .auth-note {
+    font-size: 11px;
+    color: #9d9d9d;
+    line-height: 1.3;
+  }
+  .auth-status {
+    margin-top: 6px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid #2a2a2a;
+    background: #121212;
+    color: #d3d3d3;
+    font-size: 12px;
+    min-height: 34px;
+  }
+  .auth-status.error {
+    color: #f2b1b1;
+    border-color: rgba(189,77,77,0.4);
+  }
+  .auth-status.ok {
+    color: #b8e1c8;
+    border-color: rgba(13,107,60,0.42);
+  }
+  .sequence-tools {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 10px 0 6px 0;
+  }
+  .sequence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sequence-step {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #292929;
+    border-radius: 10px;
+    padding: 10px;
+    background: #121212;
+  }
+  .sequence-step-title {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+    font-size: 14px;
+  }
+  .sequence-step-meta {
+    font-size: 11px;
+    color: #9f9f9f;
+    text-transform: uppercase;
+  }
+  .sequence-step-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sequence-row-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: #171717;
+    color: #d9d9d9;
+    cursor: pointer;
+  }
+  .mode-chip {
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px;
+    padding: 3px 8px;
+    color: #efefef;
   }
 
   #view-runner {
@@ -385,6 +576,33 @@
     border: 1px solid rgba(255,255,255,0.08);
     box-shadow: 0 18px 36px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.08);
     transition: background 240ms ease, box-shadow 240ms ease, transform 240ms ease;
+  }
+  .runner-progress {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.18);
+    border: 1px solid rgba(255,255,255,0.12);
+    overflow: hidden;
+    z-index: 3;
+  }
+  .runner-progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.62));
+    transition: width 220ms linear;
+  }
+  .phase-sub {
+    margin-top: 6px;
+    font-size: clamp(11px, 2.2vw, 14px);
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    opacity: 0.82;
+    font-weight: 600;
   }
   .runner-main::before {
     content: "";
@@ -2094,13 +2312,34 @@
 </style>
 </head>
 <body>
+  <div id="auth-gate" class="auth-gate">
+    <div class="auth-card">
+      <div class="auth-head">
+        <div class="auth-title">Arch Timer</div>
+        <div class="auth-sub">Choose how you want to enter. User accounts keep timers separated per person.</div>
+      </div>
+      <div class="auth-body" id="auth-choice">
+        <button type="button" class="auth-btn primary" onclick="showAuthForm('signup')">Sign Up</button>
+        <button type="button" class="auth-btn" onclick="showAuthForm('login')">Log In</button>
+        <button type="button" class="auth-btn" onclick="continueAsGuest()">Use as Guest</button>
+      </div>
+      <div class="auth-body auth-form" id="auth-form">
+        <input id="auth-user" class="auth-input" type="text" placeholder="username (3-24 chars)" autocomplete="username">
+        <input id="auth-pin" class="auth-input" type="password" inputmode="numeric" maxlength="8" placeholder="8-digit password" autocomplete="current-password">
+        <div class="auth-note" id="auth-form-note">Create or use your existing account.</div>
+        <button type="button" class="auth-btn primary" id="auth-submit-btn" onclick="submitAuthForm()">Continue</button>
+        <button type="button" class="auth-btn" onclick="showAuthChoices()">Back</button>
+        <div class="auth-status" id="auth-status">Waiting for selection.</div>
+      </div>
+    </div>
+  </div>
 
   <div id="screen-tabata" class="tab-screen" style="display:flex; flex-direction:column;">
 
   <div id="view-editor">
     <div class="nav-header">
       <button class="nav-btn btn-left" onclick="closeEditor()">Cancel</button>
-      <span class="nav-btn btn-center">TABATA</span>
+      <span class="nav-btn btn-center" id="editor-mode-title">TABATA</span>
       <button class="nav-btn btn-right" onclick="saveAndStart()">READY</button>
     </div>
 
@@ -2217,10 +2456,50 @@
       </div>
     </div>
 
+    <div class="section-title">Workout Mode</div>
+    <div class="options-list">
+      <div class="list-item" onclick="toggleWorkoutMode()">
+        <div class="item-left">
+          <div class="dot d-yellow"></div>
+          <div class="text-group">
+            <div class="item-title">MODE</div>
+            <div class="item-sub">Switch between Tabata and custom sequence</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <div class="mode-chip" id="mode-badge">TABATA</div>
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+      <div class="list-item" onclick="editField('sequenceLoops','int')">
+        <div class="item-left">
+          <div class="dot d-blue"></div>
+          <div class="text-group">
+            <div class="item-title">CUSTOM LOOPS</div>
+            <div class="item-sub">How many times the custom sequence repeats</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <input type="number" id="inp-seqLoops" class="input-display" value="1" min="1" readonly>
+          <i class="fa fa-chevron-right chevron"></i>
+        </div>
+      </div>
+    </div>
+
     <div class="bottom-action-area">
       <button class="btn-pill-gray" id="btn-save-timer" onclick="saveCurrentPreset()">
         <i class="fa fa-stopwatch"></i> SAVE THIS TIMER
       </button>
+    </div>
+
+    <div class="saved-section" id="sequence-panel">
+      <div class="saved-title">Custom Sequence</div>
+      <div class="sequence-tools">
+        <button class="btn-pill-gray" type="button" onclick="addSequenceStep()"><i class="fa-solid fa-plus"></i> ADD STEP</button>
+        <button class="btn-pill-gray" type="button" onclick="applySequenceTemplatePrompt()"><i class="fa-solid fa-layer-group"></i> TEMPLATE</button>
+      </div>
+      <div class="sequence-list" id="sequence-list"></div>
+      <div class="saved-empty" id="sequence-empty">No steps in custom sequence yet</div>
     </div>
 
     <div class="saved-section">
@@ -2269,7 +2548,9 @@
         onerror="this.onerror=null;this.src='assets/auks-old-school2.png';"
       >
       <div class="phase-label" id="disp-phase">PREPARE</div>
+      <div class="phase-sub" id="disp-phase-sub">CYCLE 1/2 • ROUND 1/4</div>
       <div class="time-big" id="disp-time">00:00</div>
+      <div class="runner-progress"><div class="runner-progress-fill" id="runner-progress-fill"></div></div>
     </div>
 
     <div class="quote-strip" id="quote-strip">“Yeah you right”</div>
@@ -2287,7 +2568,7 @@
     <div class="runner-bottom">
       <div class="stat-box">
         <div class="stat-value stat-left" id="disp-rounds">4</div>
-        <div class="stat-label">ROUNDS LEFT</div>
+        <div class="stat-label" id="disp-left-label">ROUNDS LEFT</div>
       </div>
 
       <div class="runner-controls">
@@ -2304,7 +2585,7 @@
 
       <div class="stat-box">
         <div class="stat-value stat-right" id="disp-cycles">2</div>
-        <div class="stat-label">CYCLES LEFT</div>
+        <div class="stat-label" id="disp-right-label">CYCLES LEFT</div>
       </div>
     </div>
   </div>
@@ -2315,7 +2596,7 @@
     <div class="nav-header">
       <button class="nav-btn btn-left" onclick="switchTab('tabata')">Cancel</button>
       <span class="nav-btn btn-center">Rounds</span>
-      <button class="nav-btn btn-right" onclick="saveAndStart()">Save</button>
+      <button class="nav-btn btn-right" onclick="saveRoundsAndOpenList()">Save</button>
     </div>
 
     <div style="padding: 12px 16px; color:#888; text-transform: uppercase; letter-spacing:1px; font-size:12px; font-weight:700;">
@@ -2395,7 +2676,7 @@
     </div>
 
     <div class="bottom-action-area">
-      <button class="btn-pill-gray" onclick="switchTab('tabata')">
+      <button class="btn-pill-gray" onclick="addNewTimerFromCurrentSetup()">
         <i class="fa fa-stopwatch"></i> ADD NEW TIMER
       </button>
     </div>
@@ -2931,14 +3212,19 @@
 <script>
   let config = {
     name: 'Workout',
+    mode: 'TABATA',
     ready: 10, work: 30, rest: 15, sets: 4,
-    cycles: 2, cycleRest: 60, cooldown: 120
+    cycles: 2, cycleRest: 60, cooldown: 120,
+    sequenceLoops: 1,
+    sequence: []
   };
 
   let state = {
     running: false, paused: false, phase: 'IDLE',
     timeLeft: 0, timerId: null,
     currentSet: 1, currentCycle: 1,
+    sequenceIndex: 0, sequenceLoop: 1,
+    phaseDisplayLabel: 'PREPARE',
     lastSpoken: null, zeroBeeped: false,
     halfwayCueSec: null,
     phaseStartedAt: 0, phaseEndAt: 0, phaseDurationSec: 0,
@@ -3046,7 +3332,9 @@
   let speechVoiceCache = null;
   const STORAGE_KEY = 'archmere_tabata_presets_v1';
   const STORAGE_ROUNDS_KEY = 'archmere_rounds_presets_v1';
+  const CURRENT_CONFIG_KEY = 'archmere_current_config_v1';
   const WORKOUT_LOG_KEY = 'archmere_workout_log_v1';
+  const PROFILE_MODELS = Object.freeze({ GUEST: 'guest', USER: 'user' });
   const DEVICE_ID_KEY = 'archmere_device_id_v1';
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
   const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
@@ -3064,6 +3352,9 @@
   let brandingPendingFiles = { full: null, mark: null, watermark: null };
   let deferredInstallPrompt = null;
   let installTarget = null;
+  let activeProfileMode = PROFILE_MODELS.GUEST;
+  let activeProfileUsername = '';
+  let authFormMode = 'login';
 
   function normalizeAccountUsername(value) {
     return String(value || '').trim().toLowerCase();
@@ -3079,6 +3370,22 @@
 
   function accountSyncCode(username) {
     return `${ACCOUNT_SYNC_PREFIX}${normalizeAccountUsername(username)}`;
+  }
+
+  function buildScopedStorageKey(baseKey) {
+    const suffix = activeProfileMode === PROFILE_MODELS.USER && activeProfileUsername
+      ? `user_${normalizeAccountUsername(activeProfileUsername)}`
+      : 'guest';
+    return `${baseKey}__${suffix}`;
+  }
+
+  function canPersistProfileData() {
+    return activeProfileMode === PROFILE_MODELS.USER && Boolean(normalizeAccountUsername(activeProfileUsername));
+  }
+
+  function setActiveProfile(mode, username='') {
+    activeProfileMode = mode === PROFILE_MODELS.USER ? PROFILE_MODELS.USER : PROFILE_MODELS.GUEST;
+    activeProfileUsername = activeProfileMode === PROFILE_MODELS.USER ? normalizeAccountUsername(username) : '';
   }
 
   function isIOSDevice() {
@@ -3520,19 +3827,37 @@
 
   function loadRoundsPresets() {
     try {
-      const raw = localStorage.getItem(STORAGE_ROUNDS_KEY);
+      if (!canPersistProfileData()) {
+        roundsPresets = [];
+        return;
+      }
+      const raw = localStorage.getItem(buildScopedStorageKey(STORAGE_ROUNDS_KEY));
       const parsed = raw ? JSON.parse(raw) : [];
-      roundsPresets = Array.isArray(parsed) ? parsed : [];
+      roundsPresets = Array.isArray(parsed) ? parsed.map((item, idx) => {
+        const p = (item && typeof item === 'object') ? item : {};
+        return {
+          ...p,
+          id: p.id || `legacy_round_${idx}_${Date.now()}`,
+          mode: normalizeMode(p.mode),
+          sequenceLoops: Math.max(1, parseInt(p.sequenceLoops, 10) || 1),
+          sequence: normalizeSequence(p.sequence)
+        };
+      }) : [];
     } catch (e) { roundsPresets = []; }
   }
 
   function persistRoundsPresets() {
-    localStorage.setItem(STORAGE_ROUNDS_KEY, JSON.stringify(roundsPresets));
+    if (!canPersistProfileData()) return;
+    localStorage.setItem(buildScopedStorageKey(STORAGE_ROUNDS_KEY), JSON.stringify(roundsPresets));
   }
 
   function loadWorkoutLog() {
     try {
-      const raw = localStorage.getItem(WORKOUT_LOG_KEY);
+      if (!canPersistProfileData()) {
+        workoutLog = [];
+        return;
+      }
+      const raw = localStorage.getItem(buildScopedStorageKey(WORKOUT_LOG_KEY));
       const parsed = raw ? JSON.parse(raw) : [];
       workoutLog = Array.isArray(parsed) ? parsed : [];
       workoutLog = workoutLog
@@ -3545,7 +3870,8 @@
   }
 
   function persistWorkoutLog() {
-    localStorage.setItem(WORKOUT_LOG_KEY, JSON.stringify(workoutLog.slice(0, 300)));
+    if (!canPersistProfileData()) return;
+    localStorage.setItem(buildScopedStorageKey(WORKOUT_LOG_KEY), JSON.stringify(workoutLog.slice(0, 300)));
   }
 
   function getDeviceId() {
@@ -3683,6 +4009,117 @@
     if (!el) return;
     el.className = `sync-status ${tone}`;
     el.innerText = message;
+  }
+
+  function setAuthGateStatus(message, tone='') {
+    const el = document.getElementById('auth-status');
+    if (!el) return;
+    el.className = `auth-status ${tone}`.trim();
+    el.innerText = message;
+  }
+
+  function showAuthChoices() {
+    const choices = document.getElementById('auth-choice');
+    const form = document.getElementById('auth-form');
+    if (choices) choices.style.display = 'grid';
+    if (form) form.classList.remove('active');
+    setAuthGateStatus('Choose Sign Up, Log In, or Guest.');
+  }
+
+  function showAuthForm(mode='login') {
+    authFormMode = mode === 'signup' ? 'signup' : 'login';
+    const choices = document.getElementById('auth-choice');
+    const form = document.getElementById('auth-form');
+    const note = document.getElementById('auth-form-note');
+    const submit = document.getElementById('auth-submit-btn');
+    const user = document.getElementById('auth-user');
+    const pin = document.getElementById('auth-pin');
+
+    if (choices) choices.style.display = 'none';
+    if (form) form.classList.add('active');
+    if (submit) submit.innerText = authFormMode === 'signup' ? 'Create Account' : 'Log In';
+    if (note) note.innerText = authFormMode === 'signup'
+      ? 'Create a new account. Your timers will be private to this user.'
+      : 'Log in to load this user timers only.';
+    if (user && !user.value) {
+      user.value = settings.accountUsernameDraft || settings.accountUsername || '';
+    }
+    if (pin) pin.value = '';
+    setAuthGateStatus(authFormMode === 'signup' ? 'Enter username + 8-digit password.' : 'Enter your username + password.');
+  }
+
+  function hideAuthGate() {
+    const gate = document.getElementById('auth-gate');
+    if (!gate) return;
+    gate.classList.add('hidden');
+  }
+
+  function continueAsGuest() {
+    setActiveProfile(PROFILE_MODELS.GUEST);
+    loadScopedProfileData();
+    hideAuthGate();
+    switchTab('tabata');
+    setAuthGateStatus('Guest mode enabled.', 'ok');
+  }
+
+  async function submitAuthForm() {
+    const userInput = document.getElementById('auth-user');
+    const pinInput = document.getElementById('auth-pin');
+    const username = normalizeAccountUsername(userInput?.value || '');
+    const pin = String(pinInput?.value || '').trim();
+
+    if (!isValidAccountUsername(username)) {
+      setAuthGateStatus('Username must be 3-24 chars.', 'error');
+      return;
+    }
+    if (!isValidAccountPin(pin)) {
+      setAuthGateStatus('Password must be exactly 8 digits.', 'error');
+      return;
+    }
+    if (!hasCloudBaseConfig()) {
+      setAuthGateStatus('Cloud auth backend unavailable now. Try again in a moment.', 'error');
+      return;
+    }
+
+    const submit = document.getElementById('auth-submit-btn');
+    if (submit) submit.disabled = true;
+    setAuthGateStatus(authFormMode === 'signup' ? 'Creating account...' : 'Logging in...');
+
+    try {
+      if (authFormMode === 'signup') {
+        const existing = await fetchAccountRecord(username);
+        if (existing) {
+          setAuthGateStatus('Username already exists. Use Log In.', 'error');
+          return;
+        }
+        const passwordHash = await hashAccountPin(username, pin);
+        await insertAccountRecord(username, passwordHash);
+      } else {
+        const account = await fetchAccountRecord(username);
+        if (!account) {
+          setAuthGateStatus('Account not found. Use Sign Up first.', 'error');
+          return;
+        }
+        const passwordHash = await hashAccountPin(username, pin);
+        if (String(account.password_hash || '') !== passwordHash) {
+          setAuthGateStatus('Incorrect password.', 'error');
+          return;
+        }
+      }
+
+      applyAccountSession(username);
+      setActiveProfile(PROFILE_MODELS.USER, username);
+      loadScopedProfileData();
+      hideAuthGate();
+      switchTab('tabata');
+      setAuthGateStatus(`Welcome @${username}`, 'ok');
+    } catch (err) {
+      console.error(err);
+      setAuthGateStatus(err?.message || 'Authentication failed.', 'error');
+    } finally {
+      if (submit) submit.disabled = false;
+      if (pinInput) pinInput.value = '';
+    }
   }
 
   function setInstallTarget(target) {
@@ -3897,6 +4334,8 @@
     clearBrandingFileInputs();
     clearAccountPinDraft();
     applySettingsToUI();
+    setActiveProfile(PROFILE_MODELS.GUEST);
+    loadScopedProfileData();
     setAccountAuthStatus('Logged out. You can still use manual sync code or log in again.', 'warn');
   }
 
@@ -3980,6 +4419,8 @@
       const passwordHash = await hashAccountPin(username, pin);
       await insertAccountRecord(username, passwordHash);
       applyAccountSession(username);
+      setActiveProfile(PROFILE_MODELS.USER, username);
+      loadScopedProfileData();
       clearAccountPinDraft();
       setAccountAuthStatus(`Account created. Logged in as ${username}.`, 'ok');
       if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
@@ -4028,6 +4469,8 @@
         return;
       }
       applyAccountSession(username);
+      setActiveProfile(PROFILE_MODELS.USER, username);
+      loadScopedProfileData();
       clearAccountPinDraft();
       setAccountAuthStatus(`Logged in as ${username}.`, 'ok');
       if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
@@ -4767,12 +5210,103 @@
     return `${m}:${r}`;
   }
 
+  function normalizeMode(value) {
+    return String(value || '').trim().toUpperCase() === 'CUSTOM' ? 'CUSTOM' : 'TABATA';
+  }
+
+  function normalizeSequencePhase(value) {
+    const raw = String(value || '').trim().toUpperCase();
+    if (raw === 'WORK' || raw === 'REST' || raw === 'READY' || raw === 'CYCLE_REST' || raw === 'COOLDOWN') return raw;
+    if (raw === 'CYCLE' || raw === 'CYCLE REST') return 'CYCLE_REST';
+    return 'WORK';
+  }
+
+  function normalizeSequenceStep(step, idx=0) {
+    const src = (step && typeof step === 'object') ? step : {};
+    const labelRaw = String(src.label || src.name || '').trim();
+    const phase = normalizeSequencePhase(src.phase || src.type || 'WORK');
+    const label = labelRaw || phase.replace('_', ' ');
+    const seconds = Math.max(1, parseInt(src.seconds ?? src.duration ?? 30, 10) || 30);
+    const id = String(src.id || `seq_${idx}_${label}_${seconds}`).trim();
+    return { id, label, phase, seconds };
+  }
+
+  function normalizeSequence(sequence) {
+    if (!Array.isArray(sequence)) return [];
+    return sequence
+      .map((step, idx) => normalizeSequenceStep(step, idx))
+      .filter((step) => step.seconds > 0)
+      .slice(0, 200);
+  }
+
+  function defaultSequenceFromConfig(src=config) {
+    return [
+      { id: 'seq_prepare', label: 'Prepare', phase: 'READY', seconds: Math.max(1, src.ready || 10) },
+      { id: 'seq_work', label: 'Work', phase: 'WORK', seconds: Math.max(1, src.work || 30) },
+      { id: 'seq_rest', label: 'Rest', phase: 'REST', seconds: Math.max(1, src.rest || 15) },
+      { id: 'seq_cooldown', label: 'Cooldown', phase: 'COOLDOWN', seconds: Math.max(1, src.cooldown || 60) }
+    ];
+  }
+
+  function ensureConfigShape() {
+    config.mode = normalizeMode(config.mode);
+    config.sequenceLoops = Math.max(1, parseInt(config.sequenceLoops, 10) || 1);
+    config.sequence = normalizeSequence(config.sequence);
+    if (!config.sequence.length) {
+      config.sequence = defaultSequenceFromConfig(config);
+    }
+  }
+
+  function resetConfigToDefaults() {
+    config = {
+      ...config,
+      name: 'Workout',
+      mode: 'TABATA',
+      ready: 10,
+      work: 30,
+      rest: 15,
+      sets: 4,
+      cycles: 2,
+      cycleRest: 60,
+      cooldown: 120,
+      sequenceLoops: 1,
+      sequence: []
+    };
+    ensureConfigShape();
+  }
+
+  function loadScopedProfileData() {
+    if (canPersistProfileData()) {
+      loadPresets();
+      loadRoundsPresets();
+      loadCurrentConfig();
+      loadWorkoutLog();
+    } else {
+      resetConfigToDefaults();
+      presets = [];
+      roundsPresets = [];
+      workoutLog = [];
+    }
+
+    applyConfigToInputs();
+    resetTimer();
+    renderPresets();
+    renderRoundsPresets();
+    renderWorkoutLog();
+    updateUI();
+  }
+
   function totalSeconds() {
+    if (config.mode === 'CUSTOM') {
+      const perLoop = config.sequence.reduce((sum, step) => sum + Math.max(0, step.seconds || 0), 0);
+      return perLoop * Math.max(1, config.sequenceLoops || 1);
+    }
     const perCycle = config.sets * (config.work + config.rest);
     return config.ready + (config.cycles * perCycle) + (config.cycleRest * (config.cycles - 1)) + config.cooldown;
   }
 
   function applyConfigToInputs() {
+    ensureConfigShape();
     document.getElementById('inp-ready').value = config.ready;
     document.getElementById('inp-work').value = config.work;
     document.getElementById('inp-rest').value = config.rest;
@@ -4780,36 +5314,100 @@
     document.getElementById('inp-cycles').value = config.cycles;
     document.getElementById('inp-cycleRest').value = config.cycleRest;
     document.getElementById('inp-cooldown').value = config.cooldown;
+    const loopsInp = document.getElementById('inp-seqLoops');
+    if (loopsInp) loopsInp.value = config.sequenceLoops;
+    const modeBadge = document.getElementById('mode-badge');
+    if (modeBadge) modeBadge.innerText = config.mode === 'CUSTOM' ? 'CUSTOM' : 'TABATA';
+    const editorTitle = document.getElementById('editor-mode-title');
+    if (editorTitle) editorTitle.innerText = config.mode === 'CUSTOM' ? 'CUSTOM' : 'TABATA';
+    renderSequenceEditor();
+    persistCurrentConfig();
   }
 
   function getConfigSnapshot() {
+    ensureConfigShape();
     return {
       name: config.name,
+      mode: config.mode,
       ready: config.ready,
       work: config.work,
       rest: config.rest,
       sets: config.sets,
       cycles: config.cycles,
       cycleRest: config.cycleRest,
-      cooldown: config.cooldown
+      cooldown: config.cooldown,
+      sequenceLoops: config.sequenceLoops,
+      sequence: config.sequence.map((step) => ({ ...step }))
     };
+  }
+
+  function persistCurrentConfig() {
+    try {
+      if (!canPersistProfileData()) return;
+      ensureConfigShape();
+      localStorage.setItem(buildScopedStorageKey(CURRENT_CONFIG_KEY), JSON.stringify(getConfigSnapshot()));
+    } catch (e) {
+      // ignore storage errors (private mode / quota)
+    }
+  }
+
+  function loadCurrentConfig() {
+    try {
+      if (!canPersistProfileData()) return false;
+      const raw = localStorage.getItem(buildScopedStorageKey(CURRENT_CONFIG_KEY));
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return false;
+
+      config = {
+        ...config,
+        ...parsed,
+        mode: normalizeMode(parsed.mode),
+        sequenceLoops: Math.max(1, parseInt(parsed.sequenceLoops, 10) || config.sequenceLoops || 1),
+        sequence: normalizeSequence(parsed.sequence)
+      };
+      ensureConfigShape();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function loadPresets() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!canPersistProfileData()) {
+        presets = [];
+        return;
+      }
+      const raw = localStorage.getItem(buildScopedStorageKey(STORAGE_KEY));
       const parsed = raw ? JSON.parse(raw) : [];
-      presets = Array.isArray(parsed) ? parsed : [];
+      presets = Array.isArray(parsed) ? parsed.map((item, idx) => {
+        const p = (item && typeof item === 'object') ? item : {};
+        return {
+          ...p,
+          id: p.id || `legacy_${idx}_${Date.now()}`,
+          mode: normalizeMode(p.mode),
+          sequenceLoops: Math.max(1, parseInt(p.sequenceLoops, 10) || 1),
+          sequence: normalizeSequence(p.sequence)
+        };
+      }) : [];
     } catch (e) {
       presets = [];
     }
   }
 
   function persistPresets() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
+    if (!canPersistProfileData()) return;
+    localStorage.setItem(buildScopedStorageKey(STORAGE_KEY), JSON.stringify(presets));
   }
 
   function presetSummary(p) {
+    const mode = normalizeMode(p.mode);
+    if (mode === 'CUSTOM') {
+      const steps = Array.isArray(p.sequence) ? p.sequence.length : 0;
+      const loops = Math.max(1, parseInt(p.sequenceLoops, 10) || 1);
+      return `Custom ${steps} steps × ${loops} loops`;
+    }
     return `W ${p.work}s / R ${p.rest}s | Rounds ${p.sets} | Cycles ${p.cycles}`;
   }
 
@@ -4825,29 +5423,97 @@
 
     empty.style.display = 'none';
     presets.forEach((p) => {
-      const btn = document.createElement('button');
-      btn.className = 'saved-item';
-      btn.type = 'button';
-      btn.onclick = () => applyPreset(p);
+      const row = document.createElement('div');
+      row.className = 'saved-item';
+      row.role = 'button';
+      row.tabIndex = 0;
+      row.onclick = () => applyPreset(p);
+      row.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          applyPreset(p);
+        }
+      };
 
       const left = document.createElement('div');
+      left.className = 'saved-item-left';
       const name = document.createElement('div');
       name.className = 'saved-name';
       name.textContent = p.name;
+      const modeChip = document.createElement('div');
+      modeChip.className = 'saved-mode-chip';
+      modeChip.textContent = normalizeMode(p.mode) === 'CUSTOM' ? 'CUSTOM' : 'TABATA';
       const meta = document.createElement('div');
       meta.className = 'saved-meta';
       meta.textContent = presetSummary(p);
       left.appendChild(name);
+      left.appendChild(modeChip);
       left.appendChild(meta);
 
-      const icon = document.createElement('i');
-      icon.className = 'fa fa-chevron-right';
-      icon.style.color = '#666';
+      const actions = document.createElement('div');
+      actions.className = 'saved-item-actions';
 
-      btn.appendChild(left);
-      btn.appendChild(icon);
-      list.appendChild(btn);
+      const renameBtn = document.createElement('button');
+      renameBtn.className = 'saved-item-action';
+      renameBtn.type = 'button';
+      renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+      renameBtn.title = 'Rename';
+      renameBtn.onclick = (e) => {
+        e.stopPropagation();
+        renamePresetById(p.id);
+      };
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'saved-item-action warn';
+      deleteBtn.type = 'button';
+      deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      deleteBtn.title = 'Delete';
+      deleteBtn.onclick = (e) => {
+        e.stopPropagation();
+        deletePresetById(p.id);
+      };
+
+      const playIcon = document.createElement('button');
+      playIcon.className = 'saved-item-action';
+      playIcon.type = 'button';
+      playIcon.innerHTML = '<i class="fa-solid fa-play"></i>';
+      playIcon.title = 'Apply';
+      playIcon.onclick = (e) => {
+        e.stopPropagation();
+        applyPreset(p);
+      };
+
+      actions.appendChild(renameBtn);
+      actions.appendChild(deleteBtn);
+      actions.appendChild(playIcon);
+
+      row.appendChild(left);
+      row.appendChild(actions);
+      list.appendChild(row);
     });
+  }
+
+  function renamePresetById(id) {
+    const idx = presets.findIndex((p) => String(p.id) === String(id));
+    if (idx < 0) return;
+    const current = presets[idx];
+    const input = window.prompt('New timer name:', current.name || 'Workout');
+    if (input === null) return;
+    const name = input.trim();
+    if (!name) return;
+    presets[idx].name = name;
+    persistPresets();
+    renderPresets();
+  }
+
+  function deletePresetById(id) {
+    const idx = presets.findIndex((p) => String(p.id) === String(id));
+    if (idx < 0) return;
+    const target = presets[idx];
+    if (!window.confirm(`Delete timer "${target.name || 'Workout'}"?`)) return;
+    presets.splice(idx, 1);
+    persistPresets();
+    renderPresets();
   }
 
   function renderRoundsPresets() {
@@ -4910,21 +5576,47 @@
     return name;
   }
 
-  function saveCurrentPreset() {
+  function saveCurrentTimerWithPrompt(base='Workout') {
+    if (!canPersistProfileData()) {
+      window.alert('Guest mode does not save timers. Please log in or sign up to save your timer list.');
+      return null;
+    }
     syncConfigFromInputs();
-    const base = 'Workout';
     const input = window.prompt('Workout name:', base);
-    if (input === null) return;
+    if (input === null) return null;
     const trimmed = input.trim();
     const name = uniquePresetName(trimmed || base);
     config.name = name;
     const snapshot = getConfigSnapshot();
-    presets.unshift({
+    const preset = {
       id: Date.now(),
       name,
       ...snapshot
-    });
+    };
+    presets.unshift(preset);
     persistPresets();
+    persistCurrentConfig();
+    renderPresets();
+    return preset;
+  }
+
+  function saveCurrentPreset() {
+    saveCurrentTimerWithPrompt('Workout');
+  }
+
+  function addNewTimerFromCurrentSetup() {
+    const saved = saveCurrentTimerWithPrompt('Timer');
+    if (!saved) return;
+    switchTab('tabata');
+    openEditor();
+    renderPresets();
+  }
+
+  function saveRoundsAndOpenList() {
+    const saved = saveCurrentTimerWithPrompt('Rounds');
+    if (!saved) return;
+    switchTab('tabata');
+    openEditor();
     renderPresets();
   }
 
@@ -4941,7 +5633,9 @@
   }
 
   function applyRoundsPreset(preset) {
+    const normalizedMode = normalizeMode(preset.mode);
     config.name = preset.name || 'Workout';
+    config.mode = normalizedMode;
     config.ready = preset.ready;
     config.work = preset.work;
     config.rest = preset.rest;
@@ -4949,6 +5643,9 @@
     config.cycles = preset.cycles;
     config.cycleRest = preset.cycleRest;
     config.cooldown = preset.cooldown;
+    config.sequenceLoops = Math.max(1, parseInt(preset.sequenceLoops, 10) || config.sequenceLoops || 1);
+    config.sequence = normalizeSequence(preset.sequence);
+    ensureConfigShape();
     applyConfigToInputs();
     updateRoundsView();
     resetTimer();
@@ -4957,6 +5654,7 @@
   }
 
   function syncConfigFromInputs() {
+    ensureConfigShape();
     config.ready = clampInt(document.getElementById('inp-ready').value, 0, config.ready);
     config.work = clampInt(document.getElementById('inp-work').value, 0, config.work);
     config.rest = clampInt(document.getElementById('inp-rest').value, 0, config.rest);
@@ -4964,10 +5662,18 @@
     config.cycles = clampInt(document.getElementById('inp-cycles').value, 1, config.cycles);
     config.cycleRest = clampInt(document.getElementById('inp-cycleRest').value, 0, config.cycleRest);
     config.cooldown = clampInt(document.getElementById('inp-cooldown').value, 0, config.cooldown);
+    const loopsInput = document.getElementById('inp-seqLoops');
+    if (loopsInput) {
+      config.sequenceLoops = clampInt(loopsInput.value, 1, config.sequenceLoops);
+    }
+    config.sequence = normalizeSequence(config.sequence);
+    persistCurrentConfig();
   }
 
   function applyPreset(preset) {
+    const normalizedMode = normalizeMode(preset.mode);
     config.name = preset.name || 'Workout';
+    config.mode = normalizedMode;
     config.ready = preset.ready;
     config.work = preset.work;
     config.rest = preset.rest;
@@ -4975,10 +5681,220 @@
     config.cycles = preset.cycles;
     config.cycleRest = preset.cycleRest;
     config.cooldown = preset.cooldown;
+    config.sequenceLoops = Math.max(1, parseInt(preset.sequenceLoops, 10) || config.sequenceLoops || 1);
+    config.sequence = normalizeSequence(preset.sequence);
+    ensureConfigShape();
     applyConfigToInputs();
     resetTimer();
     closeEditor();
     updateUI();
+  }
+
+  function renderSequenceEditor() {
+    ensureConfigShape();
+    const list = document.getElementById('sequence-list');
+    const empty = document.getElementById('sequence-empty');
+    const modeBadge = document.getElementById('mode-badge');
+    const panel = document.getElementById('sequence-panel');
+    if (modeBadge) modeBadge.innerText = config.mode === 'CUSTOM' ? 'CUSTOM' : 'TABATA';
+    if (panel) panel.style.opacity = config.mode === 'CUSTOM' ? '1' : '0.78';
+    if (!list || !empty) return;
+
+    list.innerHTML = '';
+    const steps = normalizeSequence(config.sequence);
+    config.sequence = steps;
+
+    if (!steps.length) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    steps.forEach((step, idx) => {
+      const row = document.createElement('div');
+      row.className = 'sequence-step';
+
+      const left = document.createElement('div');
+      left.style.minWidth = '0';
+      const title = document.createElement('div');
+      title.className = 'sequence-step-title';
+      title.textContent = `${idx + 1}. ${String(step.label || '').toUpperCase()}`;
+      const meta = document.createElement('div');
+      meta.className = 'sequence-step-meta';
+      meta.textContent = `${step.phase.replace('_', ' ')} • ${formatTime(step.seconds)}`;
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'sequence-step-actions';
+
+      const up = document.createElement('button');
+      up.className = 'sequence-row-btn';
+      up.type = 'button';
+      up.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
+      up.title = 'Move up';
+      up.disabled = idx === 0;
+      up.onclick = () => moveSequenceStep(idx, -1);
+
+      const down = document.createElement('button');
+      down.className = 'sequence-row-btn';
+      down.type = 'button';
+      down.innerHTML = '<i class="fa-solid fa-arrow-down"></i>';
+      down.title = 'Move down';
+      down.disabled = idx === steps.length - 1;
+      down.onclick = () => moveSequenceStep(idx, 1);
+
+      const edit = document.createElement('button');
+      edit.className = 'sequence-row-btn';
+      edit.type = 'button';
+      edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+      edit.title = 'Edit step';
+      edit.onclick = () => editSequenceStep(idx);
+
+      const del = document.createElement('button');
+      del.className = 'sequence-row-btn';
+      del.type = 'button';
+      del.style.color = '#f1b0b0';
+      del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      del.title = 'Delete step';
+      del.onclick = () => deleteSequenceStep(idx);
+
+      actions.appendChild(up);
+      actions.appendChild(down);
+      actions.appendChild(edit);
+      actions.appendChild(del);
+
+      row.appendChild(left);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+    persistCurrentConfig();
+  }
+
+  function toggleWorkoutMode() {
+    ensureConfigShape();
+    config.mode = config.mode === 'CUSTOM' ? 'TABATA' : 'CUSTOM';
+    applyConfigToInputs();
+    updateUI();
+  }
+
+  function parseSequencePhase(input, fallback='WORK') {
+    const raw = String(input || '').trim().toLowerCase();
+    if (!raw) return fallback;
+    if (raw === 'work' || raw === 'w') return 'WORK';
+    if (raw === 'rest' || raw === 'r') return 'REST';
+    if (raw === 'ready' || raw === 'prepare' || raw === 'p') return 'READY';
+    if (raw === 'cycle' || raw === 'cycle_rest' || raw === 'cycle rest' || raw === 'c') return 'CYCLE_REST';
+    if (raw === 'cooldown' || raw === 'cool' || raw === 'd') return 'COOLDOWN';
+    return normalizeSequencePhase(fallback);
+  }
+
+  function addSequenceStep() {
+    ensureConfigShape();
+    const labelInput = window.prompt('Step name (example: Work, Rest, Sprint):', 'Work');
+    if (labelInput === null) return;
+    const label = String(labelInput || '').trim() || 'Work';
+
+    const phaseInput = window.prompt('Step type: work/rest/ready/cycle/cooldown', 'work');
+    if (phaseInput === null) return;
+    const phase = parseSequencePhase(phaseInput, 'WORK');
+
+    const secInput = window.prompt('Step duration in seconds:', '30');
+    if (secInput === null) return;
+    const seconds = Math.max(1, parseInt(secInput, 10) || 30);
+
+    config.sequence.push(normalizeSequenceStep({
+      id: `seq_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      label,
+      phase,
+      seconds
+    }));
+    config.mode = 'CUSTOM';
+    renderSequenceEditor();
+    applyConfigToInputs();
+    updateUI();
+  }
+
+  function editSequenceStep(index) {
+    ensureConfigShape();
+    const step = config.sequence[index];
+    if (!step) return;
+
+    const labelInput = window.prompt('Edit step name:', step.label);
+    if (labelInput === null) return;
+    const phaseInput = window.prompt('Edit step type: work/rest/ready/cycle/cooldown', step.phase);
+    if (phaseInput === null) return;
+    const secInput = window.prompt('Edit step duration in seconds:', String(step.seconds));
+    if (secInput === null) return;
+
+    config.sequence[index] = normalizeSequenceStep({
+      ...step,
+      label: labelInput,
+      phase: parseSequencePhase(phaseInput, step.phase),
+      seconds: Math.max(1, parseInt(secInput, 10) || step.seconds)
+    }, index);
+    renderSequenceEditor();
+    updateUI();
+  }
+
+  function deleteSequenceStep(index) {
+    ensureConfigShape();
+    if (index < 0 || index >= config.sequence.length) return;
+    const step = config.sequence[index];
+    if (!window.confirm(`Delete step "${step.label}"?`)) return;
+    config.sequence.splice(index, 1);
+    config.sequence = normalizeSequence(config.sequence);
+    renderSequenceEditor();
+    updateUI();
+  }
+
+  function moveSequenceStep(index, delta) {
+    ensureConfigShape();
+    const next = index + delta;
+    if (index < 0 || index >= config.sequence.length) return;
+    if (next < 0 || next >= config.sequence.length) return;
+    const [step] = config.sequence.splice(index, 1);
+    config.sequence.splice(next, 0, step);
+    renderSequenceEditor();
+    updateUI();
+  }
+
+  function applySequenceTemplate(name) {
+    const key = String(name || '').trim().toLowerCase();
+    if (key === 'tabata') {
+      config.mode = 'CUSTOM';
+      config.sequenceLoops = 8;
+      config.sequence = normalizeSequence([
+        { label: 'Work', phase: 'WORK', seconds: 20 },
+        { label: 'Rest', phase: 'REST', seconds: 10 }
+      ]);
+    } else if (key === 'boxing') {
+      config.mode = 'CUSTOM';
+      config.sequenceLoops = 12;
+      config.sequence = normalizeSequence([
+        { label: 'Round', phase: 'WORK', seconds: 180 },
+        { label: 'Rest', phase: 'REST', seconds: 60 }
+      ]);
+    } else if (key === 'hiit') {
+      config.mode = 'CUSTOM';
+      config.sequenceLoops = 10;
+      config.sequence = normalizeSequence([
+        { label: 'Push', phase: 'WORK', seconds: 40 },
+        { label: 'Recover', phase: 'REST', seconds: 20 }
+      ]);
+    } else {
+      return;
+    }
+    applyConfigToInputs();
+    resetTimer();
+    renderSequenceEditor();
+    updateUI();
+  }
+
+  function applySequenceTemplatePrompt() {
+    const choice = window.prompt('Template: tabata / boxing / hiit', 'tabata');
+    if (!choice) return;
+    applySequenceTemplate(choice);
   }
 
   function openEditor() {
@@ -5000,8 +5916,42 @@
     resetTimer();
   }
 
+  function currentCustomStep() {
+    ensureConfigShape();
+    if (config.mode !== 'CUSTOM') return null;
+    if (!Array.isArray(config.sequence) || !config.sequence.length) return null;
+    return config.sequence[state.sequenceIndex] || null;
+  }
+
+  function customNextPosition() {
+    ensureConfigShape();
+    const total = config.sequence.length;
+    if (!total) return null;
+
+    let nextIndex = state.sequenceIndex + 1;
+    let nextLoop = state.sequenceLoop;
+    if (nextIndex >= total) {
+      nextIndex = 0;
+      nextLoop += 1;
+    }
+    if (nextLoop > config.sequenceLoops) return null;
+    return { index: nextIndex, loop: nextLoop };
+  }
+
+  function applyCustomStep(step, opts={}) {
+    if (!step) return false;
+    const display = String(step.label || step.phase || 'STEP').trim() || 'STEP';
+    setPhase(step.phase, step.seconds, {
+      ...opts,
+      displayLabel: display,
+      voiceText: display
+    });
+    return true;
+  }
+
   function toggleTimer() {
     ensureAudio();
+    ensureConfigShape();
     if (state.running) {
       state.running = false; state.paused = true;
       if (state.phase !== 'IDLE') {
@@ -5017,9 +5967,21 @@
       state.running = true; state.paused = false;
       if (state.phase === 'IDLE') {
         state.currentSet = 1; state.currentCycle = 1;
+        state.sequenceIndex = 0; state.sequenceLoop = 1;
         state.phaseHistory = [];
         startWorkoutSessionTracking();
-        setPhase('READY', config.ready);
+        if (config.mode === 'CUSTOM') {
+          const first = currentCustomStep();
+          if (!first) {
+            state.running = false;
+            state.paused = false;
+            updatePlayButton();
+            return;
+          }
+          applyCustomStep(first);
+        } else {
+          setPhase('READY', config.ready, { displayLabel: 'PREPARE', voiceText: 'Prepare' });
+        }
       } else {
         state.phaseStartedAt = Date.now();
         state.phaseEndAt = state.phaseStartedAt + (state.timeLeft * 1000);
@@ -5033,20 +5995,33 @@
   function resetTimer() {
     clearInterval(state.timerId);
     state.running = false; state.paused = false; state.phase = 'IDLE';
+    state.phaseDisplayLabel = 'PREPARE';
     state.lastSpoken = null; state.zeroBeeped = false;
     state.halfwayCueSec = null;
     state.phaseStartedAt = 0; state.phaseEndAt = 0; state.phaseDurationSec = 0;
+    state.sequenceIndex = 0; state.sequenceLoop = 1;
     state.phaseHistory = [];
     clearWorkoutSessionTracking();
     releaseWakeLock();
     updatePlayButton();
-    setPhase('READY', config.ready);
+    ensureConfigShape();
+    if (config.mode === 'CUSTOM') {
+      const first = currentCustomStep();
+      if (first) {
+        setPhase(first.phase, first.seconds, { displayLabel: first.label, voiceText: first.label });
+      } else {
+        setPhase('READY', 0, { displayLabel: 'READY', voiceText: 'Ready' });
+      }
+    } else {
+      setPhase('READY', config.ready, { displayLabel: 'PREPARE', voiceText: 'Prepare' });
+    }
     state.phase = 'IDLE';
   }
 
   function setPhase(phase, time, opts={}) {
     const anchorMs = Number.isFinite(opts.anchorMs) ? opts.anchorMs : Date.now();
     state.phase = phase;
+    state.phaseDisplayLabel = String(opts.displayLabel || phase || '').trim().toUpperCase() || 'STEP';
     state.timeLeft = Math.max(0, time);
     state.lastSpoken = null;
     state.zeroBeeped = false;
@@ -5057,9 +6032,12 @@
     if (opts.recordHistory !== false) {
       state.phaseHistory.push({
         phase: state.phase,
+        phaseDisplayLabel: state.phaseDisplayLabel,
         timeLeft: state.phaseDurationSec,
         currentSet: state.currentSet,
-        currentCycle: state.currentCycle
+        currentCycle: state.currentCycle,
+        sequenceIndex: state.sequenceIndex,
+        sequenceLoop: state.sequenceLoop
       });
       if (state.phaseHistory.length > 500) state.phaseHistory = state.phaseHistory.slice(-500);
     }
@@ -5069,7 +6047,10 @@
       if (phase === 'WORK') playBeep('go');
       else playBeep('rest');
       triggerPhaseFeedback(phase);
-      if (state.timeLeft > 0) speakPhaseCue(phase);
+      if (state.timeLeft > 0) {
+        if (opts.voiceText) speakText(opts.voiceText, { rate: 0.94, pitch: 0.94, interrupt: true });
+        else speakPhaseCue(phase);
+      }
 
       if (state.timeLeft <= 0) {
         setTimeout(() => nextPhase({ anchorMs }), 0);
@@ -5131,25 +6112,48 @@
 
   function nextPhase(opts={}) {
     const anchorMs = Number.isFinite(opts.anchorMs) ? opts.anchorMs : Date.now();
+    ensureConfigShape();
+
+    if (config.mode === 'CUSTOM') {
+      const nextPos = customNextPosition();
+      if (!nextPos) {
+        recordCompletedWorkout();
+        resetTimer();
+        return false;
+      }
+      state.sequenceIndex = nextPos.index;
+      state.sequenceLoop = nextPos.loop;
+      state.currentSet = state.sequenceIndex + 1;
+      state.currentCycle = state.sequenceLoop;
+      const step = currentCustomStep();
+      if (!step) {
+        recordCompletedWorkout();
+        resetTimer();
+        return false;
+      }
+      applyCustomStep(step, { anchorMs, skipTicker: opts.skipTicker });
+      return true;
+    }
+
     if (state.phase === 'READY') {
-      setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker });
+      setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker, displayLabel: 'WORK', voiceText: 'Work' });
       return true;
     }
 
     if (state.phase === 'WORK') {
-      setPhase('REST', config.rest, { anchorMs, skipTicker: opts.skipTicker });
+      setPhase('REST', config.rest, { anchorMs, skipTicker: opts.skipTicker, displayLabel: 'REST', voiceText: 'Rest' });
       return true;
     }
 
     if (state.phase === 'REST') {
       if (state.currentSet < config.sets) {
         state.currentSet++;
-        setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker });
+        setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker, displayLabel: 'WORK', voiceText: 'Work' });
       } else {
         if (state.currentCycle < config.cycles) {
-          setPhase('CYCLE_REST', config.cycleRest, { anchorMs, skipTicker: opts.skipTicker });
+          setPhase('CYCLE_REST', config.cycleRest, { anchorMs, skipTicker: opts.skipTicker, displayLabel: 'CYCLE REST', voiceText: 'Cycle rest' });
         } else {
-          setPhase('COOLDOWN', config.cooldown, { anchorMs, skipTicker: opts.skipTicker });
+          setPhase('COOLDOWN', config.cooldown, { anchorMs, skipTicker: opts.skipTicker, displayLabel: 'COOLDOWN', voiceText: 'Cooldown' });
         }
       }
       return true;
@@ -5158,7 +6162,7 @@
     if (state.phase === 'CYCLE_REST') {
       state.currentCycle++;
       state.currentSet = 1;
-      setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker });
+      setPhase('WORK', config.work, { anchorMs, skipTicker: opts.skipTicker, displayLabel: 'WORK', voiceText: 'Work' });
       return true;
     }
 
@@ -5187,7 +6191,13 @@
       const first = state.phaseHistory[0];
       state.currentSet = first.currentSet;
       state.currentCycle = first.currentCycle;
-      setPhase(first.phase, first.timeLeft, { anchorMs: Date.now(), recordHistory: false });
+      state.sequenceIndex = Number.isFinite(first.sequenceIndex) ? first.sequenceIndex : state.sequenceIndex;
+      state.sequenceLoop = Number.isFinite(first.sequenceLoop) ? first.sequenceLoop : state.sequenceLoop;
+      setPhase(first.phase, first.timeLeft, {
+        anchorMs: Date.now(),
+        recordHistory: false,
+        displayLabel: first.phaseDisplayLabel || first.phase
+      });
       return;
     }
     state.phaseHistory.pop();
@@ -5195,22 +6205,50 @@
     if (!prev) return;
     state.currentSet = prev.currentSet;
     state.currentCycle = prev.currentCycle;
-    setPhase(prev.phase, prev.timeLeft, { anchorMs: Date.now(), recordHistory: false });
+    state.sequenceIndex = Number.isFinite(prev.sequenceIndex) ? prev.sequenceIndex : state.sequenceIndex;
+    state.sequenceLoop = Number.isFinite(prev.sequenceLoop) ? prev.sequenceLoop : state.sequenceLoop;
+    setPhase(prev.phase, prev.timeLeft, {
+      anchorMs: Date.now(),
+      recordHistory: false,
+      displayLabel: prev.phaseDisplayLabel || prev.phase
+    });
   }
 
   function computeNextInfo() {
-    if (state.phase === 'READY' || state.phase === 'IDLE') return { label: 'WORK', time: config.work };
-    if (state.phase === 'WORK') return { label: 'REST', time: config.rest };
-    if (state.phase === 'REST') {
-      if (state.currentSet < config.sets) return { label: 'WORK', time: config.work };
-      if (state.currentCycle < config.cycles) return { label: 'CYCLE REST', time: config.cycleRest };
-      return { label: 'COOLDOWN', time: config.cooldown };
+    if (config.mode === 'CUSTOM') {
+      if (state.phase === 'IDLE') {
+        const first = config.sequence[0];
+        if (!first) return { label: 'DONE', time: 0, phase: 'READY' };
+        return { label: String(first.label || 'STEP').toUpperCase(), time: first.seconds, phase: first.phase };
+      }
+      const nextPos = customNextPosition();
+      if (!nextPos) return { label: 'DONE', time: 0, phase: 'READY' };
+      const step = config.sequence[nextPos.index];
+      if (!step) return { label: 'DONE', time: 0, phase: 'READY' };
+      return {
+        label: String(step.label || step.phase || 'STEP').toUpperCase(),
+        time: step.seconds,
+        phase: step.phase
+      };
     }
-    if (state.phase === 'CYCLE_REST') return { label: 'WORK', time: config.work };
-    return { label: 'DONE', time: 0 };
+
+    if (state.phase === 'READY' || state.phase === 'IDLE') return { label: 'WORK', time: config.work, phase: 'WORK' };
+    if (state.phase === 'WORK') return { label: 'REST', time: config.rest, phase: 'REST' };
+    if (state.phase === 'REST') {
+      if (state.currentSet < config.sets) return { label: 'WORK', time: config.work, phase: 'WORK' };
+      if (state.currentCycle < config.cycles) return { label: 'CYCLE REST', time: config.cycleRest, phase: 'CYCLE_REST' };
+      return { label: 'COOLDOWN', time: config.cooldown, phase: 'COOLDOWN' };
+    }
+    if (state.phase === 'CYCLE_REST') return { label: 'WORK', time: config.work, phase: 'WORK' };
+    return { label: 'DONE', time: 0, phase: 'READY' };
   }
 
   function roundsLeft() {
+    if (config.mode === 'CUSTOM') {
+      const total = config.sequence.length;
+      if (state.phase === 'IDLE') return total;
+      return Math.max(0, total - state.sequenceIndex);
+    }
     if (state.phase === 'COOLDOWN') return 0;
     if (state.phase === 'CYCLE_REST') return config.sets;
     if (state.phase === 'IDLE' || state.phase === 'READY') return config.sets;
@@ -5218,6 +6256,10 @@
   }
 
   function cyclesLeft() {
+    if (config.mode === 'CUSTOM') {
+      if (state.phase === 'IDLE') return config.sequenceLoops;
+      return Math.max(0, config.sequenceLoops - state.sequenceLoop + 1);
+    }
     if (state.phase === 'COOLDOWN') return 0;
     if (state.phase === 'IDLE' || state.phase === 'READY') return config.cycles;
     return Math.max(0, config.cycles - state.currentCycle + 1);
@@ -5227,10 +6269,15 @@
     const el = document.getElementById('quote-strip');
     if (!el) return;
     if (state.phase === 'IDLE') {
-      el.innerText = 'READY TO TRAIN';
+      el.innerText = config.mode === 'CUSTOM' ? 'CUSTOM WORKOUT READY' : 'READY TO TRAIN';
       return;
     }
-    const phaseText = state.phase === 'CYCLE_REST' ? 'CYCLE REST' : state.phase;
+    if (config.mode === 'CUSTOM') {
+      const totalSteps = config.sequence.length;
+      el.innerText = `LOOP ${state.sequenceLoop}/${config.sequenceLoops} • STEP ${state.sequenceIndex + 1}/${totalSteps} • ${state.phaseDisplayLabel}`;
+      return;
+    }
+    const phaseText = state.phaseDisplayLabel || (state.phase === 'CYCLE_REST' ? 'CYCLE REST' : state.phase);
     el.innerText = `CYCLE ${state.currentCycle}/${config.cycles} • ROUND ${state.currentSet}/${config.sets} • ${phaseText}`;
   }
 
@@ -5243,19 +6290,21 @@
 
     if (state.phase === 'READY' || state.phase === 'IDLE') {
       view.classList.add('phase-ready');
-      document.getElementById('disp-phase').innerText = 'PREPARE';
+      document.getElementById('disp-phase').innerText = state.phase === 'IDLE'
+        ? (config.mode === 'CUSTOM' ? 'READY' : 'PREPARE')
+        : (state.phaseDisplayLabel || 'PREPARE');
     } else if (state.phase === 'WORK') {
       view.classList.add('phase-work');
-      document.getElementById('disp-phase').innerText = 'WORK';
+      document.getElementById('disp-phase').innerText = state.phaseDisplayLabel || 'WORK';
     } else if (state.phase === 'REST') {
       view.classList.add('phase-rest');
-      document.getElementById('disp-phase').innerText = 'REST';
+      document.getElementById('disp-phase').innerText = state.phaseDisplayLabel || 'REST';
     } else if (state.phase === 'CYCLE_REST') {
       view.classList.add('phase-cycle');
-      document.getElementById('disp-phase').innerText = 'CYCLE REST';
+      document.getElementById('disp-phase').innerText = state.phaseDisplayLabel || 'CYCLE REST';
     } else if (state.phase === 'COOLDOWN') {
       view.classList.add('phase-cool');
-      document.getElementById('disp-phase').innerText = 'COOLDOWN';
+      document.getElementById('disp-phase').innerText = state.phaseDisplayLabel || 'COOLDOWN';
     }
 
     const next = computeNextInfo();
@@ -5265,21 +6314,21 @@
 
     const nextBox = document.getElementById('runner-next');
     nextBox.classList.remove('next-work','next-rest','next-cycle','next-cool','next-ready');
-    if (next.label === 'WORK') nextBox.classList.add('next-work');
-    else if (next.label === 'REST') nextBox.classList.add('next-rest');
-    else if (next.label === 'CYCLE REST') nextBox.classList.add('next-cycle');
-    else if (next.label === 'COOLDOWN') nextBox.classList.add('next-cool');
+    if (next.phase === 'WORK') nextBox.classList.add('next-work');
+    else if (next.phase === 'REST') nextBox.classList.add('next-rest');
+    else if (next.phase === 'CYCLE_REST') nextBox.classList.add('next-cycle');
+    else if (next.phase === 'COOLDOWN') nextBox.classList.add('next-cool');
     else nextBox.classList.add('next-ready');
 
-    const phaseColor = (label) => {
-      if (label === 'WORK') return phaseColors.WORK || PHASE_COLORS.WORK;
-      if (label === 'REST') return phaseColors.REST || PHASE_COLORS.REST;
-      if (label === 'CYCLE REST') return phaseColors.CYCLE_REST || PHASE_COLORS.CYCLE_REST;
-      if (label === 'COOLDOWN') return phaseColors.COOLDOWN || PHASE_COLORS.COOLDOWN;
+    const phaseColor = (phase) => {
+      if (phase === 'WORK') return phaseColors.WORK || PHASE_COLORS.WORK;
+      if (phase === 'REST') return phaseColors.REST || PHASE_COLORS.REST;
+      if (phase === 'CYCLE_REST') return phaseColors.CYCLE_REST || PHASE_COLORS.CYCLE_REST;
+      if (phase === 'COOLDOWN') return phaseColors.COOLDOWN || PHASE_COLORS.COOLDOWN;
       return phaseColors.READY || PHASE_COLORS.READY;
     };
     document.getElementById('runner-main').style.background = phaseColor(state.phase === 'IDLE' ? 'READY' : state.phase);
-    nextBox.style.background = phaseColor(next.label);
+    nextBox.style.background = phaseColor(next.phase);
 
     const rLeft = roundsLeft();
     const cLeft = cyclesLeft();
@@ -5287,6 +6336,26 @@
     document.getElementById('disp-cycles').innerText = cLeft;
     document.getElementById('disp-rounds-land').innerText = rLeft;
     document.getElementById('disp-cycles-land').innerText = cLeft;
+    const leftLabel = document.getElementById('disp-left-label');
+    const rightLabel = document.getElementById('disp-right-label');
+    if (leftLabel) leftLabel.innerText = config.mode === 'CUSTOM' ? 'STEPS LEFT' : 'ROUNDS LEFT';
+    if (rightLabel) rightLabel.innerText = config.mode === 'CUSTOM' ? 'LOOPS LEFT' : 'CYCLES LEFT';
+
+    const phaseSub = document.getElementById('disp-phase-sub');
+    if (phaseSub) {
+      if (config.mode === 'CUSTOM') {
+        phaseSub.innerText = `LOOP ${state.sequenceLoop}/${config.sequenceLoops} • STEP ${Math.max(1, state.sequenceIndex + 1)}/${Math.max(1, config.sequence.length)}`;
+      } else {
+        phaseSub.innerText = `CYCLE ${state.currentCycle}/${config.cycles} • ROUND ${state.currentSet}/${config.sets}`;
+      }
+    }
+
+    const progressFill = document.getElementById('runner-progress-fill');
+    if (progressFill) {
+      const duration = Math.max(1, state.phaseDurationSec || 1);
+      const progress = state.phase === 'IDLE' ? 0 : Math.max(0, Math.min(1, 1 - (state.timeLeft / duration)));
+      progressFill.style.width = `${Math.round(progress * 100)}%`;
+    }
 
     document.getElementById('disp-total').innerText = formatTime(totalSeconds());
     updateCoachCue();
@@ -5323,12 +6392,12 @@
   updateUI();
   loadSettings();
   applySettingsToUI();
-  loadRoundsPresets();
-  loadPresets();
-  loadWorkoutLog();
-  renderPresets();
-  renderRoundsPresets();
-  renderWorkoutLog();
+  showAuthChoices();
+  switchTab('tabata');
+  const authUserPrefill = document.getElementById('auth-user');
+  if (authUserPrefill && settings.accountUsername) {
+    authUserPrefill.value = settings.accountUsername;
+  }
 
   function switchTab(name) {
     const screens = ['tabata','rounds','stopwatch','more'];
@@ -5359,10 +6428,6 @@
 
     updateFullscreenButtonUI();
   }
-
-  loadSettings();
-  applySettingsToUI();
-  switchTab('tabata');
 
   function updateRoundsView() {
     document.getElementById('rounds-disp-ready').value = formatTime(config.ready);
@@ -5725,6 +6790,7 @@
     'inp-rest': { field: 'rest', kind: 'seconds', min: 0 },
     'inp-sets': { field: 'sets', kind: 'int', min: 1 },
     'inp-cycles': { field: 'cycles', kind: 'int', min: 1 },
+    'inp-seqLoops': { field: 'sequenceLoops', kind: 'int', min: 1 },
     'inp-cycleRest': { field: 'cycleRest', kind: 'seconds', min: 0 },
     'inp-cooldown': { field: 'cooldown', kind: 'seconds', min: 0 },
 
