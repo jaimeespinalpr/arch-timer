@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arch-timer-pwa-v4';
+const CACHE_NAME = 'arch-timer-pwa-v5';
 
 const APP_SHELL = [
   './',
@@ -57,15 +57,13 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-
-      return fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         if (!response || response.status >= 400) return response;
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
         return response;
-      });
-    })
+      })
+      .catch(() => caches.match(request))
   );
 });
