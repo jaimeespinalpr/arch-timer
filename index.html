@@ -3334,6 +3334,7 @@
   const STORAGE_ROUNDS_KEY = 'archmere_rounds_presets_v1';
   const CURRENT_CONFIG_KEY = 'archmere_current_config_v1';
   const WORKOUT_LOG_KEY = 'archmere_workout_log_v1';
+  const LOCAL_ACCOUNT_STORE_KEY = 'arch_timer_local_accounts_v1';
   const PROFILE_MODELS = Object.freeze({ GUEST: 'guest', USER: 'user' });
   const DEVICE_ID_KEY = 'archmere_device_id_v1';
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
@@ -4076,31 +4077,31 @@
       setAuthGateStatus('Password must be exactly 8 digits.', 'error');
       return;
     }
-    if (!hasCloudBaseConfig()) {
-      setAuthGateStatus('Cloud auth backend unavailable now. Try again in a moment.', 'error');
-      return;
-    }
-
     const submit = document.getElementById('auth-submit-btn');
     if (submit) submit.disabled = true;
     setAuthGateStatus(authFormMode === 'signup' ? 'Creating account...' : 'Logging in...');
 
     try {
+      const passwordHash = await hashAccountPin(username, pin);
+      let source = 'cloud';
       if (authFormMode === 'signup') {
-        const existing = await fetchAccountRecord(username);
+        const lookup = await fetchAccountRecordWithFallback(username);
+        const existing = lookup.record;
+        source = lookup.source;
         if (existing) {
           setAuthGateStatus('Username already exists. Use Log In.', 'error');
           return;
         }
-        const passwordHash = await hashAccountPin(username, pin);
-        await insertAccountRecord(username, passwordHash);
+        const created = await insertAccountRecordWithFallback(username, passwordHash);
+        source = created.source;
       } else {
-        const account = await fetchAccountRecord(username);
+        const lookup = await fetchAccountRecordWithFallback(username);
+        const account = lookup.record;
+        source = lookup.source;
         if (!account) {
           setAuthGateStatus('Account not found. Use Sign Up first.', 'error');
           return;
         }
-        const passwordHash = await hashAccountPin(username, pin);
         if (String(account.password_hash || '') !== passwordHash) {
           setAuthGateStatus('Incorrect password.', 'error');
           return;
@@ -4112,7 +4113,8 @@
       loadScopedProfileData();
       hideAuthGate();
       switchTab('tabata');
-      setAuthGateStatus(`Welcome @${username}`, 'ok');
+      const modeLabel = source === 'cloud' ? 'cloud' : 'local';
+      setAuthGateStatus(`Welcome @${username} (${modeLabel})`, 'ok');
     } catch (err) {
       console.error(err);
       setAuthGateStatus(err?.message || 'Authentication failed.', 'error');
@@ -4277,20 +4279,10 @@
 
   function refreshAccountAuthHint() {
     if (accountAuthBusy) return;
-    if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus(
-        supabaseConfigManagedByApp()
-          ? 'Cloud backend is managed by the app. Sign up or log in with username + 8-digit password.'
-          : 'Configure Supabase URL and anon key, then sign up or log in.',
-        'warn'
-      );
-      return;
-    }
-
     if (settings.accountLoggedIn && settings.accountUsername) {
       setAccountAuthStatus(`Logged in as ${settings.accountUsername}. Workouts sync to your account.`, 'ok');
     } else {
-      setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password.', 'ok');
+      setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password. If cloud is unavailable, local login will be used.', 'ok');
     }
   }
 
@@ -4349,6 +4341,91 @@
     return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
+  function isFetchNetworkError(err) {
+    const msg = String(err?.message || '').toLowerCase();
+    return (
+      msg.includes('failed to fetch') ||
+      msg.includes('networkerror') ||
+      msg.includes('network request failed') ||
+      msg.includes('load failed') ||
+      msg.includes('typeerror: failed to fetch')
+    );
+  }
+
+  function loadLocalAccountStore() {
+    try {
+      const raw = localStorage.getItem(LOCAL_ACCOUNT_STORE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return (parsed && typeof parsed === 'object') ? parsed : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function persistLocalAccountStore(store) {
+    try {
+      localStorage.setItem(LOCAL_ACCOUNT_STORE_KEY, JSON.stringify(store || {}));
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  function getLocalAccountRecord(username) {
+    const key = normalizeAccountUsername(username);
+    if (!key) return null;
+    const store = loadLocalAccountStore();
+    const row = store[key];
+    return row && typeof row === 'object' ? row : null;
+  }
+
+  function insertLocalAccountRecord(username, passwordHash) {
+    const key = normalizeAccountUsername(username);
+    if (!key) throw new Error('Invalid username');
+    const store = loadLocalAccountStore();
+    if (store[key]) {
+      throw new Error('Username already exists. Try Log In or choose another username.');
+    }
+    const now = new Date().toISOString();
+    store[key] = {
+      username: key,
+      password_hash: String(passwordHash || ''),
+      created_at: now,
+      updated_at: now,
+      backend: 'local'
+    };
+    persistLocalAccountStore(store);
+    return store[key];
+  }
+
+  async function fetchAccountRecordWithFallback(username) {
+    if (hasCloudBaseConfig()) {
+      try {
+        const record = await fetchAccountRecord(username);
+        return { record, source: 'cloud' };
+      } catch (err) {
+        if (!isFetchNetworkError(err)) throw err;
+        const local = getLocalAccountRecord(username);
+        return { record: local, source: 'local-fallback' };
+      }
+    }
+    return { record: getLocalAccountRecord(username), source: 'local' };
+  }
+
+  async function insertAccountRecordWithFallback(username, passwordHash) {
+    if (hasCloudBaseConfig()) {
+      try {
+        await insertAccountRecord(username, passwordHash);
+        return { source: 'cloud' };
+      } catch (err) {
+        if (!isFetchNetworkError(err)) throw err;
+        insertLocalAccountRecord(username, passwordHash);
+        return { source: 'local-fallback' };
+      }
+    }
+    insertLocalAccountRecord(username, passwordHash);
+    return { source: 'local' };
+  }
+
   async function fetchAccountRecord(username) {
     const baseUrl = getSupabaseBaseUrl();
     const user = encodeURIComponent(normalizeAccountUsername(username));
@@ -4387,15 +4464,6 @@
 
   async function signUpAccount() {
     if (accountAuthBusy) return;
-    if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus(
-        supabaseConfigManagedByApp()
-          ? 'Cloud backend is temporarily unavailable. Try again in a moment.'
-          : 'Add Supabase URL and anon key first.',
-        'error'
-      );
-      return;
-    }
 
     const username = getAccountUsernameDraft();
     const pin = getAccountPinDraft();
@@ -4411,19 +4479,21 @@
     setAccountAuthBusy(true);
     setAccountAuthStatus('Creating account...', 'warn');
     try {
-      const existing = await fetchAccountRecord(username);
+      const passwordHash = await hashAccountPin(username, pin);
+      const lookup = await fetchAccountRecordWithFallback(username);
+      const existing = lookup.record;
       if (existing) {
         setAccountAuthStatus('Username already exists. Try Log In or choose another username.', 'error');
         return;
       }
-      const passwordHash = await hashAccountPin(username, pin);
-      await insertAccountRecord(username, passwordHash);
+      const created = await insertAccountRecordWithFallback(username, passwordHash);
       applyAccountSession(username);
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       clearAccountPinDraft();
-      setAccountAuthStatus(`Account created. Logged in as ${username}.`, 'ok');
-      if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
+      const modeLabel = created.source === 'cloud' ? 'cloud' : 'local';
+      setAccountAuthStatus(`Account created. Logged in as ${username} (${modeLabel}).`, 'ok');
+      if (created.source === 'cloud' && hasCloudSyncConfig()) await syncCloudNow({ silent: true });
     } catch (err) {
       console.error(err);
       setAccountAuthStatus(err?.message || 'Sign up failed.', 'error');
@@ -4434,15 +4504,6 @@
 
   async function logInAccount() {
     if (accountAuthBusy) return;
-    if (!hasCloudBaseConfig()) {
-      setAccountAuthStatus(
-        supabaseConfigManagedByApp()
-          ? 'Cloud backend is temporarily unavailable. Try again in a moment.'
-          : 'Add Supabase URL and anon key first.',
-        'error'
-      );
-      return;
-    }
 
     const username = getAccountUsernameDraft();
     const pin = getAccountPinDraft();
@@ -4458,7 +4519,8 @@
     setAccountAuthBusy(true);
     setAccountAuthStatus('Logging in...', 'warn');
     try {
-      const account = await fetchAccountRecord(username);
+      const lookup = await fetchAccountRecordWithFallback(username);
+      const account = lookup.record;
       if (!account) {
         setAccountAuthStatus('Account not found. Tap Sign Up first.', 'error');
         return;
@@ -4472,8 +4534,9 @@
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       clearAccountPinDraft();
-      setAccountAuthStatus(`Logged in as ${username}.`, 'ok');
-      if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
+      const modeLabel = lookup.source === 'cloud' ? 'cloud' : 'local';
+      setAccountAuthStatus(`Logged in as ${username} (${modeLabel}).`, 'ok');
+      if (lookup.source === 'cloud' && hasCloudSyncConfig()) await syncCloudNow({ silent: true });
     } catch (err) {
       console.error(err);
       setAccountAuthStatus(err?.message || 'Log in failed.', 'error');
