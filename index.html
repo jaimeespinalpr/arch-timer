@@ -2511,7 +2511,7 @@
 
   <div id="view-runner" class="phase-ready">
     <div class="runner-top">
-      <button class="icon-btn" onclick="openEditor()" aria-label="Settings"><i class="fa-solid fa-gear"></i></button>
+      <button class="icon-btn" onclick="switchTab('tabata')" aria-label="Settings"><i class="fa-solid fa-gear"></i></button>
 
       <div class="runner-top-center">
         <img
@@ -2676,9 +2676,15 @@
     </div>
 
     <div class="bottom-action-area">
-      <button class="btn-pill-gray" onclick="addNewTimerFromCurrentSetup()">
+      <button class="btn-pill-gray" onclick="addNewTimerFromRoundsSetup()">
         <i class="fa fa-stopwatch"></i> ADD NEW TIMER
       </button>
+    </div>
+
+    <div class="saved-section">
+      <div class="saved-title">Saved Rounds Timers</div>
+      <div class="saved-list" id="rounds-saved-list"></div>
+      <div class="saved-empty" id="rounds-saved-empty">No rounds timers saved yet</div>
     </div>
   </div>
   <div id="screen-stopwatch" class="tab-screen">
@@ -3189,7 +3195,11 @@
   </div>
 
   <div class="tab-bar">
-    <button class="tab-item active" onclick="switchTab('tabata')">
+    <button class="tab-item active" onclick="switchTab('clock')">
+      <i class="fa-solid fa-clock tab-icon"></i>
+      <span class="tab-label">CLOCK</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('tabata')">
       <i class="fa-solid fa-stopwatch-20 tab-icon"></i>
       <span class="tab-label">TABATA</span>
     </button>
@@ -4059,7 +4069,7 @@
     setActiveProfile(PROFILE_MODELS.GUEST);
     loadScopedProfileData();
     hideAuthGate();
-    switchTab('tabata');
+    switchTab('clock');
     setAuthGateStatus('Guest mode enabled.', 'ok');
   }
 
@@ -4112,7 +4122,7 @@
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       hideAuthGate();
-      switchTab('tabata');
+      switchTab('clock');
       const modeLabel = source === 'cloud' ? 'cloud' : 'local';
       setAuthGateStatus(`Welcome @${username} (${modeLabel})`, 'ok');
     } catch (err) {
@@ -5663,6 +5673,30 @@
     return preset;
   }
 
+  function saveRoundsTimerWithPrompt(base='Rounds') {
+    if (!canPersistProfileData()) {
+      window.alert('Guest mode does not save timers. Please log in or sign up to save your timer list.');
+      return null;
+    }
+    syncConfigFromInputs();
+    const input = window.prompt('Rounds timer name:', base);
+    if (input === null) return null;
+    const trimmed = input.trim();
+    const name = uniquePresetNameRounds(trimmed || base);
+    config.name = name;
+    const snapshot = getConfigSnapshot();
+    const preset = {
+      id: Date.now(),
+      name,
+      ...snapshot
+    };
+    roundsPresets.unshift(preset);
+    persistRoundsPresets();
+    persistCurrentConfig();
+    renderRoundsPresets();
+    return preset;
+  }
+
   function saveCurrentPreset() {
     saveCurrentTimerWithPrompt('Workout');
   }
@@ -5676,23 +5710,21 @@
   }
 
   function saveRoundsAndOpenList() {
-    const saved = saveCurrentTimerWithPrompt('Rounds');
+    const saved = saveRoundsTimerWithPrompt('Rounds');
     if (!saved) return;
-    switchTab('tabata');
-    openEditor();
-    renderPresets();
+    switchTab('rounds');
+    renderRoundsPresets();
+  }
+
+  function addNewTimerFromRoundsSetup() {
+    const saved = saveRoundsTimerWithPrompt('Rounds');
+    if (!saved) return;
+    switchTab('rounds');
+    renderRoundsPresets();
   }
 
   function saveRoundsPreset() {
-    syncConfigFromInputs();
-    const base = 'Rounds';
-    const input = window.prompt('Rounds name:', base);
-    if (input === null) return;
-    const name = uniquePresetNameRounds(input.trim() || base);
-    const snapshot = getConfigSnapshot();
-    roundsPresets.unshift({ id: Date.now(), name, ...snapshot });
-    persistRoundsPresets();
-    renderRoundsPresets();
+    saveRoundsTimerWithPrompt('Rounds');
   }
 
   function applyRoundsPreset(preset) {
@@ -5975,8 +6007,8 @@
     syncConfigFromInputs();
 
     applyConfigToInputs();
-    closeEditor();
     resetTimer();
+    switchTab('clock');
   }
 
   function currentCustomStep() {
@@ -6456,27 +6488,34 @@
   loadSettings();
   applySettingsToUI();
   showAuthChoices();
-  switchTab('tabata');
+  switchTab('clock');
   const authUserPrefill = document.getElementById('auth-user');
   if (authUserPrefill && settings.accountUsername) {
     authUserPrefill.value = settings.accountUsername;
   }
 
   function switchTab(name) {
+    const tabs = ['clock','tabata','rounds','stopwatch','more'];
     const screens = ['tabata','rounds','stopwatch','more'];
-    if (name !== 'tabata' && isFullscreenModeActive()) {
+    const targetScreen = (name === 'clock' || name === 'tabata') ? 'tabata' : name;
+
+    if (name !== 'clock' && name !== 'tabata' && isFullscreenModeActive()) {
       exitRotateFullscreenMode().catch((err) => console.warn(err));
     }
     screens.forEach((s) => {
       const el = document.getElementById(`screen-${s}`);
-      if (el) el.style.display = s === name ? 'flex' : 'none';
+      if (el) el.style.display = s === targetScreen ? 'flex' : 'none';
     });
     document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-    const idx = screens.indexOf(name);
+    const idx = tabs.indexOf(name);
     const buttons = Array.from(document.querySelectorAll('.tab-item'));
     if (buttons[idx]) buttons[idx].classList.add('active');
 
-    if (name === 'rounds') {
+    if (name === 'clock') {
+      closeEditor();
+    } else if (name === 'tabata') {
+      openEditor();
+    } else if (name === 'rounds') {
       updateRoundsView();
     } else if (name === 'stopwatch') {
       updateStopwatchUI();
