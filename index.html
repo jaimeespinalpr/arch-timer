@@ -3049,7 +3049,7 @@
         <div class="sync-status warn" id="cloud-sync-status">Local only. Log in and tap "Sync Now" to sync across devices.</div>
 
         <div class="settings-note">
-          Si el login falla con "Load failed", entra aqui en MORE -> Cloud Sync y configura un Supabase URL + Anon Key validos.
+          Configura tu proyecto de Supabase aqui (URL + Anon Key). Sin eso, Sign Up / Log In no pueden funcionar.
         </div>
       </div>
 
@@ -3353,8 +3353,8 @@
   const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
   const BRANDING_BUCKET = 'arch-timer-branding';
   const LOCK_SUPABASE_CONFIG = false;
-  const BUILTIN_SUPABASE_URL = 'https://fymysjmpnvxfbfvhaunq.supabase.co';
-  const BUILTIN_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5bXlzam1wbnZ4ZmJmdmhhdW5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4OTUwMTMsImV4cCI6MjA4NzQ3MTAxM30.dZzFKkRKocsPoXRGdK0t-rTr-0Jvlr24ODZRvVhC-ic';
+  const BUILTIN_SUPABASE_URL = '';
+  const BUILTIN_SUPABASE_ANON_KEY = '';
   const CLOUD_PROBE_TIMEOUT_MS = 7000;
   const CLOUD_PROBE_CACHE_MS = 45000;
   const ACCOUNT_SYNC_PREFIX = 'acct_v1_';
@@ -3459,14 +3459,14 @@
   function getSupabaseBaseUrl() {
     const value = supabaseConfigManagedByApp()
       ? BUILTIN_SUPABASE_URL
-      : (settings.cloudSupabaseUrl || BUILTIN_SUPABASE_URL || '');
+      : (settings.cloudSupabaseUrl || '');
     return normalizeSupabaseUrl(value);
   }
 
   function getSupabaseAnonKey() {
     const value = supabaseConfigManagedByApp()
       ? BUILTIN_SUPABASE_ANON_KEY
-      : (settings.cloudSupabaseAnonKey || BUILTIN_SUPABASE_ANON_KEY || '');
+      : (settings.cloudSupabaseAnonKey || '');
     return String(value || '').trim();
   }
 
