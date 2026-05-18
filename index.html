@@ -3344,7 +3344,6 @@
   const STORAGE_ROUNDS_KEY = 'archmere_rounds_presets_v1';
   const CURRENT_CONFIG_KEY = 'archmere_current_config_v1';
   const WORKOUT_LOG_KEY = 'archmere_workout_log_v1';
-  const LOCAL_ACCOUNT_STORE_KEY = 'arch_timer_local_accounts_v1';
   const PROFILE_MODELS = Object.freeze({ GUEST: 'guest', USER: 'user' });
   const DEVICE_ID_KEY = 'archmere_device_id_v1';
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
@@ -4087,27 +4086,25 @@
       setAuthGateStatus('Password must be exactly 8 digits.', 'error');
       return;
     }
+    if (!hasCloudBaseConfig()) {
+      setAuthGateStatus('Cloud auth backend unavailable. Open GitHub Pages URL (not file://) and try again.', 'error');
+      return;
+    }
     const submit = document.getElementById('auth-submit-btn');
     if (submit) submit.disabled = true;
     setAuthGateStatus(authFormMode === 'signup' ? 'Creating account...' : 'Logging in...');
 
     try {
       const passwordHash = await hashAccountPin(username, pin);
-      let source = 'cloud';
       if (authFormMode === 'signup') {
-        const lookup = await fetchAccountRecordWithFallback(username);
-        const existing = lookup.record;
-        source = lookup.source;
+        const existing = await fetchAccountRecord(username);
         if (existing) {
           setAuthGateStatus('Username already exists. Use Log In.', 'error');
           return;
         }
-        const created = await insertAccountRecordWithFallback(username, passwordHash);
-        source = created.source;
+        await insertAccountRecord(username, passwordHash);
       } else {
-        const lookup = await fetchAccountRecordWithFallback(username);
-        const account = lookup.record;
-        source = lookup.source;
+        const account = await fetchAccountRecord(username);
         if (!account) {
           setAuthGateStatus('Account not found. Use Sign Up first.', 'error');
           return;
@@ -4123,11 +4120,14 @@
       loadScopedProfileData();
       hideAuthGate();
       switchTab('clock');
-      const modeLabel = source === 'cloud' ? 'cloud' : 'local';
-      setAuthGateStatus(`Welcome @${username} (${modeLabel})`, 'ok');
+      setAuthGateStatus(`Welcome @${username} (cloud)`, 'ok');
     } catch (err) {
       console.error(err);
-      setAuthGateStatus(err?.message || 'Authentication failed.', 'error');
+      const msg = String(err?.message || '');
+      const guidance = msg.toLowerCase().includes('failed to fetch')
+        ? 'Network/CORS issue. Open GitHub Pages URL and try again.'
+        : 'Authentication failed.';
+      setAuthGateStatus(`${guidance} ${msg}`.trim(), 'error');
     } finally {
       if (submit) submit.disabled = false;
       if (pinInput) pinInput.value = '';
@@ -4292,7 +4292,7 @@
     if (settings.accountLoggedIn && settings.accountUsername) {
       setAccountAuthStatus(`Logged in as ${settings.accountUsername}. Workouts sync to your account.`, 'ok');
     } else {
-      setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password. If cloud is unavailable, local login will be used.', 'ok');
+      setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password (cloud account).', 'ok');
     }
   }
 
@@ -4351,91 +4351,6 @@
     return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
-  function isFetchNetworkError(err) {
-    const msg = String(err?.message || '').toLowerCase();
-    return (
-      msg.includes('failed to fetch') ||
-      msg.includes('networkerror') ||
-      msg.includes('network request failed') ||
-      msg.includes('load failed') ||
-      msg.includes('typeerror: failed to fetch')
-    );
-  }
-
-  function loadLocalAccountStore() {
-    try {
-      const raw = localStorage.getItem(LOCAL_ACCOUNT_STORE_KEY);
-      const parsed = raw ? JSON.parse(raw) : {};
-      return (parsed && typeof parsed === 'object') ? parsed : {};
-    } catch (e) {
-      return {};
-    }
-  }
-
-  function persistLocalAccountStore(store) {
-    try {
-      localStorage.setItem(LOCAL_ACCOUNT_STORE_KEY, JSON.stringify(store || {}));
-    } catch (_) {
-      // ignore
-    }
-  }
-
-  function getLocalAccountRecord(username) {
-    const key = normalizeAccountUsername(username);
-    if (!key) return null;
-    const store = loadLocalAccountStore();
-    const row = store[key];
-    return row && typeof row === 'object' ? row : null;
-  }
-
-  function insertLocalAccountRecord(username, passwordHash) {
-    const key = normalizeAccountUsername(username);
-    if (!key) throw new Error('Invalid username');
-    const store = loadLocalAccountStore();
-    if (store[key]) {
-      throw new Error('Username already exists. Try Log In or choose another username.');
-    }
-    const now = new Date().toISOString();
-    store[key] = {
-      username: key,
-      password_hash: String(passwordHash || ''),
-      created_at: now,
-      updated_at: now,
-      backend: 'local'
-    };
-    persistLocalAccountStore(store);
-    return store[key];
-  }
-
-  async function fetchAccountRecordWithFallback(username) {
-    if (hasCloudBaseConfig()) {
-      try {
-        const record = await fetchAccountRecord(username);
-        return { record, source: 'cloud' };
-      } catch (err) {
-        if (!isFetchNetworkError(err)) throw err;
-        const local = getLocalAccountRecord(username);
-        return { record: local, source: 'local-fallback' };
-      }
-    }
-    return { record: getLocalAccountRecord(username), source: 'local' };
-  }
-
-  async function insertAccountRecordWithFallback(username, passwordHash) {
-    if (hasCloudBaseConfig()) {
-      try {
-        await insertAccountRecord(username, passwordHash);
-        return { source: 'cloud' };
-      } catch (err) {
-        if (!isFetchNetworkError(err)) throw err;
-        insertLocalAccountRecord(username, passwordHash);
-        return { source: 'local-fallback' };
-      }
-    }
-    insertLocalAccountRecord(username, passwordHash);
-    return { source: 'local' };
-  }
-
   async function fetchAccountRecord(username) {
     const baseUrl = getSupabaseBaseUrl();
     const user = encodeURIComponent(normalizeAccountUsername(username));
@@ -4474,6 +4389,10 @@
 
   async function signUpAccount() {
     if (accountAuthBusy) return;
+    if (!hasCloudBaseConfig()) {
+      setAccountAuthStatus('Cloud auth backend unavailable. Open GitHub Pages URL and try again.', 'error');
+      return;
+    }
 
     const username = getAccountUsernameDraft();
     const pin = getAccountPinDraft();
@@ -4490,23 +4409,25 @@
     setAccountAuthStatus('Creating account...', 'warn');
     try {
       const passwordHash = await hashAccountPin(username, pin);
-      const lookup = await fetchAccountRecordWithFallback(username);
-      const existing = lookup.record;
+      const existing = await fetchAccountRecord(username);
       if (existing) {
         setAccountAuthStatus('Username already exists. Try Log In or choose another username.', 'error');
         return;
       }
-      const created = await insertAccountRecordWithFallback(username, passwordHash);
+      await insertAccountRecord(username, passwordHash);
       applyAccountSession(username);
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       clearAccountPinDraft();
-      const modeLabel = created.source === 'cloud' ? 'cloud' : 'local';
-      setAccountAuthStatus(`Account created. Logged in as ${username} (${modeLabel}).`, 'ok');
-      if (created.source === 'cloud' && hasCloudSyncConfig()) await syncCloudNow({ silent: true });
+      setAccountAuthStatus(`Account created. Logged in as ${username} (cloud).`, 'ok');
+      if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
     } catch (err) {
       console.error(err);
-      setAccountAuthStatus(err?.message || 'Sign up failed.', 'error');
+      const msg = String(err?.message || '');
+      const guidance = msg.toLowerCase().includes('failed to fetch')
+        ? 'Network/CORS issue. Use GitHub Pages URL and try again.'
+        : 'Sign up failed.';
+      setAccountAuthStatus(`${guidance} ${msg}`.trim(), 'error');
     } finally {
       setAccountAuthBusy(false);
     }
@@ -4514,6 +4435,10 @@
 
   async function logInAccount() {
     if (accountAuthBusy) return;
+    if (!hasCloudBaseConfig()) {
+      setAccountAuthStatus('Cloud auth backend unavailable. Open GitHub Pages URL and try again.', 'error');
+      return;
+    }
 
     const username = getAccountUsernameDraft();
     const pin = getAccountPinDraft();
@@ -4529,8 +4454,7 @@
     setAccountAuthBusy(true);
     setAccountAuthStatus('Logging in...', 'warn');
     try {
-      const lookup = await fetchAccountRecordWithFallback(username);
-      const account = lookup.record;
+      const account = await fetchAccountRecord(username);
       if (!account) {
         setAccountAuthStatus('Account not found. Tap Sign Up first.', 'error');
         return;
@@ -4544,12 +4468,15 @@
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       clearAccountPinDraft();
-      const modeLabel = lookup.source === 'cloud' ? 'cloud' : 'local';
-      setAccountAuthStatus(`Logged in as ${username} (${modeLabel}).`, 'ok');
-      if (lookup.source === 'cloud' && hasCloudSyncConfig()) await syncCloudNow({ silent: true });
+      setAccountAuthStatus(`Logged in as ${username} (cloud).`, 'ok');
+      if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
     } catch (err) {
       console.error(err);
-      setAccountAuthStatus(err?.message || 'Log in failed.', 'error');
+      const msg = String(err?.message || '');
+      const guidance = msg.toLowerCase().includes('failed to fetch')
+        ? 'Network/CORS issue. Use GitHub Pages URL and try again.'
+        : 'Log in failed.';
+      setAccountAuthStatus(`${guidance} ${msg}`.trim(), 'error');
     } finally {
       setAccountAuthBusy(false);
     }
