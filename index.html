@@ -2319,6 +2319,7 @@
         <div class="auth-sub">Choose how you want to enter. User accounts keep timers separated per person.</div>
       </div>
       <div class="auth-body" id="auth-choice">
+        <button type="button" class="auth-btn" onclick="openHostedApp()">Open Online App</button>
         <button type="button" class="auth-btn primary" onclick="showAuthForm('signup')">Sign Up</button>
         <button type="button" class="auth-btn" onclick="showAuthForm('login')">Log In</button>
         <button type="button" class="auth-btn" onclick="continueAsGuest()">Use as Guest</button>
@@ -3345,6 +3346,7 @@
   const CURRENT_CONFIG_KEY = 'archmere_current_config_v1';
   const WORKOUT_LOG_KEY = 'archmere_workout_log_v1';
   const PROFILE_MODELS = Object.freeze({ GUEST: 'guest', USER: 'user' });
+  const PUBLIC_APP_URL = 'https://jaimeespinalpr.github.io/arch-timer/';
   const DEVICE_ID_KEY = 'archmere_device_id_v1';
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
   const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
@@ -3396,6 +3398,18 @@
   function setActiveProfile(mode, username='') {
     activeProfileMode = mode === PROFILE_MODELS.USER ? PROFILE_MODELS.USER : PROFILE_MODELS.GUEST;
     activeProfileUsername = activeProfileMode === PROFILE_MODELS.USER ? normalizeAccountUsername(username) : '';
+  }
+
+  function isFileMode() {
+    return String(window.location.protocol || '').toLowerCase() === 'file:';
+  }
+
+  function openHostedApp() {
+    try {
+      window.location.href = PUBLIC_APP_URL;
+    } catch (_) {
+      // ignore
+    }
   }
 
   function isIOSDevice() {
@@ -4033,7 +4047,11 @@
     const form = document.getElementById('auth-form');
     if (choices) choices.style.display = 'grid';
     if (form) form.classList.remove('active');
-    setAuthGateStatus('Choose Sign Up, Log In, or Guest.');
+    if (isFileMode()) {
+      setAuthGateStatus('You are in local file mode. For cross-device user accounts, tap "Open Online App".', 'error');
+    } else {
+      setAuthGateStatus('Choose Sign Up, Log In, or Guest.');
+    }
   }
 
   function showAuthForm(mode='login') {
@@ -4086,6 +4104,10 @@
       setAuthGateStatus('Password must be exactly 8 digits.', 'error');
       return;
     }
+    if (isFileMode()) {
+      setAuthGateStatus('Authentication in file mode is blocked by browser network policy. Tap "Open Online App".', 'error');
+      return;
+    }
     if (!hasCloudBaseConfig()) {
       setAuthGateStatus('Cloud auth backend unavailable. Open GitHub Pages URL (not file://) and try again.', 'error');
       return;
@@ -4124,7 +4146,8 @@
     } catch (err) {
       console.error(err);
       const msg = String(err?.message || '');
-      const guidance = msg.toLowerCase().includes('failed to fetch')
+      const lower = msg.toLowerCase();
+      const guidance = (lower.includes('failed to fetch') || lower.includes('load failed'))
         ? 'Network/CORS issue. Open GitHub Pages URL and try again.'
         : 'Authentication failed.';
       setAuthGateStatus(`${guidance} ${msg}`.trim(), 'error');
@@ -4389,6 +4412,10 @@
 
   async function signUpAccount() {
     if (accountAuthBusy) return;
+    if (isFileMode()) {
+      setAccountAuthStatus('Sign up requires the online app URL (GitHub Pages), not file://.', 'error');
+      return;
+    }
     if (!hasCloudBaseConfig()) {
       setAccountAuthStatus('Cloud auth backend unavailable. Open GitHub Pages URL and try again.', 'error');
       return;
@@ -4424,7 +4451,8 @@
     } catch (err) {
       console.error(err);
       const msg = String(err?.message || '');
-      const guidance = msg.toLowerCase().includes('failed to fetch')
+      const lower = msg.toLowerCase();
+      const guidance = (lower.includes('failed to fetch') || lower.includes('load failed'))
         ? 'Network/CORS issue. Use GitHub Pages URL and try again.'
         : 'Sign up failed.';
       setAccountAuthStatus(`${guidance} ${msg}`.trim(), 'error');
@@ -4435,6 +4463,10 @@
 
   async function logInAccount() {
     if (accountAuthBusy) return;
+    if (isFileMode()) {
+      setAccountAuthStatus('Log in requires the online app URL (GitHub Pages), not file://.', 'error');
+      return;
+    }
     if (!hasCloudBaseConfig()) {
       setAccountAuthStatus('Cloud auth backend unavailable. Open GitHub Pages URL and try again.', 'error');
       return;
@@ -4473,7 +4505,8 @@
     } catch (err) {
       console.error(err);
       const msg = String(err?.message || '');
-      const guidance = msg.toLowerCase().includes('failed to fetch')
+      const lower = msg.toLowerCase();
+      const guidance = (lower.includes('failed to fetch') || lower.includes('load failed'))
         ? 'Network/CORS issue. Use GitHub Pages URL and try again.'
         : 'Log in failed.';
       setAccountAuthStatus(`${guidance} ${msg}`.trim(), 'error');
