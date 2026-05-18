@@ -2934,7 +2934,7 @@
         <div class="settings-item">
           <div class="settings-left">
             <div class="settings-label">Log in or Sign up</div>
-            <div class="settings-sub">Use username + 8-digit password to share workouts across devices (no technical setup)</div>
+            <div class="settings-sub">Uses Firebase Authentication (username + 8-digit password)</div>
           </div>
           <div class="settings-value" id="account-auth-state">Logged out</div>
         </div>
@@ -2979,6 +2979,20 @@
 
         <div class="sync-status warn" id="account-auth-status">Enter a username and 8-digit password to sign up or log in.</div>
 
+        <div class="settings-item col">
+          <div class="settings-left">
+            <div class="settings-label">Firebase Web API Key (Users)</div>
+            <div class="settings-sub">Used for Sign Up / Log In (Firebase Authentication)</div>
+          </div>
+          <input
+            id="set-firebase-key"
+            class="settings-input"
+            type="password"
+            placeholder="AIza..."
+            oninput="updateCloudField('firebaseWebApiKey', this.value)"
+          >
+        </div>
+
         <div class="settings-item" id="cloud-backend-managed-item">
           <div class="settings-left">
             <div class="settings-label">Cloud Backend</div>
@@ -2989,8 +3003,8 @@
 
         <div class="settings-item col" id="cloud-url-item">
           <div class="settings-left">
-            <div class="settings-label">Supabase URL</div>
-            <div class="settings-sub">Free project URL (https://...supabase.co)</div>
+            <div class="settings-label">Supabase URL (Sync Now)</div>
+            <div class="settings-sub">Optional: used for workouts/branding sync (https://...supabase.co)</div>
           </div>
           <input
             id="set-cloud-url"
@@ -3003,8 +3017,8 @@
 
         <div class="settings-item col" id="cloud-key-item">
           <div class="settings-left">
-            <div class="settings-label">Supabase Anon Key</div>
-            <div class="settings-sub">Public anon key (safe for client apps)</div>
+            <div class="settings-label">Supabase Anon Key (Sync Now)</div>
+            <div class="settings-sub">Optional: public anon key for sync backend</div>
           </div>
           <input
             id="set-cloud-key"
@@ -3042,14 +3056,14 @@
 
         <div class="settings-actions">
           <button type="button" class="settings-action-btn" onclick="generateSyncCode()">Generate Code</button>
-          <button type="button" class="settings-action-btn" id="btn-cloud-test" onclick="testCloudBackend()">Test Cloud</button>
+          <button type="button" class="settings-action-btn" id="btn-cloud-test" onclick="testCloudBackend()">Test Backends</button>
           <button type="button" class="settings-action-btn primary" id="btn-cloud-sync" onclick="syncCloudNow()">Sync Now</button>
         </div>
 
         <div class="sync-status warn" id="cloud-sync-status">Local only. Log in and tap "Sync Now" to sync across devices.</div>
 
         <div class="settings-note">
-          Configura tu proyecto de Supabase aqui (URL + Anon Key). Sin eso, Sign Up / Log In no pueden funcionar.
+          Sign Up / Log In usan Firebase. Supabase se usa para Sync Now (workouts/branding entre dispositivos).
         </div>
       </div>
 
@@ -3282,6 +3296,7 @@
     paleColors: false,
     keepAwake: true,
     timeFormat: 'mm:ss',
+    firebaseWebApiKey: '',
     cloudSupabaseUrl: '',
     cloudSupabaseAnonKey: '',
     cloudSyncCode: '',
@@ -3350,8 +3365,8 @@
   const PUBLIC_APP_URL = 'https://jaimeespinalpr.github.io/arch-timer/';
   const DEVICE_ID_KEY = 'archmere_device_id_v1';
   const CLOUD_SYNC_TABLE = 'workout_sync_profiles';
-  const CLOUD_ACCOUNTS_TABLE = 'arch_timer_accounts';
   const BRANDING_BUCKET = 'arch-timer-branding';
+  const BUILTIN_FIREBASE_WEB_API_KEY = '';
   const LOCK_SUPABASE_CONFIG = false;
   const BUILTIN_SUPABASE_URL = '';
   const BUILTIN_SUPABASE_ANON_KEY = '';
@@ -3371,6 +3386,7 @@
   let activeProfileUsername = '';
   let authFormMode = 'login';
   let cloudProbeCache = { key: '', ok: null, checkedAt: 0, message: '' };
+  let firebaseAuthProbeCache = { key: '', ok: null, checkedAt: 0, message: '' };
 
   function normalizeAccountUsername(value) {
     return String(value || '').trim().toLowerCase();
@@ -3418,7 +3434,7 @@
 
   function openCloudSetupScreen() {
     switchTab('more');
-    const userInput = document.getElementById('set-cloud-url');
+    const userInput = document.getElementById('set-firebase-key') || document.getElementById('set-cloud-url');
     if (userInput) userInput.focus();
   }
 
@@ -3470,22 +3486,20 @@
     return String(value || '').trim();
   }
 
-  function isLikelySupabaseUrl(url) {
-    const value = normalizeSupabaseUrl(url);
-    return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(value);
+  function getFirebaseWebApiKey() {
+    return String(settings.firebaseWebApiKey || BUILTIN_FIREBASE_WEB_API_KEY || '').trim();
   }
 
-  function isLikelySupabaseAnonKey(key) {
-    const value = String(key || '').trim();
-    return value.startsWith('eyJ') && value.length > 60;
+  function isLikelyFirebaseWebApiKey(key) {
+    return /^AIza[0-9A-Za-z_-]{20,}$/.test(String(key || '').trim());
   }
 
   function hasCloudConfigShape() {
-    return isLikelySupabaseUrl(getSupabaseBaseUrl()) && isLikelySupabaseAnonKey(getSupabaseAnonKey());
+    return isLikelyFirebaseWebApiKey(getFirebaseWebApiKey());
   }
 
   function getCloudSetupGuidance() {
-    return 'Open MORE -> Cloud Sync and set a valid Supabase URL + Anon Key, then retry.';
+    return 'Open MORE -> Cloud Sync and set a valid Firebase Web API Key, then retry.';
   }
 
   function isNetworkLikeErrorMessage(message) {
@@ -3501,6 +3515,60 @@
   }
 
   async function probeCloudBackend(options={}) {
+    const apiKey = getFirebaseWebApiKey();
+    const cacheKey = apiKey.slice(0, 16);
+    const force = Boolean(options.force);
+    const now = Date.now();
+    if (
+      !force &&
+      firebaseAuthProbeCache.key === cacheKey &&
+      now - firebaseAuthProbeCache.checkedAt < CLOUD_PROBE_CACHE_MS &&
+      firebaseAuthProbeCache.ok !== null
+    ) {
+      return firebaseAuthProbeCache;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), CLOUD_PROBE_TIMEOUT_MS);
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${encodeURIComponent(apiKey)}`;
+
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ returnSecureToken: true }),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      let code = '';
+      try {
+        const body = await resp.json();
+        code = String(body?.error?.message || '');
+      } catch (_) {
+        code = '';
+      }
+      const ok = code === 'MISSING_EMAIL' || code === 'INVALID_EMAIL' || code === 'EMAIL_EXISTS' || resp.status === 200;
+      firebaseAuthProbeCache = {
+        key: cacheKey,
+        ok,
+        checkedAt: now,
+        message: ok ? '' : (code || `Firebase auth backend error (${resp.status}).`)
+      };
+      return firebaseAuthProbeCache;
+    } catch (err) {
+      clearTimeout(timeout);
+      const msg = String(err?.message || err || 'Cloud probe failed');
+      firebaseAuthProbeCache = {
+        key: cacheKey,
+        ok: false,
+        checkedAt: now,
+        message: msg
+      };
+      return firebaseAuthProbeCache;
+    }
+  }
+
+  async function probeSupabaseBackend(options={}) {
     const baseUrl = getSupabaseBaseUrl();
     const anonKey = getSupabaseAnonKey();
     const cacheKey = `${baseUrl}|${anonKey.slice(0, 16)}`;
@@ -3517,7 +3585,6 @@
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), CLOUD_PROBE_TIMEOUT_MS);
-
     try {
       const resp = await fetch(`${baseUrl}/rest/v1/`, {
         method: 'GET',
@@ -3530,12 +3597,12 @@
         key: cacheKey,
         ok,
         checkedAt: now,
-        message: ok ? '' : `Cloud backend error (${resp.status}).`
+        message: ok ? '' : `Supabase backend error (${resp.status}).`
       };
       return cloudProbeCache;
     } catch (err) {
       clearTimeout(timeout);
-      const msg = String(err?.message || err || 'Cloud probe failed');
+      const msg = String(err?.message || err || 'Supabase probe failed');
       cloudProbeCache = {
         key: cacheKey,
         ok: false,
@@ -3546,26 +3613,65 @@
     }
   }
 
+  function mapFirebaseAuthError(code, mode='login') {
+    const value = String(code || '').trim().toUpperCase();
+    if (mode === 'signup' && value === 'EMAIL_EXISTS') return 'Username already exists. Use Log In.';
+    if (value === 'EMAIL_NOT_FOUND') return 'Account not found. Tap Sign Up first.';
+    if (value === 'INVALID_PASSWORD' || value === 'INVALID_LOGIN_CREDENTIALS') return 'Incorrect password.';
+    if (value === 'USER_DISABLED') return 'This account is disabled.';
+    if (value === 'TOO_MANY_ATTEMPTS_TRY_LATER') return 'Too many attempts. Try again later.';
+    if (value === 'OPERATION_NOT_ALLOWED') return 'Firebase Email/Password sign-in is disabled in this project.';
+    if (value === 'API_KEY_INVALID') return 'Firebase API key is invalid.';
+    if (value === 'PROJECT_NOT_FOUND') return 'Firebase project not found for this API key.';
+    return '';
+  }
+
+  function accountToFirebaseEmail(username) {
+    return `${normalizeAccountUsername(username)}@archtimer.app`;
+  }
+
+  async function firebaseAuthRequest(mode, username, pin) {
+    const apiKey = getFirebaseWebApiKey();
+    const endpoint = mode === 'signup' ? 'accounts:signUp' : 'accounts:signInWithPassword';
+    const url = `https://identitytoolkit.googleapis.com/v1/${endpoint}?key=${encodeURIComponent(apiKey)}`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: accountToFirebaseEmail(username),
+        password: String(pin || '').trim(),
+        returnSecureToken: true
+      })
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      const code = String(data?.error?.message || '');
+      const mapped = mapFirebaseAuthError(code, mode);
+      throw new Error(mapped || `Firebase auth failed (${code || resp.status})`);
+    }
+    return data;
+  }
+
   async function ensureCloudAuthReady(statusWriter) {
     if (isFileMode()) {
       statusWriter('Authentication in file mode is blocked by browser network policy. Tap "Open Online App".', 'error');
       return false;
     }
-    if (!hasCloudBaseConfig()) {
-      statusWriter(`Cloud auth backend unavailable. ${getCloudSetupGuidance()}`, 'error');
+    if (!getFirebaseWebApiKey()) {
+      statusWriter(`Firebase auth config unavailable. ${getCloudSetupGuidance()}`, 'error');
       openCloudSetupScreen();
       return false;
     }
     if (!hasCloudConfigShape()) {
-      statusWriter(`Cloud credentials format is invalid. ${getCloudSetupGuidance()}`, 'error');
+      statusWriter(`Firebase API key format is invalid. ${getCloudSetupGuidance()}`, 'error');
       openCloudSetupScreen();
       return false;
     }
     const probe = await probeCloudBackend();
     if (!probe.ok) {
       const networkNote = isNetworkLikeErrorMessage(probe.message)
-        ? 'Cannot reach cloud backend from this network.'
-        : 'Cloud backend is responding with an error.';
+        ? 'Cannot reach Firebase backend from this network.'
+        : 'Firebase backend is responding with an error.';
       statusWriter(`${networkNote} ${getCloudSetupGuidance()}`, 'error');
       openCloudSetupScreen();
       return false;
@@ -3940,6 +4046,7 @@
         const parsed = JSON.parse(raw);
         settings = { ...settings, ...parsed };
       }
+      settings.firebaseWebApiKey = String(settings.firebaseWebApiKey || '').trim();
       settings.accountUsername = normalizeAccountUsername(settings.accountUsername);
       settings.accountUsernameDraft = normalizeAccountUsername(settings.accountUsernameDraft || settings.accountUsername);
       settings.accountLoggedIn = Boolean(settings.accountLoggedIn && settings.accountUsername);
@@ -4127,6 +4234,9 @@
       return;
     }
     settings[key] = value;
+    if (key === 'firebaseWebApiKey') {
+      firebaseAuthProbeCache = { key: '', ok: null, checkedAt: 0, message: '' };
+    }
     if (key === 'cloudSupabaseUrl' || key === 'cloudSupabaseAnonKey') {
       cloudProbeCache = { key: '', ok: null, checkedAt: 0, message: '' };
     }
@@ -4135,6 +4245,7 @@
     }
     persistSettings();
     refreshCloudStatusHint();
+    refreshAccountAuthHint();
   }
 
   function setCloudStatus(message, tone='warn') {
@@ -4165,8 +4276,8 @@
     if (form) form.classList.remove('active');
     if (isFileMode()) {
       setAuthGateStatus('You are in local file mode. For cross-device user accounts, tap "Open Online App".', 'error');
-    } else if (!hasCloudBaseConfig() || !hasCloudConfigShape()) {
-      setAuthGateStatus(`Cloud setup is missing or invalid. ${getCloudSetupGuidance()}`, 'error');
+    } else if (!getFirebaseWebApiKey() || !hasCloudConfigShape()) {
+      setAuthGateStatus(`Firebase setup is missing or invalid. ${getCloudSetupGuidance()}`, 'error');
     } else {
       setAuthGateStatus('Choose Sign Up, Log In, or Guest.');
     }
@@ -4230,32 +4341,14 @@
     setAuthGateStatus(authFormMode === 'signup' ? 'Creating account...' : 'Logging in...');
 
     try {
-      const passwordHash = await hashAccountPin(username, pin);
-      if (authFormMode === 'signup') {
-        const existing = await fetchAccountRecord(username);
-        if (existing) {
-          setAuthGateStatus('Username already exists. Use Log In.', 'error');
-          return;
-        }
-        await insertAccountRecord(username, passwordHash);
-      } else {
-        const account = await fetchAccountRecord(username);
-        if (!account) {
-          setAuthGateStatus('Account not found. Use Sign Up first.', 'error');
-          return;
-        }
-        if (String(account.password_hash || '') !== passwordHash) {
-          setAuthGateStatus('Incorrect password.', 'error');
-          return;
-        }
-      }
+      await firebaseAuthRequest(authFormMode === 'signup' ? 'signup' : 'login', username, pin);
 
       applyAccountSession(username);
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       hideAuthGate();
       switchTab('clock');
-      setAuthGateStatus(`Welcome @${username} (cloud)`, 'ok');
+      setAuthGateStatus(`Welcome @${username} (Firebase)`, 'ok');
     } catch (err) {
       console.error(err);
       const msg = String(err?.message || '');
@@ -4426,11 +4519,11 @@
   function refreshAccountAuthHint() {
     if (accountAuthBusy) return;
     if (settings.accountLoggedIn && settings.accountUsername) {
-      setAccountAuthStatus(`Logged in as ${settings.accountUsername}. Workouts sync to your account.`, 'ok');
-    } else if (!hasCloudBaseConfig() || !hasCloudConfigShape()) {
-      setAccountAuthStatus(`Cloud setup required before account auth. ${getCloudSetupGuidance()}`, 'warn');
+      setAccountAuthStatus(`Logged in as ${settings.accountUsername}. User account is stored in Firebase.`, 'ok');
+    } else if (!getFirebaseWebApiKey() || !hasCloudConfigShape()) {
+      setAccountAuthStatus(`Firebase setup required before account auth. ${getCloudSetupGuidance()}`, 'warn');
     } else {
-      setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password (cloud account).', 'ok');
+      setAccountAuthStatus('Ready. Sign up or log in with username + 8-digit password (Firebase account).', 'ok');
     }
   }
 
@@ -4479,52 +4572,6 @@
     setAccountAuthStatus('Logged out. You can still use manual sync code or log in again.', 'warn');
   }
 
-  async function hashAccountPin(username, pin) {
-    if (!(window.crypto && window.crypto.subtle)) {
-      throw new Error('This browser does not support secure hashing for login.');
-    }
-    const payload = `arch_timer_auth_v1|${normalizeAccountUsername(username)}|${String(pin).trim()}`;
-    const bytes = new TextEncoder().encode(payload);
-    const hashBuffer = await window.crypto.subtle.digest('SHA-256', bytes);
-    return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  async function fetchAccountRecord(username) {
-    const baseUrl = getSupabaseBaseUrl();
-    const user = encodeURIComponent(normalizeAccountUsername(username));
-    const url = `${baseUrl}/rest/v1/${CLOUD_ACCOUNTS_TABLE}?username=eq.${user}&select=username,password_hash,created_at,updated_at`;
-    const resp = await fetch(url, { headers: cloudRequestHeaders(false) });
-    if (!resp.ok) {
-      const text = await resp.text();
-      throw new Error(`Account lookup failed (${resp.status}) ${text.slice(0, 120)}`.trim());
-    }
-    const rows = await resp.json();
-    return Array.isArray(rows) && rows.length ? rows[0] : null;
-  }
-
-  async function insertAccountRecord(username, passwordHash) {
-    const baseUrl = getSupabaseBaseUrl();
-    const now = new Date().toISOString();
-    const body = [{
-      username: normalizeAccountUsername(username),
-      password_hash: passwordHash,
-      created_at: now,
-      updated_at: now
-    }];
-    const headers = cloudRequestHeaders(true);
-    headers.Prefer = 'return=representation';
-    const resp = await fetch(`${baseUrl}/rest/v1/${CLOUD_ACCOUNTS_TABLE}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
-    if (!resp.ok) {
-      const text = await resp.text();
-      throw new Error(`Sign up failed (${resp.status}) ${text.slice(0, 160)}`.trim());
-    }
-    return resp.json().catch(() => []);
-  }
-
   async function signUpAccount() {
     if (accountAuthBusy) return;
     if (!(await ensureCloudAuthReady(setAccountAuthStatus))) {
@@ -4545,18 +4592,12 @@
     setAccountAuthBusy(true);
     setAccountAuthStatus('Creating account...', 'warn');
     try {
-      const passwordHash = await hashAccountPin(username, pin);
-      const existing = await fetchAccountRecord(username);
-      if (existing) {
-        setAccountAuthStatus('Username already exists. Try Log In or choose another username.', 'error');
-        return;
-      }
-      await insertAccountRecord(username, passwordHash);
+      await firebaseAuthRequest('signup', username, pin);
       applyAccountSession(username);
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       clearAccountPinDraft();
-      setAccountAuthStatus(`Account created. Logged in as ${username} (cloud).`, 'ok');
+      setAccountAuthStatus(`Account created. Logged in as ${username} (Firebase).`, 'ok');
       if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
     } catch (err) {
       console.error(err);
@@ -4591,21 +4632,12 @@
     setAccountAuthBusy(true);
     setAccountAuthStatus('Logging in...', 'warn');
     try {
-      const account = await fetchAccountRecord(username);
-      if (!account) {
-        setAccountAuthStatus('Account not found. Tap Sign Up first.', 'error');
-        return;
-      }
-      const passwordHash = await hashAccountPin(username, pin);
-      if (String(account.password_hash || '') !== passwordHash) {
-        setAccountAuthStatus('Incorrect password.', 'error');
-        return;
-      }
+      await firebaseAuthRequest('login', username, pin);
       applyAccountSession(username);
       setActiveProfile(PROFILE_MODELS.USER, username);
       loadScopedProfileData();
       clearAccountPinDraft();
-      setAccountAuthStatus(`Logged in as ${username} (cloud).`, 'ok');
+      setAccountAuthStatus(`Logged in as ${username} (Firebase).`, 'ok');
       if (hasCloudSyncConfig()) await syncCloudNow({ silent: true });
     } catch (err) {
       console.error(err);
@@ -4741,23 +4773,42 @@
   }
 
   async function testCloudBackend() {
-    if (!hasCloudBaseConfig()) {
-      setCloudStatus(`Missing cloud credentials. ${getCloudSetupGuidance()}`, 'error');
+    const hasFirebase = Boolean(getFirebaseWebApiKey());
+    const hasSupabase = hasCloudBaseConfig();
+    if (!hasFirebase && !hasSupabase) {
+      setAccountAuthStatus(`Missing Firebase key. ${getCloudSetupGuidance()}`, 'error');
+      setCloudStatus('Missing Supabase URL/anon key for Sync Now.', 'warn');
       return;
     }
-    if (!hasCloudConfigShape()) {
-      setCloudStatus(`Cloud URL/key format looks invalid. ${getCloudSetupGuidance()}`, 'error');
-      return;
+
+    if (hasFirebase) {
+      if (!hasCloudConfigShape()) {
+        setAccountAuthStatus(`Firebase API key format is invalid. ${getCloudSetupGuidance()}`, 'error');
+      } else {
+        const authProbe = await probeCloudBackend({ force: true });
+        if (authProbe.ok) {
+          setAccountAuthStatus('Firebase auth reachable. You can Sign Up / Log In now.', 'ok');
+        } else {
+          const authNote = isNetworkLikeErrorMessage(authProbe.message)
+            ? 'Cannot reach Firebase backend from this network.'
+            : 'Firebase backend returned an error.';
+          setAccountAuthStatus(`${authNote} ${getCloudSetupGuidance()}`, 'error');
+        }
+      }
     }
-    setCloudStatus('Testing cloud backend...', 'warn');
-    const probe = await probeCloudBackend({ force: true });
-    if (probe.ok) {
-      setCloudStatus('Cloud backend reachable. You can sign up or log in now.', 'ok');
+
+    if (hasSupabase) {
+      const syncProbe = await probeSupabaseBackend({ force: true });
+      if (syncProbe.ok) {
+        setCloudStatus('Supabase sync backend reachable.', 'ok');
+      } else {
+        const syncNote = isNetworkLikeErrorMessage(syncProbe.message)
+          ? 'Cannot reach Supabase sync backend from this network.'
+          : 'Supabase sync backend returned an error.';
+        setCloudStatus(`${syncNote} Check your Supabase URL + anon key.`, 'error');
+      }
     } else {
-      const networkNote = isNetworkLikeErrorMessage(probe.message)
-        ? 'Cannot reach cloud backend from this network.'
-        : 'Cloud backend returned an error.';
-      setCloudStatus(`${networkNote} ${getCloudSetupGuidance()}`, 'error');
+      setCloudStatus('Supabase sync not configured yet (optional for Sync Now).', 'warn');
     }
   }
 
@@ -5043,6 +5094,7 @@
     set('set-scheme', settings.soundScheme);
     set('set-timeformat', settings.timeFormat);
     set('set-account-user', settings.accountUsernameDraft || settings.accountUsername);
+    set('set-firebase-key', settings.firebaseWebApiKey || BUILTIN_FIREBASE_WEB_API_KEY || '');
     set('set-cloud-url', supabaseConfigManagedByApp() ? '' : (settings.cloudSupabaseUrl || BUILTIN_SUPABASE_URL || ''));
     set('set-cloud-key', supabaseConfigManagedByApp() ? '' : (settings.cloudSupabaseAnonKey || BUILTIN_SUPABASE_ANON_KEY || ''));
     set('set-cloud-code', settings.cloudSyncCode);

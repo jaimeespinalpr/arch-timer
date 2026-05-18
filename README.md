@@ -42,3 +42,9 @@ Drop custom images into `assets/` with these names:
 - `watermark.png`
 
 If they are missing, the app uses the current images as fallback.
+
+## User accounts (Firebase)
+
+- `Sign Up / Log In` now uses **Firebase Authentication** (username mapped to an internal email + 8-digit password).
+- In app: `MORE -> Cloud Sync`, fill `Firebase Web API Key (Users)` before creating users.
+- `Supabase URL + Anon Key` remains optional and is used for `Sync Now` (workouts/branding), not for user creation.
