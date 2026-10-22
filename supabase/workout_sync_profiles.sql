@@ -1,4 +1,4 @@
--- Arch Timer - simple cross-device sync (Supabase free tier)
+-- Young Guns Nashville Timer - simple cross-device sync (Supabase free tier)
 -- Run this in Supabase SQL Editor.
 
 create table if not exists public.workout_sync_profiles (

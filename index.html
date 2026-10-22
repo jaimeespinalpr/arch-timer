@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Archmere Tabata Pro</title>
-<meta name="theme-color" content="#0f7d3b">
+<title>Young Guns Nashville Tabata Pro</title>
+<meta name="theme-color" content="#a72c30">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Arch Timer">
+<meta name="apple-mobile-web-app-title" content="Young Guns Nashville Timer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -28,14 +28,14 @@
     --glass-line: rgba(255,255,255,0.08);
     --glass-fill: rgba(18,18,19,0.65);
 
-    /* Archmere-inspired palette: Forest Green + White, with Auks accents */
-    --arch-green: #0d6b3c;
-    --arch-green-deep: #084b2a;
-    --arch-white: #f3f6f0;
-    --arch-gold: #c8a842;
-    --auk-slate: #2a353d;
-    --auk-navy: #183543;
-    --auk-mist: #d5dee3;
+    /* Young Guns Nashville palette: black, white, brick red, and peach */
+    --arch-green: #a72c30;
+    --arch-green-deep: #641c22;
+    --arch-white: #f7f6f2;
+    --arch-gold: #d38b72;
+    --auk-slate: #7f252a;
+    --auk-navy: #3b171b;
+    --auk-mist: #e7c1ad;
 
     --dot-yellow: var(--arch-gold);  /* cycle break / beak accent */
     --dot-green: var(--arch-green);  /* work */
@@ -335,6 +335,14 @@
   .auth-head {
     padding: 20px 18px 12px 18px;
     text-align: center;
+  }
+  .auth-logo {
+    display: block;
+    width: min(170px, 52vw);
+    max-height: 190px;
+    object-fit: contain;
+    margin: 0 auto 10px;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.35));
   }
   .auth-title {
     font-family: 'Oswald', sans-serif;
@@ -2315,7 +2323,8 @@
   <div id="auth-gate" class="auth-gate">
     <div class="auth-card">
       <div class="auth-head">
-        <div class="auth-title">Arch Timer</div>
+        <img class="auth-logo" src="assets/young-guns-nashville.png" alt="Young Guns Nashville Wrestling Club">
+        <div class="auth-title">Young Guns Nashville Timer</div>
         <div class="auth-sub">Choose how you want to enter. User accounts keep timers separated per person.</div>
       </div>
       <div class="auth-body" id="auth-choice">
@@ -2347,11 +2356,11 @@
     <div class="editor-brand">
       <img
         id="brand-logo-full"
-        src="assets/default-logo-full.svg"
-        alt="Archmere Auks"
-        data-default-src="assets/default-logo-full.svg"
-        data-fallback-src="assets/archmere-auks-greeniii-original.png"
-        onerror="this.onerror=null;this.src='assets/archmere-auks-greeniii-original.png';"
+        src="assets/young-guns-nashville.png"
+        alt="Young Guns Nashville Wrestling Club"
+        data-default-src="assets/young-guns-nashville.png"
+        data-fallback-src="assets/young-guns-nashville.png"
+        onerror="this.onerror=null;this.src='assets/young-guns-nashville.png';"
       >
     </div>
 
@@ -2518,11 +2527,11 @@
         <img
           id="brand-logo-mark"
           class="brand-icon"
-          src="assets/default-logo-mark.svg"
-          alt="Archmere Auks"
-          data-default-src="assets/default-logo-mark.svg"
-          data-fallback-src="assets/archmere-a-auks-green-original.png"
-          onerror="this.onerror=null;this.src='assets/archmere-a-auks-green-original.png';"
+          src="assets/young-guns-nashville-mark.png"
+          alt="Young Guns Nashville Wrestling Club"
+          data-default-src="assets/young-guns-nashville-mark.png"
+          data-fallback-src="assets/young-guns-nashville-mark.png"
+          onerror="this.onerror=null;this.src='assets/young-guns-nashville-mark.png';"
         >
         <div class="runner-title" id="runner-title">WORKOUT</div>
         <div class="runner-total" id="disp-total">00:00</div>
@@ -2542,11 +2551,11 @@
       <img
         id="brand-watermark"
         class="runner-watermark"
-        src="assets/default-watermark.svg"
-        alt="Auks Old School"
-        data-default-src="assets/default-watermark.svg"
-        data-fallback-src="assets/auks-old-school2.png"
-        onerror="this.onerror=null;this.src='assets/auks-old-school2.png';"
+        src="assets/young-guns-nashville-watermark.png"
+        alt="Young Guns Nashville Wrestling Club"
+        data-default-src="assets/young-guns-nashville-watermark.png"
+        data-fallback-src="assets/young-guns-nashville-watermark.png"
+        onerror="this.onerror=null;this.src='assets/young-guns-nashville-watermark.png';"
       >
       <div class="phase-label" id="disp-phase">PREPARE</div>
       <div class="phase-sub" id="disp-phase-sub">CYCLE 1/2 • ROUND 1/4</div>
@@ -3138,12 +3147,12 @@
           </div>
           <div class="branding-pack-row">
             <button type="button" class="branding-pack-btn" id="btn-logo-pack-default" onclick="selectBuiltinLogoPack('default')">
-              <span class="branding-pack-name">Default</span>
-              <span class="branding-pack-sub">Nuevo pack incluido en la app</span>
+              <span class="branding-pack-name">Young Guns Nashville</span>
+              <span class="branding-pack-sub">Logo oficial incluido en la app</span>
             </button>
             <button type="button" class="branding-pack-btn" id="btn-logo-pack-archmere" onclick="selectBuiltinLogoPack('archmere')">
-              <span class="branding-pack-name">Archmere</span>
-              <span class="branding-pack-sub">Pack original de Archmere / Auks</span>
+              <span class="branding-pack-name">Young Guns Nashville</span>
+              <span class="branding-pack-sub">Pack alternativo de Young Guns Nashville</span>
             </button>
           </div>
           <div class="branding-upload-grid">
@@ -3179,7 +3188,7 @@
         </div>
 
         <div class="branding-help">
-          Incluye 2 packs de logos integrados (Default y Archmere). Si subes tus propios logos, se guardan en Supabase Storage (no en <code>assets/</code> del proyecto).
+          Incluye 2 packs de logos integrados de Young Guns Nashville. Si subes tus propios logos, se guardan en Supabase Storage (no en <code>assets/</code> del proyecto).
         </div>
       </div>
     </div>
@@ -3269,7 +3278,7 @@
 
   const SETTINGS_KEY = 'archmere_tabata_settings_v1';
   const SOUND_SCHEMES = [
-    'Auks Chime','Modern Arena','Censor','Boxing Bell','Gym Whistle','Digital Beep','Wood Block',
+    'Young Guns Chime','Modern Arena','Censor','Boxing Bell','Gym Whistle','Digital Beep','Wood Block',
     'Cowbell','Claves','Click','Ping','Buzzer','Ride Cymbal','Clap'
   ];
   const COACH_CUES = {
@@ -3283,7 +3292,7 @@
 
   let settings = {
     soundEnabled: true,
-    soundScheme: 'Auks Chime',
+    soundScheme: 'Young Guns Chime',
     volume: 80, // 0-100
     voiceAssist: true,
     vibration: true,
@@ -3313,18 +3322,18 @@
   };
 
   const PHASE_COLORS = {
-    READY: '#f3f6f0',      // Archmere white
-    WORK: '#0d6b3c',       // Forest green
-    REST: '#2a353d',       // Auk slate
-    CYCLE_REST: '#c8a842', // Beak gold
-    COOLDOWN: '#183543'    // Auk navy
+    READY: '#f7f6f2',      // Young Guns Nashville white
+    WORK: '#a72c30',       // Forest green
+    REST: '#7f252a',       // Auk slate
+    CYCLE_REST: '#d38b72', // Beak gold
+    COOLDOWN: '#3b171b'    // Auk navy
   };
   const DEFAULT_BRANDING_COLORS = {
-    primary: '#0d6b3c',
-    gold: '#c8a842',
-    slate: '#2a353d',
-    navy: '#183543',
-    white: '#f3f6f0',
+    primary: '#a72c30',
+    gold: '#d38b72',
+    slate: '#7f252a',
+    navy: '#3b171b',
+    white: '#f7f6f2',
     ready: PHASE_COLORS.READY,
     work: PHASE_COLORS.WORK,
     rest: PHASE_COLORS.REST,
@@ -3334,19 +3343,19 @@
   const DEFAULT_LOGO_PACK_ID = 'default';
   const BUILTIN_LOGO_PACKS = {
     default: {
-      label: 'Default',
+      label: 'Young Guns Nashville',
       logos: {
-        full: 'assets/default-logo-full.svg',
-        mark: 'assets/default-logo-mark.svg',
-        watermark: 'assets/default-watermark.svg'
+        full: 'assets/young-guns-nashville.png',
+        mark: 'assets/young-guns-nashville-mark.png',
+        watermark: 'assets/young-guns-nashville-watermark.png'
       }
     },
     archmere: {
-      label: 'Archmere',
+      label: 'Young Guns Nashville',
       logos: {
-        full: 'assets/archmere-auks-greeniii-original.png',
-        mark: 'assets/archmere-a-auks-green-original.png',
-        watermark: 'assets/auks-old-school2.png'
+        full: 'assets/young-guns-nashville.png',
+        mark: 'assets/young-guns-nashville-mark.png',
+        watermark: 'assets/young-guns-nashville-watermark.png'
       }
     }
   };
@@ -3954,9 +3963,9 @@
 
     const packId = normalizeBrandingLogoPack(settings.brandingLogoPack);
     const btnDefault = document.getElementById('btn-logo-pack-default');
-    const btnArchmere = document.getElementById('btn-logo-pack-archmere');
+    const btnYoungGuns = document.getElementById('btn-logo-pack-archmere');
     if (btnDefault) btnDefault.classList.toggle('active', packId === 'default');
-    if (btnArchmere) btnArchmere.classList.toggle('active', packId === 'archmere');
+    if (btnYoungGuns) btnYoungGuns.classList.toggle('active', packId === 'archmere');
 
     const acctState = document.getElementById('branding-account-state');
     if (acctState) {
@@ -5196,7 +5205,7 @@
     const scheme = settings.soundScheme;
     const tone = (freq, duration, shape='sine', extra={}) => playTone(freq, duration, { shape, ...extra });
 
-    if (scheme === 'Auks Chime') {
+    if (scheme === 'Young Guns Chime') {
       if (type === 'go') {
         playPattern([
           { freq: 660, duration: 0.13, shape: 'triangle', gain: 0.48, harmonic: { ratio: 2, gainScale: 0.18 }, filter: { type: 'lowpass', freq: 2400 }, start: 0.00 },
@@ -6883,12 +6892,12 @@
 
   // Picker logic
   const COLOR_OPTIONS = [
-    '#0d6b3c', // Forest green (Archmere)
-    '#f3f6f0', // Archmere white
-    '#c8a842', // Beak gold (Auks accent)
-    '#2a353d', // Auk slate
-    '#183543', // Auk navy
-    '#d5dee3'  // Mist neutral
+    '#a72c30', // Forest green (Young Guns Nashville)
+    '#f7f6f2', // Young Guns Nashville white
+    '#d38b72', // Beak gold (Young Guns accent)
+    '#7f252a', // Auk slate
+    '#3b171b', // Auk navy
+    '#e7c1ad'  // Mist neutral
   ];
 
   function openPicker(field) {

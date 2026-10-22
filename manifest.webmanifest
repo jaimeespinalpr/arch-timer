@@ -1,13 +1,13 @@
 {
   "id": "./",
-  "name": "Arch Timer",
-  "short_name": "Arch Timer",
-  "description": "Archmere Tabata and workout timer.",
+  "name": "Young Guns Nashville Timer",
+  "short_name": "Young Guns Nashville Timer",
+  "description": "Young Guns Nashville wrestling workout timer.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0b0b0c",
-  "theme_color": "#0f7d3b",
+  "theme_color": "#a72c30",
   "lang": "es",
   "icons": [
     {

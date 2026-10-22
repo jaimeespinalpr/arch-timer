@@ -1,6 +1,6 @@
-﻿# Arch Timer
+﻿# Young Guns Nashville Timer
 
-Archmere Tabata timer (single-page app / PWA).
+Young Guns Nashville wrestling timer (single-page app / PWA).
 
 ## Local preview
 - Double-click `index.html` (basic view)
