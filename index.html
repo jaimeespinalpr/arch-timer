@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Young Guns Nashville Timer">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -1539,8 +1541,28 @@
   body.pseudo-fullscreen .tab-bar {
     display: none;
   }
+  body.pseudo-fullscreen {
+    overflow: hidden;
+    background: #050505;
+  }
   body.pseudo-fullscreen #screen-tabata {
-    min-height: 100dvh;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-width: none !important;
+    margin: 0 !important;
+    min-height: 0;
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body.pseudo-fullscreen #screen-tabata {
+    min-height: 0;
+  }
+  body.pseudo-fullscreen #view-runner,
+  body.pseudo-fullscreen #view-editor {
+    min-height: 0;
+    height: 100%;
   }
   body.pseudo-fullscreen #view-runner {
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
@@ -1558,6 +1580,9 @@
     left: 0;
     width: 100dvh;
     height: 100dvw;
+    max-width: none;
+    max-height: none;
+    margin: 0 !important;
     min-height: 0;
     transform-origin: top left;
     transform: rotate(90deg) translateY(-100%);
@@ -7241,9 +7266,8 @@
       }
     }
 
-    if (!nativeFullscreenEntered) {
-      setPseudoFullscreen(true);
-    }
+    // Keep the timer as one app surface in both native fullscreen and iPhone focus mode.
+    setPseudoFullscreen(true);
 
     const landscapeLocked = await tryLockScreenOrientation('landscape');
 
