@@ -1,4 +1,4 @@
-const CACHE_NAME = 'young-guns-nashville-pwa-v7';
+const CACHE_NAME = 'young-guns-nashville-pwa-v8';
 
 const APP_SHELL = [
   './',

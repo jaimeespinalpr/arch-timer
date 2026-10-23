@@ -2869,13 +2869,10 @@
       <div class="settings-list">
         <div class="settings-item">
           <div class="settings-left">
-            <div class="settings-label">Ducking</div>
-            <div class="settings-sub">Reduce music volume</div>
+            <div class="settings-label">Music ducking</div>
+            <div class="settings-sub">Always off — music stays at its volume</div>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="set-ducking" onchange="toggleSetting('ducking', this.checked)">
-            <span class="slider"></span>
-          </label>
+          <div class="settings-value">OFF</div>
         </div>
 
         <div class="settings-item" onclick="pickTimeFormat()">
@@ -5099,7 +5096,7 @@
     set('set-pale', settings.paleColors);
     set('set-keep-awake', settings.keepAwake);
     set('set-screen-flash', settings.screenFlash);
-    set('set-ducking', settings.ducking);
+
     set('set-scheme', settings.soundScheme);
     set('set-timeformat', settings.timeFormat);
     set('set-account-user', settings.accountUsernameDraft || settings.accountUsername);
@@ -5140,7 +5137,11 @@
   }
 
   function ensureAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Keep timer alerts mixed locally. Never alter external music/media volume.
+    if (!audioCtx) {
+      const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextCtor({ latencyHint: 'interactive' });
+    }
     if (audioCtx.state === 'suspended') audioCtx.resume();
   }
 
