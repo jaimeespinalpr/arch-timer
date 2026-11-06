@@ -3714,9 +3714,17 @@
   }
 
   function openCloudSetupScreen() {
+    const gate = document.getElementById('auth-gate');
+    if (gate && !gate.classList.contains('hidden')) {
+      // Let the user reach Cloud Sync settings even when account auth is not configured.
+      continueAsGuest();
+    }
     switchTab('more');
     const userInput = document.getElementById('set-firebase-key') || document.getElementById('set-cloud-url');
-    if (userInput) userInput.focus();
+    if (userInput) {
+      userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => userInput.focus(), 250);
+    }
   }
 
   function isIOSDevice() {
