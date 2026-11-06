@@ -2540,6 +2540,25 @@
   .runner-bottom { height:auto; }
   .time-big { font-size:clamp(38px,13vh,68px); }
 }
+
+  .sequence-edit-backdrop {
+    position:fixed; inset:0; z-index:2147483646; display:flex; align-items:center; justify-content:center;
+    padding:18px; background:rgba(0,0,0,.76); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  }
+  .sequence-edit-panel {
+    width:min(100%,440px); max-height:calc(100dvh - 36px); overflow:auto; padding:20px;
+    border:1px solid rgba(255,255,255,.14); border-radius:18px;
+    background:#151a21; color:#f5f7fb; box-shadow:0 24px 70px rgba(0,0,0,.55);
+  }
+  .sequence-edit-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px;
+    font:600 20px 'Oswald',sans-serif; text-transform:uppercase; }
+  .sequence-edit-close { width:38px; height:38px; border:0; border-radius:12px; color:white; background:#252c36; font-size:26px; }
+  .sequence-edit-field { display:flex; flex-direction:column; gap:7px; margin:12px 0; color:#aeb8c5; font-size:13px; }
+  .sequence-edit-field input,.sequence-edit-field select { width:100%; min-height:48px; padding:10px 12px; border:1px solid #343d49; border-radius:11px;
+    color:#fff; background:#0c1016; font:500 16px 'Roboto',sans-serif; }
+  .sequence-edit-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+  .sequence-edit-save { min-height:44px; padding:0 20px; border:0; border-radius:12px; color:#07110c; background:#39d98a; font-weight:700; }
+
 </style>
 </head>
 <body>
@@ -3435,6 +3454,39 @@
       <div class="picker-colors" id="picker-colors"></div>
       <div class="picker-footer">
         <button class="picker-apply" onclick="applyPicker()">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sequence-edit-modal" class="sequence-edit-backdrop" style="display:none" role="dialog" aria-modal="true" aria-labelledby="sequence-edit-title">
+    <div class="sequence-edit-panel">
+      <div class="sequence-edit-header">
+        <div id="sequence-edit-title">Edit Circuit Step</div>
+        <button type="button" class="sequence-edit-close" onclick="closeSequenceEditor()" aria-label="Close">×</button>
+      </div>
+      <div id="sequence-step-fields">
+        <label class="sequence-edit-field">Step name
+          <input id="sequence-edit-label" type="text" maxlength="48" autocomplete="off" placeholder="e.g. Work">
+        </label>
+        <label class="sequence-edit-field">Step type
+          <select id="sequence-edit-phase">
+            <option value="WORK">Work</option><option value="REST">Rest</option>
+            <option value="READY">Ready</option><option value="CYCLE_REST">Cycle Rest</option>
+            <option value="COOLDOWN">Cooldown</option>
+          </select>
+        </label>
+        <label class="sequence-edit-field">Duration (seconds)
+          <input id="sequence-edit-seconds" type="number" min="1" step="1" inputmode="numeric">
+        </label>
+      </div>
+      <div id="sequence-number-fields" style="display:none">
+        <label class="sequence-edit-field" id="sequence-number-label">Value
+          <input id="sequence-edit-number" type="number" min="1" step="1" inputmode="numeric">
+        </label>
+      </div>
+      <div class="sequence-edit-actions">
+        <button type="button" class="btn-pill-gray" onclick="closeSequenceEditor()">Cancel</button>
+        <button type="button" class="sequence-edit-save" onclick="saveSequenceEditor()">Save</button>
       </div>
     </div>
   </div>
@@ -6273,51 +6325,70 @@
   }
 
   function addSequenceStep() {
-    ensureConfigShape();
-    const labelInput = window.prompt('Step name (example: Work, Rest, Sprint):', 'Work');
-    if (labelInput === null) return;
-    const label = String(labelInput || '').trim() || 'Work';
-
-    const phaseInput = window.prompt('Step type: work/rest/ready/cycle/cooldown', 'work');
-    if (phaseInput === null) return;
-    const phase = parseSequencePhase(phaseInput, 'WORK');
-
-    const secInput = window.prompt('Step duration in seconds:', '30');
-    if (secInput === null) return;
-    const seconds = Math.max(1, parseInt(secInput, 10) || 30);
-
-    config.sequence.push(normalizeSequenceStep({
-      id: `seq_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      label,
-      phase,
-      seconds
-    }));
-    config.mode = 'CUSTOM';
-    renderSequenceEditor();
-    applyConfigToInputs();
-    updateUI();
+    openSequenceEditor();
   }
 
   function editSequenceStep(index) {
+    openSequenceEditor(index);
+  }
+
+  let sequenceEditorIndex = null;
+  let sequenceEditorMode = 'step';
+  let sequenceEditorField = '';
+
+  function openSequenceEditor(index=null) {
     ensureConfigShape();
-    const step = config.sequence[index];
+    sequenceEditorMode = 'step';
+    sequenceEditorIndex = Number.isInteger(index) ? index : null;
+    const step = sequenceEditorIndex === null ? {label:'Work', phase:'WORK', seconds:30} : config.sequence[sequenceEditorIndex];
     if (!step) return;
+    document.getElementById('sequence-edit-title').textContent = sequenceEditorIndex === null ? 'Add Circuit Step' : 'Edit Circuit Step';
+    document.getElementById('sequence-step-fields').style.display = 'block';
+    document.getElementById('sequence-number-fields').style.display = 'none';
+    document.getElementById('sequence-edit-label').value = step.label || '';
+    document.getElementById('sequence-edit-phase').value = normalizeSequencePhase(step.phase);
+    document.getElementById('sequence-edit-seconds').value = Math.max(1, parseInt(step.seconds, 10) || 30);
+    document.getElementById('sequence-edit-modal').style.display = 'flex';
+    setTimeout(() => document.getElementById('sequence-edit-label').focus(), 50);
+  }
 
-    const labelInput = window.prompt('Edit step name:', step.label);
-    if (labelInput === null) return;
-    const phaseInput = window.prompt('Edit step type: work/rest/ready/cycle/cooldown', step.phase);
-    if (phaseInput === null) return;
-    const secInput = window.prompt('Edit step duration in seconds:', String(step.seconds));
-    if (secInput === null) return;
+  function closeSequenceEditor() {
+    document.getElementById('sequence-edit-modal').style.display = 'none';
+  }
 
-    config.sequence[index] = normalizeSequenceStep({
-      ...step,
-      label: labelInput,
-      phase: parseSequencePhase(phaseInput, step.phase),
-      seconds: Math.max(1, parseInt(secInput, 10) || step.seconds)
-    }, index);
+  function saveSequenceEditor() {
+    ensureConfigShape();
+    if (sequenceEditorMode === 'number') {
+      const value = parseInt(document.getElementById('sequence-edit-number').value, 10);
+      if (!Number.isFinite(value) || value < 1) {
+        document.getElementById('sequence-edit-number').focus();
+        return;
+      }
+      config[sequenceEditorField] = value;
+      applyConfigToInputs();
+      updateRoundsView();
+      updateUI();
+      closeSequenceEditor();
+      return;
+    }
+
+    const label = document.getElementById('sequence-edit-label').value.trim() || 'Work';
+    const phase = document.getElementById('sequence-edit-phase').value;
+    const seconds = Math.max(1, parseInt(document.getElementById('sequence-edit-seconds').value, 10) || 1);
+    const step = {label, phase:parseSequencePhase(phase, 'WORK'), seconds};
+    if (sequenceEditorIndex === null) {
+      step.id = `seq_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      config.sequence.push(normalizeSequenceStep(step));
+      config.mode = 'CUSTOM';
+    } else {
+      const previous = config.sequence[sequenceEditorIndex];
+      if (!previous) return;
+      config.sequence[sequenceEditorIndex] = normalizeSequenceStep({...previous, ...step}, sequenceEditorIndex);
+    }
     renderSequenceEditor();
+    applyConfigToInputs();
     updateUI();
+    closeSequenceEditor();
   }
 
   function deleteSequenceStep(index) {
@@ -7351,14 +7422,16 @@
     if (kind === 'time') {
       openPicker(field);
     } else if (kind === 'int') {
-      const current = config[field];
-      const input = window.prompt(`Set ${field.toUpperCase()} (number):`, current);
-      if (input === null) return;
-      const num = parseInt(input, 10);
-      if (!Number.isNaN(num) && num > 0) config[field] = num;
-      applyConfigToInputs();
-      updateRoundsView();
-      updateUI();
+      ensureConfigShape();
+      sequenceEditorMode = 'number';
+      sequenceEditorField = field;
+      document.getElementById('sequence-edit-title').textContent = `Set ${field.toUpperCase()}`;
+      document.getElementById('sequence-step-fields').style.display = 'none';
+      document.getElementById('sequence-number-fields').style.display = 'block';
+      document.getElementById('sequence-number-label').firstChild.textContent = `${field.toUpperCase()} `;
+      document.getElementById('sequence-edit-number').value = Math.max(1, parseInt(config[field], 10) || 1);
+      document.getElementById('sequence-edit-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('sequence-edit-number').focus(), 50);
     }
   }
 
