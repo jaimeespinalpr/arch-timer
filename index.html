@@ -2524,6 +2524,22 @@
   .timer-display { font-size:clamp(40px,14vh,76px); line-height:.9; }
 }
 
+
+@media (max-width: 480px) {
+  .runner-top { height:auto; }
+  .runner-bottom { height:auto; }
+  .time-big { font-size:clamp(52px,18vw,112px); line-height:.95; }
+}
+@media (max-height: 700px) and (orientation: portrait) {
+  .runner-top { height:auto; }
+  .runner-bottom { height:auto; }
+  .time-big { font-size:clamp(44px,14vh,88px); }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .runner-top { height:auto; }
+  .runner-bottom { height:auto; }
+  .time-big { font-size:clamp(38px,13vh,68px); }
+}
 </style>
 </head>
 <body>
