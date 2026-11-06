@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Young Guns Nashville Tabata Pro</title>
-<meta name="theme-color" content="#a72c30">
+<meta name="theme-color" content="#f05a4f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Young Guns Nashville Timer">
@@ -17,33 +17,33 @@
 
 <style>
   :root {
-    --bg-dark: #121212;
-    --bg-card: #1c1c1e;
-    --text-white: #ffffff;
-    --text-gray: #8e8e93;
-    --border-color: #2c2c2e;
-    --panel-edge: rgba(255,255,255,0.07);
-    --panel-shadow: 0 12px 30px rgba(0,0,0,0.28);
+    --bg-dark: #0d1118;
+    --bg-card: #151c27;
+    --text-white: #f5f7fb;
+    --text-gray: #a2adbd;
+    --border-color: #263244;
+    --panel-edge: rgba(226,234,247,0.10);
+    --panel-shadow: 0 18px 42px rgba(0,0,0,0.32);
     --radius-md: 14px;
     --radius-lg: 18px;
     --radius-xl: 24px;
-    --glass-line: rgba(255,255,255,0.08);
-    --glass-fill: rgba(18,18,19,0.65);
-
-    /* Young Guns Nashville palette: black, white, brick red, and peach */
-    --arch-green: #a72c30;
-    --arch-green-deep: #641c22;
-    --arch-white: #f7f6f2;
-    --arch-gold: #d38b72;
-    --auk-slate: #7f252a;
-    --auk-navy: #3b171b;
-    --auk-mist: #e7c1ad;
-
-    --dot-yellow: var(--arch-gold);  /* cycle break / beak accent */
-    --dot-green: var(--arch-green);  /* work */
-    --dot-red: var(--auk-slate);     /* rest (recovery slate) */
-    --dot-blue: var(--auk-navy);     /* cooldown / sea navy */
-    --bar-dark: #2a2a2a;
+    --glass-line: rgba(226,234,247,0.12);
+    --glass-fill: rgba(18,24,34,0.78);
+    --ui-accent: #f05a4f;
+    --ui-highlight: #ffc857;
+    --ui-surface: #141b25;
+    --arch-green: #f05a4f;
+    --arch-green-deep: #ad3636;
+    --arch-white: #f8f7f2;
+    --arch-gold: #ffc857;
+    --auk-slate: #435166;
+    --auk-navy: #223449;
+    --auk-mist: #d7e0ea;
+    --dot-yellow: var(--arch-gold);
+    --dot-green: var(--arch-green);
+    --dot-red: var(--auk-slate);
+    --dot-blue: var(--auk-navy);
+    --bar-dark: #202b3a;
   }
   .quote-strip {
     display: flex;
@@ -2342,6 +2342,146 @@
 
     .runner-bottom { display: none; }
   }
+  /* Fresh, high-contrast training UI with comfortable tap targets. */
+  body {
+    background:
+      radial-gradient(circle at 8% 0%, rgba(240,90,79,0.15), transparent 34%),
+      radial-gradient(circle at 95% 8%, rgba(255,200,87,0.10), transparent 32%),
+      linear-gradient(155deg, #101722 0%, #0b0f15 62%, #121521 100%);
+    color: var(--text-white);
+    font-family: 'Roboto', ui-sans-serif, system-ui, sans-serif;
+  }
+  button, input { font: inherit; }
+  button { touch-action: manipulation; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--ui-highlight); outline-offset: 3px; }
+  #view-runner, #view-editor {
+    background:
+      radial-gradient(circle at 6% 4%, rgba(240,90,79,0.09), transparent 34%),
+      radial-gradient(circle at 96% 10%, rgba(255,200,87,0.06), transparent 32%),
+      linear-gradient(160deg, #101722 0%, #0b0f15 70%, #111722 100%);
+  }
+  .nav-header, .runner-top, .runner-bottom, .runner-next, .tab-bar,
+  .options-list, .list-item, .saved-item, .sequence-step, .settings-list,
+  .settings-item, .auth-card {
+    border-color: rgba(218,229,244,0.12);
+  }
+  .nav-header {
+    min-height: 48px; height: auto; background: rgba(15,21,30,0.94);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  }
+  .runner-top, .runner-bottom, .runner-next {
+    background: linear-gradient(145deg, rgba(31,43,59,0.96), rgba(17,24,34,0.96));
+    border: 1px solid rgba(218,229,244,0.14);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .runner-top { min-height: 58px; height: auto; }
+  .runner-title { letter-spacing: 0.8px; }
+  .runner-total {
+    color: #18202b; background: var(--ui-highlight); font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .icon-btn {
+    border: 1px solid rgba(230,238,248,0.14);
+    background: linear-gradient(150deg, #26364a, #182231);
+    color: var(--arch-white); box-shadow: 0 7px 18px rgba(0,0,0,0.28);
+  }
+  .btn-fullscreen { color: var(--ui-highlight); }
+  .runner-main {
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 22px 50px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.16);
+  }
+  .runner-main .time-big {
+    font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.045em;
+    text-shadow: 0 5px 24px rgba(0,0,0,0.12);
+  }
+  .runner-main .phase-label { font-weight: 700; letter-spacing: 0.08em; }
+  .quote-strip {
+    background: linear-gradient(125deg, rgba(240,90,79,0.20), rgba(34,52,73,0.88) 54%, rgba(255,200,87,0.17));
+    border: 1px solid rgba(218,229,244,0.14); border-radius: 18px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+  }
+  .tab-bar {
+    background: rgba(17,24,34,0.96); border: 1px solid rgba(218,229,244,0.14);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.34);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  }
+  .tab-item { min-height: 44px; transition: color 160ms ease, background 160ms ease; }
+  .tab-item.active { color: var(--arch-green); }
+  .list-item, .settings-item, .saved-item, .sequence-step { background-color: rgba(20,27,37,0.96); }
+  .auth-gate {
+    background:
+      radial-gradient(circle at 15% 5%, rgba(240,90,79,0.28), transparent 38%),
+      radial-gradient(circle at 90% 100%, rgba(255,200,87,0.16), transparent 40%),
+      linear-gradient(155deg, #101722, #080c12);
+  }
+  .auth-card { background: rgba(17,24,34,0.96); border-radius: 22px; box-shadow: 0 28px 70px rgba(0,0,0,0.48); }
+
+  /* Native fullscreen hides browser chrome where supported; fallback fills the page viewport. */
+  #screen-tabata:fullscreen, #screen-tabata:-webkit-full-screen {
+    width: 100vw !important; height: 100vh !important; height: 100dvh !important;
+    max-width: none !important; max-height: none !important; margin: 0 !important;
+    padding: 0 !important; background: #0b0f15;
+  }
+  body.pseudo-fullscreen, body.forced-landscape {
+    position: fixed !important; inset: 0 !important; width: 100vw !important;
+    height: 100vh !important; height: 100dvh !important; min-height: 0 !important;
+    padding: 0 !important; margin: 0 !important; overflow: hidden !important;
+    overscroll-behavior: none; background: #0b0f15;
+  }
+  body.pseudo-fullscreen > .tab-screen:not(#screen-tabata),
+  body.pseudo-fullscreen > .tab-bar,
+  body.forced-landscape > .tab-screen:not(#screen-tabata),
+  body.forced-landscape > .tab-bar { display: none !important; }
+  body.pseudo-fullscreen #screen-tabata {
+    position: fixed !important; inset: 0 !important; width: 100vw !important;
+    height: 100vh !important; height: 100dvh !important; max-width: none !important;
+    max-height: none !important; margin: 0 !important;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px) !important;
+    min-height: 0 !important; z-index: 2147483000 !important; background: #0b0f15;
+  }
+  body.pseudo-fullscreen #view-runner, body.pseudo-fullscreen #view-editor {
+    width: 100%; height: 100%; min-height: 0;
+  }
+  body.pseudo-fullscreen #view-runner {
+    padding: clamp(8px, 1.5vw, 22px);
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+  body.forced-landscape #screen-tabata {
+    z-index: 2147483000 !important; max-width: none !important; max-height: none !important; padding: 0 !important;
+  }
+  @media (min-width: 900px) {
+    #view-runner { padding: clamp(16px, 2vw, 30px); gap: clamp(12px, 1.6vw, 22px); }
+    #view-runner > * { width: 100%; max-width: 1500px; align-self: center; }
+    .runner-top { min-height: 68px; }
+    .runner-main .time-big { font-size: clamp(100px, 20vh, 230px); }
+    .runner-bottom { min-height: 104px; }
+  }
+  @media (max-width: 640px) {
+    .runner-top { min-height: 54px; padding-block: 4px; }
+    .icon-btn { width: 40px; height: 40px; font-size: 16px; }
+    .runner-main { border-radius: 20px; }
+    .runner-main .time-big { font-size: clamp(52px, 17vw, 100px); }
+    .quote-strip { min-height: 42px; padding: 7px 10px; font-size: clamp(11px, 3.4vw, 14px); }
+    .runner-bottom { min-height: 72px; }
+    body.pseudo-fullscreen #view-runner { padding: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+  }
+  @media (max-width: 380px) {
+    .runner-title { max-width: 30vw; font-size: 12px; }
+    .runner-total { font-size: 10px; padding: 3px 5px; }
+    .runner-top-center { gap: 4px; }
+    .brand-icon { width: 20px; }
+  }
+  @media (max-height: 520px) and (orientation: landscape) {
+    #view-runner { gap: 6px; padding: 6px; }
+    .runner-top { min-height: 42px; }
+    .runner-main .time-big { font-size: clamp(54px, 22vh, 128px); }
+    .quote-strip { min-height: 34px; padding: 4px 8px; }
+    .runner-bottom { min-height: 58px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -3344,18 +3484,18 @@
   };
 
   const PHASE_COLORS = {
-    READY: '#f7f6f2',      // Young Guns Nashville white
-    WORK: '#a72c30',       // Forest green
-    REST: '#7f252a',       // Auk slate
-    CYCLE_REST: '#d38b72', // Beak gold
-    COOLDOWN: '#3b171b'    // Auk navy
+    READY: '#f8f7f2',
+    WORK: '#f05a4f',
+    REST: '#435166',
+    CYCLE_REST: '#ffc857',
+    COOLDOWN: '#223449'
   };
   const DEFAULT_BRANDING_COLORS = {
-    primary: '#a72c30',
-    gold: '#d38b72',
-    slate: '#7f252a',
-    navy: '#3b171b',
-    white: '#f7f6f2',
+    primary: '#f05a4f',
+    gold: '#ffc857',
+    slate: '#435166',
+    navy: '#223449',
+    white: '#f8f7f2',
     ready: PHASE_COLORS.READY,
     work: PHASE_COLORS.WORK,
     rest: PHASE_COLORS.REST,
@@ -3822,14 +3962,31 @@
   }
 
   function ensureBrandingSettingsShape() {
-    settings.brandingColors = normalizeBrandingColors(settings.brandingColors);
+    const savedColors = settings.brandingColors && typeof settings.brandingColors === 'object'
+      ? settings.brandingColors
+      : {};
+    settings.brandingUpdatedAt = String(settings.brandingUpdatedAt || '').trim();
+
+    // Refresh the previous built-in palette while leaving user-customized branding untouched.
+    if (!settings.brandingUpdatedAt) {
+      const legacyDefaults = {
+        primary: '#a72c30', gold: '#d38b72', slate: '#7f252a', navy: '#3b171b',
+        work: '#a72c30', rest: '#7f252a', cycleRest: '#d38b72', cooldown: '#3b171b'
+      };
+      Object.entries(legacyDefaults).forEach(([key, value]) => {
+        if (String(savedColors[key] || '').toLowerCase() === value) {
+          savedColors[key] = DEFAULT_BRANDING_COLORS[key] || DEFAULT_BRANDING_COLORS.primary;
+        }
+      });
+    }
+
+    settings.brandingColors = normalizeBrandingColors(savedColors);
     settings.brandingLogos = normalizeBrandingLogos(settings.brandingLogos);
     settings.brandingLogoPack = normalizeBrandingLogoPack(settings.brandingLogoPack || inferBrandingLogoPack(settings.brandingLogos));
     if (!settings.brandingLogos.full && !settings.brandingLogos.mark && !settings.brandingLogos.watermark) {
       const pack = getBuiltinLogoPack(settings.brandingLogoPack);
       settings.brandingLogos = normalizeBrandingLogos(pack.logos);
     }
-    settings.brandingUpdatedAt = String(settings.brandingUpdatedAt || '').trim();
     phaseColors = {
       READY: settings.brandingColors.ready,
       WORK: settings.brandingColors.work,
@@ -7151,12 +7308,13 @@
     return document.fullscreenElement || document.webkitFullscreenElement || null;
   }
 
+  function getFullscreenTarget() {
+    return document.getElementById('screen-tabata') || document.documentElement;
+  }
+
   function hasNativeFullscreenSupport() {
-    const elem = document.documentElement;
-    return Boolean(
-      elem &&
-      (elem.requestFullscreen || elem.webkitRequestFullscreen)
-    );
+    const elem = getFullscreenTarget();
+    return Boolean(elem && (elem.requestFullscreen || elem.webkitRequestFullscreen));
   }
 
   function isPseudoFullscreenActive() {
@@ -7228,23 +7386,38 @@
     const active = isFullscreenModeActive();
     btn.classList.toggle('active', active);
     btn.innerHTML = active ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-expand"></i>';
-    const label = active ? 'Exit Rotate Fullscreen / Focus Mode' : 'Rotate + Fullscreen / Focus Mode';
+    const label = active ? 'Exit full screen' : 'Enter full screen';
     btn.setAttribute('aria-label', label);
-    const titleBase = active ? 'Exit' : 'Enter';
-    btn.title = isIOSDevice()
-      ? `${titleBase} Rotate Focus Mode`
-      : `${titleBase} Rotate Fullscreen`;
+    btn.title = label;
   }
 
   async function requestNativeFullscreen(elem) {
     if (!elem) throw new Error('No element for fullscreen');
     if (elem.requestFullscreen) {
-      return elem.requestFullscreen();
+      await elem.requestFullscreen({ navigationUI: 'hide' });
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    } else {
+      throw new Error('Fullscreen API not supported');
     }
-    if (elem.webkitRequestFullscreen) {
-      return elem.webkitRequestFullscreen();
+
+    if (!getNativeFullscreenElement()) {
+      await new Promise((resolve) => {
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+        document.addEventListener('fullscreenchange', finish, { once: true });
+        document.addEventListener('webkitfullscreenchange', finish, { once: true });
+        window.setTimeout(finish, 350);
+      });
     }
-    throw new Error('Fullscreen API not supported');
+
+    if (!getNativeFullscreenElement()) {
+      throw new Error('The browser did not enter native fullscreen mode');
+    }
   }
 
   async function exitNativeFullscreen() {
@@ -7254,30 +7427,27 @@
   }
 
   async function enterRotateFullscreenMode() {
-    const root = document.documentElement;
     let nativeFullscreenEntered = false;
 
-    if (!isIOSDevice() && hasNativeFullscreenSupport()) {
+    if (hasNativeFullscreenSupport()) {
       try {
-        await requestNativeFullscreen(root);
+        await requestNativeFullscreen(getFullscreenTarget());
         nativeFullscreenEntered = Boolean(getNativeFullscreenElement());
       } catch (err) {
         console.warn('Native fullscreen unavailable, using focus mode fallback:', err);
       }
     }
 
-    // Keep the timer as one app surface in both native fullscreen and iPhone focus mode.
+    // Hide app navigation and fill the viewport when native fullscreen is unavailable.
     setPseudoFullscreen(true);
 
     const landscapeLocked = await tryLockScreenOrientation('landscape');
-
     if (landscapeLocked) {
       setForcedLandscape(false);
       updateFullscreenButtonUI();
       return;
     }
 
-    // Fallback for browsers (notably iPhone Safari/PWA) that don't expose orientation lock.
     const isPortraitViewport = window.innerHeight > window.innerWidth;
     if (isPortraitViewport) {
       setForcedLandscape(true);
@@ -7319,8 +7489,22 @@
     await enterRotateFullscreenMode();
   }
 
-  document.addEventListener('fullscreenchange', updateFullscreenButtonUI);
-  document.addEventListener('webkitfullscreenchange', updateFullscreenButtonUI);
+  let nativeFullscreenSessionActive = false;
+  function syncFullscreenAfterBrowserChange() {
+    const nativeActive = Boolean(getNativeFullscreenElement());
+    if (nativeActive) {
+      nativeFullscreenSessionActive = true;
+    } else if (nativeFullscreenSessionActive) {
+      nativeFullscreenSessionActive = false;
+      setForcedLandscape(false);
+      setPseudoFullscreen(false);
+      tryUnlockScreenOrientation();
+    }
+    updateFullscreenButtonUI();
+  }
+
+  document.addEventListener('fullscreenchange', syncFullscreenAfterBrowserChange);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenAfterBrowserChange);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && state.running) {
       acquireWakeLock();
