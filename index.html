@@ -2482,6 +2482,48 @@
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 
+
+/* Compact-screen fit: keep the complete timer and controls visible. */
+#view-runner { min-width:0; min-height:0; overflow-x:hidden; overflow-y:auto; }
+.runner-top, .quote-strip, .runner-next, .runner-bottom { flex-shrink:0; }
+.runner-main { min-width:0; min-height:0; flex:1 1 auto; }
+.runner-top-center, .runner-title, .runner-total, .runner-bottom > * { min-width:0; }
+@media (max-width: 480px) {
+  #view-runner { gap:clamp(3px,1vh,8px); }
+  .runner-top { min-height:46px; padding:4px 6px; grid-template-columns:36px minmax(0,1fr) 36px; gap:4px; }
+  .runner-top-center { grid-template-columns:20px minmax(0,1fr) auto; gap:4px; }
+  .runner-title { font-size:clamp(10px,3.1vw,13px); overflow:hidden; text-overflow:ellipsis; }
+  .runner-total { font-size:9px; padding:2px 4px; white-space:nowrap; }
+  .runner-top .icon-btn { width:36px; height:36px; }
+  .runner-bottom { min-height:58px; height:auto; padding:4px; gap:4px; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); }
+  .stat-box { min-width:0; padding:3px 2px; }
+  .runner-controls { gap:4px; }
+  .btn-round-control { width:36px; height:36px; }
+  .btn-play-round { width:42px; height:42px; }
+  .runner-main { padding:clamp(4px,1.4vh,12px) 6px; }
+  .timer-display { font-size:clamp(52px,18vw,112px); line-height:.95; }
+}
+@media (max-height: 700px) and (orientation: portrait) {
+  #view-runner { gap:4px; }
+  .runner-top { min-height:42px; }
+  .quote-strip { min-height:30px; padding:3px 8px; }
+  .runner-next { min-height:38px; padding:3px 8px; }
+  .runner-bottom { min-height:52px; padding:3px; }
+  .runner-main { padding-top:2px; padding-bottom:2px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  #view-runner { gap:3px; overflow-y:auto; }
+  .runner-top { min-height:38px; padding:2px 6px; }
+  .runner-top .icon-btn { width:32px; height:32px; }
+  .quote-strip { min-height:24px; padding:2px 8px; }
+  .runner-next { min-height:30px; padding:2px 8px; }
+  .runner-bottom { display:grid !important; height:auto; min-height:42px; padding:2px 4px; }
+  .btn-round-control { width:32px; height:32px; }
+  .btn-play-round { width:36px; height:36px; }
+  .runner-main { padding:0 4px; }
+  .timer-display { font-size:clamp(40px,14vh,76px); line-height:.9; }
+}
+
 </style>
 </head>
 <body>
